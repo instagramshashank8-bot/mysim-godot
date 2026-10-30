@@ -12,6 +12,7 @@ public static class UnityMaterialBinder {
   alphaCache[path]=alpha;return alpha;
  }
 
+ static readonly System.Text.RegularExpressions.Regex OpaqueSurfaceClass=new System.Text.RegularExpressions.Regex(@"^mat_(metal_corrugated|concrete)(_|\.)",System.Text.RegularExpressions.RegexOptions.IgnoreCase);
  static readonly System.Text.RegularExpressions.Regex CutoutClass=new System.Text.RegularExpressions.Regex(@"(^org_|(^|[_/ .-])(fence|crowd|tree|leaf|leaves|foliage|bush|hedge|wire|net|grate)([_/ .-]|$))",System.Text.RegularExpressions.RegexOptions.IgnoreCase);
  static readonly Dictionary<string, Material> cache = new Dictionary<string, Material>();
  static readonly Shader GroundShader = new Shader { Code = @"shader_type spatial; render_mode cull_disabled; global uniform float mysim_surface_water; uniform float wet_darkening = 0.12; uniform float wet_roughness = 0.18; uniform float wet_specular = 0.45;
@@ -65,6 +66,10 @@ void fragment() { vec3 wp0 = (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz; vec2 tuv
       if(System.Environment.GetEnvironmentVariable("MYSIM_SOURCE_ALPHA_POLICY")=="1"){
        int queue=mi2.ContainsKey("queue")?mi2["queue"].AsInt32():-1;
        clip=authoredClip||(queue>=2450&&queue<2500)||(texAlpha&&CutoutClass.IsMatch(nm+"/"+(tp??"")));
+      }
+      if(System.Environment.GetEnvironmentVariable("MYSIM_SOURCE_ALPHA_POLICY")=="2"){
+       int queue=mi2.ContainsKey("queue")?mi2["queue"].AsInt32():-1;
+       if(!authoredClip&&queue<2450&&OpaqueSurfaceClass.IsMatch(System.IO.Path.GetFileName(tp??"")))clip=false;
       }
  bool trans = mi2.ContainsKey("transparent") && mi2["transparent"].AsBool(); float cut = mi2.ContainsKey("cutoff") ? (float)mi2["cutoff"].AsDouble() : 0.5f; if (cut <= 0.01f) cut = 0.5f;
       if (tex != null || col != Colors.White) {

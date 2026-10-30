@@ -27,7 +27,7 @@ if os.environ.get('REBUILT_RIM_REVIEW')=='1':
  print('COMPLETE rebuilt rim candidate views; manual acceptance required',flush=True);sys.exit(0)
 if os.environ.get('ALPHA_POLICY_REVIEW')=='1':
  track=(0,5)[shard]
- for source_policy in (0,1):
+ for source_policy in (0,2):
   label=f'alpha-track-{track:02}-source-policy-{source_policy}';shot=out/(label+'.png')
   run(label,{'MYSIM_TRACK':str(track),'MYSIM_CAR':'16','MYSIM_TOD':'0','MYSIM_WET':'0','MYSIM_AI':'1','MYSIM_AUTODRIVE':'1','MYSIM_NOPIT':'1','MYSIM_RIVALS':'0','MYSIM_SECONDS':'3','MYSIM_SOURCE_ALPHA_POLICY':str(source_policy),'MYSIM_SHOT':str(shot)})
   assert shot.exists()
