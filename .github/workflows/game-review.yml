@@ -3,7 +3,7 @@ run-name: '${{ inputs.depth }} cars ${{ inputs.cars || ''16'' }}'
 on:
   workflow_dispatch:
     inputs:
-      depth: {description: 'Preview coverage or full races with live mesh collision', type: choice, options: [preview, full_races, geometry, surfaces, collision_probe, car_materials, input_physics, car_uv, native_races, wheel_orientation, contact_trace, car_uv_roles, precise_ai, native_focus, car_panel_uv, wheel_compounds, assembly_review, weather_review, gui_review, livery_uv, rear_panel_uv, rain_focus], default: preview}
+      depth: {description: 'Preview coverage or full races with live mesh collision', type: choice, options: [preview, full_races, geometry, surfaces, collision_probe, car_materials, input_physics, car_uv, native_races, wheel_orientation, contact_trace, car_uv_roles, precise_ai, native_focus, car_panel_uv, wheel_compounds, assembly_review, weather_review, gui_review, livery_uv, rear_panel_uv, rain_focus, route_parity], default: preview}
       native_ai: {description: 'Apply explicit experimental AI mode during native regression only', type: boolean, default: false}
       case_set: {description: 'Exact native regression cases; completed cases are not repeated', type: choice, options: [shutdown, bridge, monaco_ai3, ai4_regression], default: shutdown}
       ai_mode: {description: 'Opt-in curvature AI experiment; default game AI is unchanged', type: choice, options: ['1', '2', '3', '4'], default: '1'}
@@ -18,7 +18,7 @@ jobs:
       fail-fast: false
       max-parallel: 12
       matrix:
-        shard: ${{ fromJSON(inputs.depth == 'native_races' && '[0,1,2,3,4,5,6,7,8,9,10,11]' || (inputs.depth == 'geometry' || inputs.depth == 'surfaces' || inputs.depth == 'collision_probe' || inputs.depth == 'car_materials' || inputs.depth == 'input_physics' || inputs.depth == 'car_uv' || inputs.depth == 'wheel_orientation' || inputs.depth == 'contact_trace' || inputs.depth == 'car_uv_roles' || inputs.depth == 'precise_ai' || inputs.depth == 'native_focus' || inputs.depth == 'car_panel_uv' || inputs.depth == 'wheel_compounds' || inputs.depth == 'gui_review' || inputs.depth == 'livery_uv' || inputs.depth == 'rear_panel_uv' || inputs.depth == 'rain_focus') && '[0]' || '[0,1,2,3,4,5]') }}
+        shard: ${{ fromJSON(inputs.depth == 'native_races' && '[0,1,2,3,4,5,6,7,8,9,10,11]' || (inputs.depth == 'geometry' || inputs.depth == 'surfaces' || inputs.depth == 'collision_probe' || inputs.depth == 'car_materials' || inputs.depth == 'input_physics' || inputs.depth == 'car_uv' || inputs.depth == 'wheel_orientation' || inputs.depth == 'contact_trace' || inputs.depth == 'car_uv_roles' || inputs.depth == 'precise_ai' || inputs.depth == 'native_focus' || inputs.depth == 'car_panel_uv' || inputs.depth == 'wheel_compounds' || inputs.depth == 'gui_review' || inputs.depth == 'livery_uv' || inputs.depth == 'rear_panel_uv' || inputs.depth == 'rain_focus' || inputs.depth == 'route_parity') && '[0]' || '[0,1,2,3,4,5]') }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
@@ -48,13 +48,19 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           MYSIM_INTAKE_KEY: ${{ secrets.MYSIM_INTAKE_KEY }}
         run: python tools/cloud_asset_patches.py
+      - name: Verify route parity after encrypted source restoration
+        run: |
+          mkdir -p outputs/cloud-game
+          python tools/check_track_route_parity.py > outputs/cloud-game/track-route-parity.json
       - name: Scope import only for isolated diagnostics
+        if: inputs.depth != 'route_parity'
         env:
           SHARD: ${{ matrix.shard }}
           IMPORT_REVIEW_DEPTH: ${{ inputs.depth }}
           IMPORT_CASE_SET: ${{ inputs.case_set || 'shutdown' }}
         run: python tools/cloud_scope_import.py
       - name: Install software renderer and Godot
+        if: inputs.depth != 'route_parity'
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y xvfb mesa-vulkan-drivers vulkan-tools libxkbcommon-x11-0
@@ -70,6 +76,7 @@ jobs:
           dotnet build -v quiet
           "$G" --headless --editor --path . --import > import.log 2>&1
       - name: Render layouts and cars; test real scene transitions
+        if: inputs.depth != 'route_parity'
         env:
           SHARD: ${{ matrix.shard }}
           GEOMETRY_ONLY: ${{ inputs.depth == 'geometry' && '1' || '0' }}

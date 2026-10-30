@@ -187,7 +187,7 @@ public partial class Main : Node3D {
   int place = order.IndexOf(p) + 1;
   if(activeSeries!=null){var summary=new Label {Text="SERIES / ROUND "+(activeSeries.Round+1)+" OF "+activeSeries.Tracks.Length+"\nPrevious finishes: "+string.Join(", ",activeSeries.Places),Position=new Vector2(60,100)};layer.AddChild(summary);}
 
-  l.Text = "RESULTS   P" + place + " of " + order.Count + "\n\n" + (order.Count > 1 ? board + "\n" : "") + "TIME  " + p.finishTime.ToString("0.00") + " s\nBEST LAP  " + p.bestLap.ToString("0.00") + " s\nPENALTY  " + p.penalty.ToString("0.0") + " s\nDAMAGE  " + (int)(p.damage * 100) + "%\n\nENTER restart    ESC menu    (pad: A restart, B menu)"; layer.AddChild(l);
+  l.Text = "RESULTS   P" + place + " of " + order.Count + "\n\n" + (order.Count > 1 ? board + "\n" : "") + "TIME  " + p.finishTime.ToString("0.00") + " s\nBEST LAP  " + p.bestLap.ToString("0.00") + " s\nPENALTY  " + p.penalty.ToString("0.0") + " s\nDAMAGE  " + (int)(p.damage * 100) + "%" + (activeSeries==null?"\n\nENTER race again / ESC menu":"\n\nENTER next round / ESC menu"); layer.AddChild(l);
  }
 }}
 
