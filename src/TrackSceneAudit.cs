@@ -8,7 +8,7 @@ namespace MySim {
 public static class TrackSceneAudit {
  public static void Write(List<Node3D> layers,int track,string destination){
   var groups=new Dictionary<string,List<object>>();var lamps=new List<object>();int meshes=0;
-  foreach(var layer in layers){using var children=layer.FindChildren("*","MeshInstance3D",true,false);foreach(var node in children){
+  foreach(var layer in layers){var children=layer.FindChildren("*","MeshInstance3D",true,false);foreach(var node in children){
    var mesh=(MeshInstance3D)node;if(mesh.Mesh==null||!mesh.IsVisibleInTree())continue;meshes++;
    using var hash=IncrementalHash.CreateHash(HashAlgorithmName.SHA256);int vertices=0,indices=0;var materials=new List<string>();
    for(int surface=0;surface<mesh.Mesh.GetSurfaceCount();surface++){
@@ -23,6 +23,7 @@ public static class TrackSceneAudit {
    if(!groups.ContainsKey(key))groups[key]=new List<object>();groups[key].Add(record);
    string label=mesh.Name.ToString().ToLowerInvariant();if(label.Contains("lamp")||label.Contains("flood")||label.Contains("light"))lamps.Add(record);
   }
+  children.Clear();
   }
   var duplicates=new List<object>();foreach(var pair in groups)if(pair.Value.Count>1)duplicates.Add(new {worldGeometryHash=pair.Key,instances=pair.Value});
   Directory.CreateDirectory(Path.GetDirectoryName(destination));System.IO.File.WriteAllText(destination,System.Text.Json.JsonSerializer.Serialize(new {track,visibleMeshes=meshes,duplicateGroups=duplicates,lightingNameCandidates=lamps,scope="Read-only geometry candidates quantized0.1mm; intentional overlays/LOD require manual review. No automatic hiding, deduplication or collision change."},new System.Text.Json.JsonSerializerOptions {WriteIndented=true}));
