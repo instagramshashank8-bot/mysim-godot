@@ -1,0 +1,8 @@
+{
+  "cases": 1152,
+  "failedStops": 0,
+  "slickWaterMonotonicViolations": 0,
+  "scope": "controlled flat road fixture, no native track or real-world calibration",
+  "source": "23c6ebd",
+  "run": 41091174611
+}

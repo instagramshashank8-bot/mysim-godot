@@ -16,5 +16,11 @@ for key,pair in pairs.items():
  error=abs(pair[120]['metres']-pair[240]['metres'])/max(.01,pair[240]['metres'])
  worst=max(worst,error)
  assert error<.02,f'timestep-dependent braking: {key} error {error}'
+water_groups={}
+for row in rows:
+ if row['compound']!='Wet':water_groups.setdefault((row['car'],row['compound'],row['initialKmh'],row['hz']),{})[row['water']]=row['metres']
+for key,distances in water_groups.items():
+ assert set(distances)=={0,.5,1},f'missing water condition: {key}'
+ assert distances[0]<=distances[.5]<=distances[1],f'slick water braking inversion: {key} {distances}'
 pathlib.Path('braking-summary.json').write_text(json.dumps({'cases':len(rows),'failures':0,'worstRelativeDistanceDifference':worst,'scope':'flat uninterrupted road dynamics fixture; no native geometry or real-world validation'},indent=2))
 print(f'PASS {len(rows)} controlled stops; maximum timestep distance difference {worst:.6%}')

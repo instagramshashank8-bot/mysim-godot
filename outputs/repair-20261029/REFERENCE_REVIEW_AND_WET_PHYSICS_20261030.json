@@ -21,10 +21,15 @@
     "core_41090194014": "FAIL CS0136 fixture variable scope",
     "contacts_41090193821": "FAIL same compile error",
     "distinct_fix": "b21b7da renames planning fixture loop variable",
-    "core_41090703178": "running",
-    "contacts_41090702117": "running",
-    "braking_41090706233": "running",
-    "braking_41090627357": "failed old source; preserve"
+    "core_41090703178": "PASS",
+    "contacts_41090702117": "PASS",
+    "braking_41090706233": "FAIL 214/1152 stops",
+    "braking_41090627357": "failed old source; preserve",
+    "braking_41090978666": "FAIL 163/1152 after brake impulse fix alone",
+    "braking_41091174611": "PASS1152/1152 after bounded480Hz coupling; <=0.0361% distance variation",
+    "core_41091173814": "PASS",
+    "laps_41091173882": "PASS",
+    "contacts_41091179468": "PASS"
   },
   "not_complete": [
     "night fixture lighting",

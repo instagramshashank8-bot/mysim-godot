@@ -1,0 +1,482 @@
+[
+  {
+    "track": 0,
+    "points": 121,
+    "minSegment": 15.570530056809242,
+    "maxSegment": 16.11603432920146,
+    "meanSegment": 15.922267267371398,
+    "maxToMinRatio": 1.03503440604796
+  },
+  {
+    "track": 1,
+    "points": 226,
+    "minSegment": 14.60147680887108,
+    "maxSegment": 16.183638535570424,
+    "meanSegment": 15.936549619259763,
+    "maxToMinRatio": 1.1083562811768537
+  },
+  {
+    "track": 2,
+    "points": 160,
+    "minSegment": 15.068852394923775,
+    "maxSegment": 16.11057979248419,
+    "meanSegment": 15.891992645022901,
+    "maxToMinRatio": 1.0691311700625152
+  },
+  {
+    "track": 3,
+    "points": 389,
+    "minSegment": 15.315688443553558,
+    "maxSegment": 16.558725985111295,
+    "meanSegment": 15.896689565795935,
+    "maxToMinRatio": 1.081161062144806
+  },
+  {
+    "track": 4,
+    "points": 269,
+    "minSegment": 15.085433785609215,
+    "maxSegment": 16.949373144750812,
+    "meanSegment": 15.958873479152327,
+    "maxToMinRatio": 1.1235588837305897
+  },
+  {
+    "track": 5,
+    "points": 292,
+    "minSegment": 8.305212971381287,
+    "maxSegment": 23.64879753814134,
+    "meanSegment": 15.9405808966478,
+    "maxToMinRatio": 2.8474643118282583
+  },
+  {
+    "track": 6,
+    "points": 344,
+    "minSegment": 15.084139020839075,
+    "maxSegment": 16.144005272855928,
+    "meanSegment": 15.92244731482125,
+    "maxToMinRatio": 1.0702636226404851
+  },
+  {
+    "track": 7,
+    "points": 252,
+    "minSegment": 15.729277041555342,
+    "maxSegment": 16.144489191361863,
+    "meanSegment": 15.94846406596982,
+    "maxToMinRatio": 1.0263974083938867
+  },
+  {
+    "track": 8,
+    "points": 286,
+    "minSegment": 15.100962303773889,
+    "maxSegment": 16.57287410952005,
+    "meanSegment": 15.940735819865425,
+    "maxToMinRatio": 1.0974713913018852
+  },
+  {
+    "track": 9,
+    "points": 465,
+    "minSegment": 3.775951866748304,
+    "maxSegment": 4.250459533979826,
+    "meanSegment": 3.993324087066706,
+    "maxToMinRatio": 1.1256657086680897
+  },
+  {
+    "track": 10,
+    "points": 252,
+    "minSegment": 15.75,
+    "maxSegment": 16.12802781650627,
+    "meanSegment": 15.947357742504101,
+    "maxToMinRatio": 1.0240017661273821
+  },
+  {
+    "track": 11,
+    "points": 127,
+    "minSegment": 13.74616423770646,
+    "maxSegment": 16.184603988049876,
+    "meanSegment": 15.859974392406063,
+    "maxToMinRatio": 1.1773905584260842
+  },
+  {
+    "track": 12,
+    "points": 262,
+    "minSegment": 14.977436162441096,
+    "maxSegment": 16.31046443238205,
+    "meanSegment": 15.873607872697448,
+    "maxToMinRatio": 1.0890024337599107
+  },
+  {
+    "track": 13,
+    "points": 149,
+    "minSegment": 15.727786915202024,
+    "maxSegment": 16.02463923150846,
+    "meanSegment": 15.927340699038057,
+    "maxToMinRatio": 1.018874385691194
+  },
+  {
+    "track": 14,
+    "points": 164,
+    "minSegment": 14.763897054978404,
+    "maxSegment": 16.62229771271108,
+    "meanSegment": 15.951389166689562,
+    "maxToMinRatio": 1.1258746691887844
+  },
+  {
+    "track": 15,
+    "points": 208,
+    "minSegment": 13.436191796785279,
+    "maxSegment": 16.06553959566874,
+    "meanSegment": 15.881640695966572,
+    "maxToMinRatio": 1.1956914458092622
+  },
+  {
+    "track": 16,
+    "points": 364,
+    "minSegment": 14.525435664722762,
+    "maxSegment": 16.15573621039908,
+    "meanSegment": 15.951926085498053,
+    "maxToMinRatio": 1.1122376349534047
+  },
+  {
+    "track": 17,
+    "points": 488,
+    "minSegment": 3.7837027169163275,
+    "maxSegment": 4.292526208423194,
+    "meanSegment": 3.996520312046928,
+    "maxToMinRatio": 1.1344776610572491
+  },
+  {
+    "track": 18,
+    "points": 149,
+    "minSegment": 14.364262293971104,
+    "maxSegment": 16.106336097946052,
+    "meanSegment": 15.820115443992286,
+    "maxToMinRatio": 1.1212783342661545
+  },
+  {
+    "track": 19,
+    "points": 322,
+    "minSegment": 15.145260190898009,
+    "maxSegment": 16.159000007735628,
+    "meanSegment": 15.918859559672326,
+    "maxToMinRatio": 1.066934460290544
+  },
+  {
+    "track": 20,
+    "points": 149,
+    "minSegment": 14.884057116592908,
+    "maxSegment": 16.18689670690463,
+    "meanSegment": 15.894499944909215,
+    "maxToMinRatio": 1.087532557830573
+  },
+  {
+    "track": 21,
+    "points": 1079,
+    "minSegment": 3.7546845739688974,
+    "maxSegment": 4.233884888609987,
+    "meanSegment": 3.9945105740710587,
+    "maxToMinRatio": 1.1276273160103434
+  },
+  {
+    "track": 22,
+    "points": 71,
+    "minSegment": 16.351844314938912,
+    "maxSegment": 16.7744690676039,
+    "meanSegment": 16.559743642970776,
+    "maxToMinRatio": 1.0258456932762552
+  },
+  {
+    "track": 23,
+    "points": 368,
+    "minSegment": 15.358349724172841,
+    "maxSegment": 16.181103948742187,
+    "meanSegment": 15.959459547892859,
+    "maxToMinRatio": 1.0535704837658695
+  },
+  {
+    "track": 24,
+    "points": 366,
+    "minSegment": 14.953312760054208,
+    "maxSegment": 16.20052564733626,
+    "meanSegment": 15.968498692688666,
+    "maxToMinRatio": 1.0834071290619838
+  },
+  {
+    "track": 25,
+    "points": 317,
+    "minSegment": 14.637281168304447,
+    "maxSegment": 16.210769953953452,
+    "meanSegment": 15.905589581188202,
+    "maxToMinRatio": 1.107498706047694
+  },
+  {
+    "track": 26,
+    "points": 441,
+    "minSegment": 14.983454416455507,
+    "maxSegment": 16.152229915711327,
+    "meanSegment": 15.911280280560586,
+    "maxToMinRatio": 1.0780044085142488
+  },
+  {
+    "track": 27,
+    "points": 362,
+    "minSegment": 15.383127932901033,
+    "maxSegment": 16.191843046731893,
+    "meanSegment": 15.968701547136977,
+    "maxToMinRatio": 1.0525715652472214
+  },
+  {
+    "track": 28,
+    "points": 348,
+    "minSegment": 14.55122954426876,
+    "maxSegment": 16.072710762344975,
+    "meanSegment": 15.915774153444017,
+    "maxToMinRatio": 1.1045603200366994
+  },
+  {
+    "track": 29,
+    "points": 108,
+    "minSegment": 15.558608951316952,
+    "maxSegment": 16.138318143474553,
+    "meanSegment": 15.910708119092817,
+    "maxToMinRatio": 1.0372597057983473
+  },
+  {
+    "track": 30,
+    "points": 194,
+    "minSegment": 15.042777544389866,
+    "maxSegment": 17.36926614022596,
+    "meanSegment": 15.91253620828802,
+    "maxToMinRatio": 1.1546581799119768
+  },
+  {
+    "track": 31,
+    "points": 280,
+    "minSegment": 15.519393109912514,
+    "maxSegment": 18.463329365258044,
+    "meanSegment": 17.019733388436688,
+    "maxToMinRatio": 1.1896940321374543
+  },
+  {
+    "track": 32,
+    "points": 361,
+    "minSegment": 14.626201873692295,
+    "maxSegment": 16.68937255411359,
+    "meanSegment": 15.970847116534452,
+    "maxToMinRatio": 1.1410599072977556
+  },
+  {
+    "track": 33,
+    "points": 338,
+    "minSegment": 15.526816520137023,
+    "maxSegment": 16.183759220280063,
+    "meanSegment": 15.929947281248968,
+    "maxToMinRatio": 1.042310199215083
+  },
+  {
+    "track": 34,
+    "points": 110,
+    "minSegment": 15.361401506698535,
+    "maxSegment": 16.152713587815516,
+    "meanSegment": 15.92664330995584,
+    "maxToMinRatio": 1.0515130133648234
+  },
+  {
+    "track": 35,
+    "points": 272,
+    "minSegment": 15.635621389954414,
+    "maxSegment": 16.171927838077934,
+    "meanSegment": 15.944751468935621,
+    "maxToMinRatio": 1.0343002964031918
+  },
+  {
+    "track": 36,
+    "points": 225,
+    "minSegment": 15.303696448897567,
+    "maxSegment": 16.204865203080217,
+    "meanSegment": 15.955742651784593,
+    "maxToMinRatio": 1.058885691910569
+  },
+  {
+    "track": 37,
+    "points": 71,
+    "minSegment": 15.54655307455643,
+    "maxSegment": 16.049849103652033,
+    "meanSegment": 15.797519264033816,
+    "maxToMinRatio": 1.0323734802616342
+  },
+  {
+    "track": 38,
+    "points": 232,
+    "minSegment": 15.297186220020988,
+    "maxSegment": 16.28889575753986,
+    "meanSegment": 15.93067882526613,
+    "maxToMinRatio": 1.0648295394496092
+  },
+  {
+    "track": 39,
+    "points": 163,
+    "minSegment": 14.67419610234237,
+    "maxSegment": 16.108639956557475,
+    "meanSegment": 15.891967432115873,
+    "maxToMinRatio": 1.0977528066417304
+  },
+  {
+    "track": 40,
+    "points": 252,
+    "minSegment": 15.388840315306414,
+    "maxSegment": 16.1875,
+    "meanSegment": 15.978521597282018,
+    "maxToMinRatio": 1.0518986270784294
+  },
+  {
+    "track": 41,
+    "points": 141,
+    "minSegment": 15.383127932901033,
+    "maxSegment": 16.147876214846335,
+    "meanSegment": 15.882245370852296,
+    "maxToMinRatio": 1.0497134448391134
+  },
+  {
+    "track": 42,
+    "points": 237,
+    "minSegment": 13.325844250928345,
+    "maxSegment": 16.422640622019347,
+    "meanSegment": 15.931544636638078,
+    "maxToMinRatio": 1.2323902570657213
+  },
+  {
+    "track": 43,
+    "points": 153,
+    "minSegment": 14.85608040500589,
+    "maxSegment": 16.330808690937506,
+    "meanSegment": 15.94062869902504,
+    "maxToMinRatio": 1.0992676564563215
+  },
+  {
+    "track": 44,
+    "points": 94,
+    "minSegment": 15.237828134284754,
+    "maxSegment": 16.044006863935206,
+    "meanSegment": 15.816946399095619,
+    "maxToMinRatio": 1.0529064065131808
+  },
+  {
+    "track": 45,
+    "points": 227,
+    "minSegment": 14.846216900274628,
+    "maxSegment": 16.148964750100856,
+    "meanSegment": 15.907538687440473,
+    "maxToMinRatio": 1.0877494824827818
+  },
+  {
+    "track": 46,
+    "points": 321,
+    "minSegment": 14.299393562315851,
+    "maxSegment": 16.240622294111763,
+    "meanSegment": 15.942620779042453,
+    "maxToMinRatio": 1.135756018137144
+  },
+  {
+    "track": 47,
+    "points": 166,
+    "minSegment": 15.363435691602318,
+    "maxSegment": 16.365216543021972,
+    "meanSegment": 15.896104335600556,
+    "maxToMinRatio": 1.0652055224839605
+  },
+  {
+    "track": 48,
+    "points": 187,
+    "minSegment": 15.347027399467299,
+    "maxSegment": 16.191360543512086,
+    "meanSegment": 15.96116411259017,
+    "maxToMinRatio": 1.0550160706739922
+  },
+  {
+    "track": 49,
+    "points": 141,
+    "minSegment": 13.465958237347984,
+    "maxSegment": 16.183517849960804,
+    "meanSegment": 15.911015176734251,
+    "maxToMinRatio": 1.2018095975580585
+  },
+  {
+    "track": 50,
+    "points": 216,
+    "minSegment": 14.35705401536123,
+    "maxSegment": 16.59077774698944,
+    "meanSegment": 15.937800954672484,
+    "maxToMinRatio": 1.155583710226224
+  },
+  {
+    "track": 51,
+    "points": 348,
+    "minSegment": 14.55122954426876,
+    "maxSegment": 16.072710762344975,
+    "meanSegment": 15.915774153444017,
+    "maxToMinRatio": 1.1045603200366994
+  },
+  {
+    "track": 52,
+    "points": 124,
+    "minSegment": 14.720972496747624,
+    "maxSegment": 16.100878275733905,
+    "meanSegment": 15.893418913774953,
+    "maxToMinRatio": 1.0937374062271463
+  },
+  {
+    "track": 53,
+    "points": 233,
+    "minSegment": 15.064574545933914,
+    "maxSegment": 16.187982618288174,
+    "meanSegment": 15.915933200879174,
+    "maxToMinRatio": 1.0745728376814652
+  },
+  {
+    "track": 54,
+    "points": 852,
+    "minSegment": 15.043951242941384,
+    "maxSegment": 16.21390221384106,
+    "meanSegment": 15.981445725422267,
+    "maxToMinRatio": 1.077768862182973
+  },
+  {
+    "track": 55,
+    "points": 149,
+    "minSegment": 15.207034761912002,
+    "maxSegment": 16.044006863935206,
+    "meanSegment": 15.878027802079016,
+    "maxToMinRatio": 1.0550384815401033
+  },
+  {
+    "track": 56,
+    "points": 151,
+    "minSegment": 15.631123799970366,
+    "maxSegment": 16.107548696185898,
+    "meanSegment": 15.962504412848816,
+    "maxToMinRatio": 1.0304792478335074
+  },
+  {
+    "track": 57,
+    "points": 584,
+    "minSegment": 3.8017265814363874,
+    "maxSegment": 4.250459533979826,
+    "meanSegment": 3.995934417885705,
+    "maxToMinRatio": 1.1180339887498947
+  },
+  {
+    "track": 58,
+    "points": 169,
+    "minSegment": 13.875,
+    "maxSegment": 17.187613635987983,
+    "meanSegment": 15.952576971226998,
+    "maxToMinRatio": 1.2387469287198547
+  },
+  {
+    "track": 59,
+    "points": 194,
+    "minSegment": 13.972210141920998,
+    "maxSegment": 18.33712082089225,
+    "meanSegment": 15.941682714670872,
+    "maxToMinRatio": 1.3123994439415962
+  }
+]
