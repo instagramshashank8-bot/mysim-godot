@@ -96,12 +96,7 @@ public partial class Main : Node3D {
   var hint = new Label { Text = "Pick track and car, then START.  Drive: WASD/arrows, Space handbrake, P pit, C camera, hold brake when stopped = reverse, Esc pause", Position = new Vector2(48, 650) }; ui.AddChild(hint);
   var start = new Button { Text = "START RACE", Position = new Vector2(1060, 200), Size = new Vector2(180, 56) };
   start.Pressed += () => { Ui("swoosh"); var ts = tracks.GetSelectedItems(); var cs = cars.GetSelectedItems(); StartRace(ts.Length > 0 ? ts[0] : 0, cs.Length > 0 ? cs[0] : 0, (int)laps.Value); };
-  { var sp = new HFlowContainer { Position = new Vector2(48, 624), Size = new Vector2(1184, 84) }; ui.AddChild(sp); sp.AddChild(new Label { Text = "SETTINGS   " });
-    void Chk(string text, string key, bool def, bool invert, System.Action after = null) { var cb = new CheckBox { Text = text, ButtonPressed = invert ? !Settings.Get(key, def) : Settings.Get(key, def) }; cb.Toggled += on => { Ui("toggle"); Settings.Set(key, invert ? !on : on); after?.Invoke(); }; sp.AddChild(cb); }
-    void Opt(string key, string[] names) { var ob = new OptionButton(); foreach (var nm in names) ob.AddItem(nm); ob.Selected = Mathf.Clamp(Settings.Get(key, 0), 0, names.Length - 1); ob.ItemSelected += i => { Ui("toggle"); Settings.Set(key, (int)i); }; sp.AddChild(ob); }
-    { var rb = new OptionButton(); string[] rn = { "Solo", "1 rival", "2 rivals", "3 rivals", "4 rivals", "5 rivals" }; foreach (var nm in rn) rb.AddItem(nm); rb.Selected = Mathf.Clamp(Settings.Get("rivals", 5), 0, 5); rb.ItemSelected += i => { Ui("toggle"); Settings.Set("rivals", (int)i); }; sp.AddChild(rb); sp.AddChild(new Label { Text = " " }); }
-    sp.AddChild(new Label { Text = "Time" }); Opt("tod", Conditions.TodNames); sp.AddChild(new Label { Text = " Weather" }); Opt("wet", Conditions.WetNames);
-    Chk("Sound on (M in race)", "mute", true, true, Settings.ApplyAudio); Chk("Screen controls", "screen_controls", true, false); Chk("ABS", "abs", true, false); Chk("Traction control", "tc", true, false); Chk("Tilt steering (touch)", "tilt", false, false); }
+  var options=new Button {Text="RACE SETTINGS",Position=new Vector2(1040,590),Size=new Vector2(200,36)};options.Pressed+=()=>AddChild(new RaceSettingsPanel());ui.AddChild(options);
   tracks.GrabFocus(); menuStart = start;
   var controls=new Button {Text="CONTROLS / KEY BINDINGS",Position=new Vector2(600,590),Size=new Vector2(420,36)};controls.Pressed+=()=>AddChild(new ControlsPanel());ui.AddChild(controls);
   ui.AddChild(start); tracks.ItemActivated += i => start.EmitSignal(BaseButton.SignalName.Pressed); cars.ItemActivated += i => start.EmitSignal(BaseButton.SignalName.Pressed);
