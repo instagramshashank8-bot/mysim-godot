@@ -106,10 +106,10 @@ public partial class Main : Node3D {
   var hint = new Label { Text = "Pick track and car, then START.  Drive: WASD/arrows, Space handbrake, P pit, C camera, hold brake when stopped = reverse, Esc pause", Position = new Vector2(48, 650) }; ui.AddChild(hint);
   var start = new Button { Text = "START RACE", Position = new Vector2(1060, 200), Size = new Vector2(180, 56) };
   start.Pressed += () => { Ui("swoosh"); var ts = tracks.GetSelectedItems(); var cs = cars.GetSelectedItems(); StartRace(ts.Length > 0 ? ts[0] : 0, cs.Length > 0 ? cs[0] : 0, (int)laps.Value); };
-  var options=new Button {Text="RACE SETTINGS",Position=new Vector2(1040,590),Size=new Vector2(200,36)};options.Pressed+=()=>AddChild(new RaceSettingsPanel());ui.AddChild(options);
+  var options=new Button {Text="SESSION OPTIONS",Position=new Vector2(1040,590),Size=new Vector2(200,36)};options.Pressed+=()=>AddChild(new RaceSettingsPanel());ui.AddChild(options);
   tracks.GrabFocus(); menuStart = start;
   var controls=new Button {Text="CONTROLS / KEY BINDINGS",Position=new Vector2(600,590),Size=new Vector2(420,36)};controls.Pressed+=()=>AddChild(new ControlsPanel());ui.AddChild(controls);
-  ui.AddChild(start); tracks.ItemActivated += i => start.EmitSignal(BaseButton.SignalName.Pressed); cars.ItemActivated += i => start.EmitSignal(BaseButton.SignalName.Pressed);
+  ui.AddChild(start); var raceTheme=MySimTheme.Build();foreach(var child in ui.GetChildren())if(child is Control control)control.Theme=raceTheme; tracks.ItemActivated += i => start.EmitSignal(BaseButton.SignalName.Pressed); cars.ItemActivated += i => start.EmitSignal(BaseButton.SignalName.Pressed);
  }
  async void DebugRoad(Node3D track) {
   foreach (var n in track.FindChildren("*", "MeshInstance3D", true, false)) { var mi = (MeshInstance3D)n; mi.CreateTrimeshCollision(); foreach (var ch in mi.GetChildren()) if (ch is StaticBody3D sb) { sb.CollisionLayer = 8; sb.CollisionMask = 0; sb.SetMeta("mesh", mi.GetPath().ToString()); foreach (var cs in sb.GetChildren()) if (cs is CollisionShape3D c3 && c3.Shape is ConcavePolygonShape3D cp) cp.BackfaceCollision = true; } }
