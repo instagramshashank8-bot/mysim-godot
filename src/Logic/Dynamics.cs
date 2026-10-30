@@ -77,8 +77,9 @@ namespace MySimulator.Rebuild
                 float k=Math.Max(0,(fx1-fx0)/.02f);
                 // torques: rear-wheel drive with TC, front-biased brakes with ABS
                 float td=front?0:driveTotal*.5f*R;if(!front&&v.traction&&!inp.reverse)td*=MathUtil.Clamp(1-(st.kappa[i]-.14f)/.1f,.1f,1f);
-                float tb=WheelBrakeForce(brakeTotal,mass,front,inp.handbrake)*R;
-                if(v.abs&&inp.brake>0)tb*=MathUtil.Clamp(1-(-st.kappa[i]-.13f)/.08f,.15f,1f);
+                float serviceTb=WheelBrakeForce(brakeTotal,mass,front,false)*R;
+                if(v.abs&&inp.brake>0)serviceTb*=MathUtil.Clamp(1-(-st.kappa[i]-.13f)/.08f,.15f,1f);
+                float tb=serviceTb+WheelBrakeForce(0,mass,front,inp.handbrake)*R;
                 float wi=st.w[i],sg=Math.Abs(wi)>.05f?Math.Sign(wi):0;
                 float torque=td-sg*tb;
                 float wn=wi+dt/Iw*(torque-R*fx0)/(1+dt*R*R*k/(Iw*vref));
