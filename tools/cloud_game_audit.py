@@ -16,6 +16,13 @@ def run(label,values,args=None,timeout=300):
   (out/(label+f'-{attempt}-process.json')).write_text(json.dumps({'returncode':code,'timed_out':timed_out,'elapsed_seconds':time.monotonic()-started,'timeout_seconds':timeout,'screenshot_exists':shot.exists() if shot else None,'error_lines':[line for line in text.splitlines() if 'ERROR:' in line]},indent=2))
   if code==0 and 'ERROR:' not in text:return text
  raise RuntimeError(label+' failed; see saved logs')
+if os.environ.get('REBUILT_RIM_REVIEW')=='1':
+ car=(1,6,16)[shard]
+ for view,camera in enumerate(('4,1,0','0,1.1,-6')):
+  label=f'rebuilt-rim-car-{car:02}-view-{view}';shot=out/(label+'.png')
+  text=run(label,{'MYSIM_CARVIEW':str(car),'MYSIM_REBUILT_RIMS':'1','MYSIM_FITVIEW':'1','MYSIM_CAMPOS':camera,'MYSIM_SHOT':str(shot)})
+  assert shot.exists() and 'PASS complete visible car framing' in text
+ print('COMPLETE rebuilt rim candidate views; manual acceptance required',flush=True);sys.exit(0)
 if os.environ.get('ALPHA_POLICY_REVIEW')=='1':
  track=(0,5)[shard]
  for source_policy in (0,1):
