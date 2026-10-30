@@ -1,0 +1,42 @@
+name: phone-reference-review
+on:
+  workflow_dispatch: {}
+permissions: {contents: write}
+defaults:
+  run:
+    shell: bash
+jobs:
+  frames:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Restore encrypted reference recordings
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MYSIM_INTAKE_KEY: ${{ secrets.MYSIM_INTAKE_KEY }}
+        run: |
+          pip install cryptography Pillow
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg
+          gh release download reference-phone-20261030 --pattern phone-reference-recordings.enc --dir /tmp
+          python tools/cloud_decrypt.py /tmp/phone-reference-recordings.enc /tmp/phone-reference
+      - name: Extract labelled samples and motion sequences
+        run: python tools/phone_reference_frames.py
+      - name: Preserve encrypted reference frames
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MYSIM_INTAKE_KEY: ${{ secrets.MYSIM_INTAKE_KEY }}
+        run: |
+          if [ -d outputs/phone-reference ]; then
+            python tools/cloud_encrypt_output.py outputs/phone-reference /tmp/phone-review-${{ github.run_id }}.enc
+            gh release upload repair-review-20261029 /tmp/phone-review-${{ github.run_id }}.enc
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reference-frame-metadata
+          path: outputs/phone-reference/manifest.json
