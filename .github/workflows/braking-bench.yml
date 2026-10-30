@@ -19,3 +19,17 @@ jobs:
           name: controlled-braking-${{ matrix.shard }}-attempt-${{ github.run_attempt }}
           path: braking-*.json
           retention-days: 14
+  convergence:
+    needs: braking
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: controlled-braking-*-attempt-${{ github.run_attempt }}
+          path: brake-results
+      - run: python tools/check_braking_results.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: braking-summary-attempt-${{ github.run_attempt }}
+          path: braking-summary.json

@@ -1,0 +1,39 @@
+{
+  "source_commit": "b21b7da",
+  "reference_cloud_run": 41089354964,
+  "review_scope": "Five labelled sheets manually inspected; sampled stills only, not continuous motion or recovered physics constants.",
+  "reviewed_sheets": [
+    "monoposto-part-2-sheet-00.jpg",
+    "monoposto-part-2-sheet-01.jpg",
+    "monoposto-part-3-sheet-00.jpg",
+    "f1-clash-wet-sheet-00.jpg",
+    "f1-clash-wet-sheet-01.jpg"
+  ],
+  "observations": [
+    "Monoposto: integrated cockpit, consistent car assembly, contextual race messages, full standings, grid lights and visible racing-line guidance.",
+    "Monoposto part2 includes red flag, tyre setup, restarts and retirement; part3 shows yellow/safety-car status, retirement and results. This collection is not a clean uninterrupted two-lap calibration trial.",
+    "F1 Clash: wet track remains readable, white vehicle spray is visible, compound and pit/energy actions remain available beside the race; no exact force model inferred.",
+    "MySim rain-focus car16 night heavy rain is nearly black. Removal of fake F1 headlamps is correct but leaves missing authored circuit illumination exposed. Visual gate FAILED."
+  ],
+  "implementation": "60e1cb6 shares tyre weather grip loss with AI cornering and braking budgets, dry factor exactly 1; weakest mixed tyre limits planning; wet tyres receive no unvalidated speed bonus.",
+  "validation": {
+    "dry_lap_matrix_41090194066": "PASS",
+    "core_41090194014": "FAIL CS0136 fixture variable scope",
+    "contacts_41090193821": "FAIL same compile error",
+    "distinct_fix": "b21b7da renames planning fixture loop variable",
+    "core_41090703178": "running",
+    "contacts_41090702117": "running",
+    "braking_41090706233": "running",
+    "braking_41090627357": "failed old source; preserve"
+  },
+  "not_complete": [
+    "night fixture lighting",
+    "rain spray and wet material acceptance",
+    "native collision failures",
+    "car panel UV/assembly",
+    "full LAN racing",
+    "pit crew animation and audio",
+    "exhaustive per-asset manual review",
+    "current Windows gameplay verification"
+  ]
+}
