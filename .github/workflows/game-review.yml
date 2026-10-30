@@ -3,7 +3,7 @@ run-name: '${{ inputs.depth }} cars ${{ inputs.cars || ''16'' }}'
 on:
   workflow_dispatch:
     inputs:
-      depth: {description: 'Preview coverage or full races with live mesh collision', type: choice, options: [preview, full_races, geometry, surfaces, collision_probe, car_materials, input_physics, car_uv, native_races, wheel_orientation, contact_trace, car_uv_roles, precise_ai, native_focus, car_panel_uv, wheel_compounds, assembly_review, weather_review, gui_review, livery_uv, rear_panel_uv, rain_focus, route_parity, ground_review, controls_gameplay, track_scene_audit, alpha_policy_review, rebuilt_rim_review, car_assembly_audit, rebuilt_wheel_review], default: preview}
+      depth: {description: 'Preview coverage or full races with live mesh collision', type: choice, options: [preview, full_races, geometry, surfaces, collision_probe, car_materials, input_physics, car_uv, native_races, wheel_orientation, contact_trace, car_uv_roles, precise_ai, native_focus, car_panel_uv, wheel_compounds, assembly_review, weather_review, gui_review, livery_uv, rear_panel_uv, rain_focus, route_parity, ground_review, controls_gameplay, track_scene_audit, alpha_policy_review, rebuilt_rim_review, car_assembly_audit, rebuilt_wheel_review, car_shape_review], default: preview}
       native_ai: {description: 'Apply explicit experimental AI mode during native regression only', type: boolean, default: false}
       case_set: {description: 'Exact native regression cases; completed cases are not repeated', type: choice, options: [shutdown, bridge, monaco_ai3, ai4_regression, braking_monaco], default: shutdown}
       ai_mode: {description: 'Opt-in curvature AI experiment; default game AI is unchanged', type: choice, options: ['1', '2', '3', '4', '5'], default: '1'}
@@ -18,7 +18,7 @@ jobs:
       fail-fast: false
       max-parallel: 12
       matrix:
-        shard: ${{ fromJSON(inputs.depth == 'native_races' && '[0,1,2,3,4,5,6,7,8,9,10,11]' || (inputs.depth == 'rebuilt_rim_review' || inputs.depth == 'car_assembly_audit' || inputs.depth == 'rebuilt_wheel_review') && '[0,1,2]' || (inputs.depth == 'ground_review' || inputs.depth == 'track_scene_audit' || inputs.depth == 'alpha_policy_review') && '[0,1]' || (inputs.depth == 'geometry' || inputs.depth == 'surfaces' || inputs.depth == 'collision_probe' || inputs.depth == 'car_materials' || inputs.depth == 'input_physics' || inputs.depth == 'car_uv' || inputs.depth == 'wheel_orientation' || inputs.depth == 'contact_trace' || inputs.depth == 'car_uv_roles' || inputs.depth == 'precise_ai' || inputs.depth == 'native_focus' || inputs.depth == 'car_panel_uv' || inputs.depth == 'wheel_compounds' || inputs.depth == 'gui_review' || inputs.depth == 'livery_uv' || inputs.depth == 'rear_panel_uv' || inputs.depth == 'controls_gameplay' || inputs.depth == 'rain_focus' || inputs.depth == 'route_parity') && '[0]' || '[0,1,2,3,4,5]') }}
+        shard: ${{ fromJSON(inputs.depth == 'native_races' && '[0,1,2,3,4,5,6,7,8,9,10,11]' || (inputs.depth == 'rebuilt_rim_review' || inputs.depth == 'car_assembly_audit' || inputs.depth == 'rebuilt_wheel_review' || inputs.depth == 'car_shape_review') && '[0,1,2]' || (inputs.depth == 'ground_review' || inputs.depth == 'track_scene_audit' || inputs.depth == 'alpha_policy_review') && '[0,1]' || (inputs.depth == 'geometry' || inputs.depth == 'surfaces' || inputs.depth == 'collision_probe' || inputs.depth == 'car_materials' || inputs.depth == 'input_physics' || inputs.depth == 'car_uv' || inputs.depth == 'wheel_orientation' || inputs.depth == 'contact_trace' || inputs.depth == 'car_uv_roles' || inputs.depth == 'precise_ai' || inputs.depth == 'native_focus' || inputs.depth == 'car_panel_uv' || inputs.depth == 'wheel_compounds' || inputs.depth == 'gui_review' || inputs.depth == 'livery_uv' || inputs.depth == 'rear_panel_uv' || inputs.depth == 'controls_gameplay' || inputs.depth == 'rain_focus' || inputs.depth == 'route_parity') && '[0]' || '[0,1,2,3,4,5]') }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
@@ -92,7 +92,8 @@ jobs:
           AI_MODE: ${{ inputs.ai_mode || '1' }}
           PRECISE_AI: ${{ inputs.depth == 'precise_ai' && '1' || '0' }}
           REBUILT_WHEEL_REVIEW: ${{ inputs.depth == 'rebuilt_wheel_review' && '1' || '0' }}
-          CAR_ASSEMBLY_AUDIT: ${{ inputs.depth == 'car_assembly_audit' && '1' || '0' }}
+          CAR_ASSEMBLY_AUDIT: ${{ (inputs.depth == 'car_assembly_audit' || inputs.depth == 'car_shape_review') && '1' || '0' }}
+          NEUTRAL_CAR_REVIEW: ${{ inputs.depth == 'car_shape_review' && '1' || '0' }}
           REBUILT_RIM_REVIEW: ${{ inputs.depth == 'rebuilt_rim_review' && '1' || '0' }}
           ALPHA_POLICY_REVIEW: ${{ inputs.depth == 'alpha_policy_review' && '1' || '0' }}
           TRACK_SCENE_AUDIT: ${{ inputs.depth == 'track_scene_audit' && '1' || '0' }}
