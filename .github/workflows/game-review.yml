@@ -28,6 +28,7 @@ jobs:
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
       - name: Restore source assets from encrypted transport
+        if: inputs.depth != 'gui_review'
         env:
           GH_TOKEN: ${{ github.token }}
           MYSIM_INTAKE_KEY: ${{ secrets.MYSIM_INTAKE_KEY }}
@@ -44,21 +45,29 @@ jobs:
               pathlib.Path('/tmp/parts/'+name).unlink()
           PY
       - name: Restore checksum-verified supplemental recovered assets
+        if: inputs.depth != 'gui_review'
         env:
           GH_TOKEN: ${{ github.token }}
           MYSIM_INTAKE_KEY: ${{ secrets.MYSIM_INTAKE_KEY }}
         run: python tools/cloud_asset_patches.py
       - name: Verify route parity after encrypted source restoration
+        if: inputs.depth != 'gui_review'
         run: |
           mkdir -p outputs/cloud-game
           python tools/check_track_route_parity.py > outputs/cloud-game/track-route-parity.json
       - name: Scope import only for isolated diagnostics
-        if: inputs.depth != 'route_parity'
+        if: inputs.depth != 'route_parity' && inputs.depth != 'gui_review'
         env:
           SHARD: ${{ matrix.shard }}
           IMPORT_REVIEW_DEPTH: ${{ inputs.depth }}
           IMPORT_CASE_SET: ${{ inputs.case_set || 'shutdown' }}
         run: python tools/cloud_scope_import.py
+      - name: Isolate asset-independent GUI fixtures
+        if: inputs.depth == 'gui_review'
+        run: |
+          mkdir -p assets outputs/cloud-game
+          touch assets/.gdignore
+          python -c "import pathlib,json;pathlib.Path('outputs/cloud-game/gui-isolation.json').write_text(json.dumps({'scope':'UI interaction/layout only; no imported car, track or collision acceptance','sourceAssetsImported':False}))"
       - name: Install software renderer and Godot
         if: inputs.depth != 'route_parity'
         run: |
@@ -76,7 +85,7 @@ jobs:
           dotnet build -v quiet
           "$G" --headless --editor --path . --import > import.log 2>&1
       - name: Render layouts and cars; test real scene transitions
-        if: inputs.depth != 'route_parity'
+        if: inputs.depth != 'route_parity' && inputs.depth != 'gui_review'
         env:
           SHARD: ${{ matrix.shard }}
           GEOMETRY_ONLY: ${{ inputs.depth == 'geometry' && '1' || '0' }}
