@@ -8,7 +8,7 @@ public partial class Hud : CanvasLayer {
  public override void _Ready() {
   var root = new Control { AnchorRight = 1, AnchorBottom = 1, MouseFilter = Control.MouseFilterEnum.Ignore }; AddChild(root);
   standings=new RaceStandingsPanel();root.AddChild(standings);pitDisplay=new PitServiceDisplay();root.AddChild(pitDisplay);strategy=new PitStrategyPanel();root.AddChild(strategy);
-  speed = Make(root, 48, new Vector2(-300, -140), true); gear = Make(root, 26, new Vector2(-300, -210), true); info = Make(root, 18, new Vector2(24, 20), false); mini = new MiniMap { H = this, Size = new Vector2(190, 150) }; mini.AnchorLeft = touchMode ? .5f : 0; mini.AnchorTop = 1; mini.AnchorRight = touchMode ? .5f : 0; mini.AnchorBottom = 1; mini.OffsetLeft = touchMode ? -100 : 20; mini.OffsetTop = -170; mini.OffsetRight = touchMode ? 90 : 210; mini.OffsetBottom = -20; root.AddChild(mini);
+  speed = Make(root, 48, new Vector2(-300, -140), true); gear = Make(root, 26, new Vector2(-300, -210), true); info = Make(root, 18, new Vector2(24, 20), false); mini = new MiniMap { H = this, Size = new Vector2(190, 150) }; mini.AnchorLeft = mini.AnchorRight = touchMode ? 1 : 0; mini.AnchorTop = mini.AnchorBottom = touchMode ? 0 : 1; mini.OffsetLeft = touchMode ? -214 : 20; mini.OffsetTop = touchMode ? 170 : -170; mini.OffsetRight = touchMode ? -24 : 210; mini.OffsetBottom = touchMode ? 320 : -20; root.AddChild(mini);
  }
  static bool touchMode => DisplayServer.IsTouchscreenAvailable() || Settings.Get("screen_controls", true) || System.Environment.GetEnvironmentVariable("MYSIM_TOUCH") != null;
  static Label Make(Control p, int size, Vector2 off, bool bottomRight) {
@@ -34,7 +34,7 @@ partial class MiniMap : Control {
  }
  MiniMap mini;
  public override void _Process(double delta) {
-  if (Player == null) return;pitDisplay.Player=Player;strategy.Player=Player;strategy.Race=Race;
+  if (Player == null) return;mini.Visible=!strategy.Open;pitDisplay.Player=Player;strategy.Player=Player;strategy.Race=Race;
   if (Paused) { info.Text = "PAUSED  (Esc / Tab to resume)"; return; }
   speed.Text = ((int)(Player.speed * 3.6f)) + " km/h"; gear.Text = "GEAR " + (Player.gear < 0 ? "R" : Player.gear.ToString());
   standings.Race=Race;standings.Player=Player;

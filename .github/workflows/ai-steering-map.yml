@@ -1,6 +1,8 @@
 name: isolated-ai-steering-map-regression
 on: {workflow_dispatch: {}}
 permissions: {contents: read}
+defaults:
+  run: {shell: bash}
 jobs:
   laps:
     runs-on: ubuntu-latest

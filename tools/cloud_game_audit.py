@@ -23,8 +23,8 @@ if os.environ.get('TRACK_SCENE_AUDIT')=='1':
  print('COMPLETE scene metadata audit; visual and duplicate acceptance separate',flush=True);sys.exit(0)
 if os.environ.get('CONTROLS_GAMEPLAY')=='1':
  label='controls-gameplay-crisp';shot=out/(label+'.png')
- text=run(label,{'MYSIM_TRACK':'0','MYSIM_CAR':'16','MYSIM_TOD':'0','MYSIM_WET':'0','MYSIM_AI':'1','MYSIM_AUTODRIVE':'1','MYSIM_NOPIT':'1','MYSIM_RIVALS':'0','MYSIM_SECONDS':'4','MYSIM_CAMERA_CYCLE_CHECK':'1','MYSIM_CAM':'0','MYSIM_TOUCH':'1','MYSIM_SHOT':str(shot)})
- assert shot.exists() and 'PASS full camera cycle restores all four wheels' in text
+ text=run(label,{'MYSIM_TRACK':'0','MYSIM_CAR':'16','MYSIM_TOD':'0','MYSIM_WET':'0','MYSIM_AI':'1','MYSIM_AUTODRIVE':'1','MYSIM_NOPIT':'1','MYSIM_RIVALS':'0','MYSIM_SECONDS':'4','MYSIM_CAMERA_CYCLE_CHECK':'1','MYSIM_CAMERA_FRAME_CHECK':'1','MYSIM_CAM':'0','MYSIM_TOUCH':'1','MYSIM_SHOT':str(shot)})
+ assert shot.exists() and 'PASS full camera cycle restores all four wheels' in text and 'PASS complete gameplay car framing' in text
  print('COMPLETE crisp controls in real track scene; visual review separate',flush=True);sys.exit(0)
 if os.environ.get('GROUND_REVIEW')=='1':
  track=(0,5)[shard]

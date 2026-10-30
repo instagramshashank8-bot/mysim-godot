@@ -89,6 +89,15 @@ AudioStreamPlayer engineSnd, whineSnd; AudioStreamPlayer[] sfxPool; int sfxNext;
  void CaptureShot(string fallback) {
   if (DisplayServer.GetName()=="headless") { GD.Print("SCREENSHOT_SKIPPED headless (logic check only)"); return; }
   string path=System.Environment.GetEnvironmentVariable("MYSIM_SHOT") ?? fallback;GD.Print("SCREENSHOT_BEGIN ",path);
+  if(System.Environment.GetEnvironmentVariable("MYSIM_CAMERA_FRAME_CHECK")=="1"){
+   var size=GetViewport().GetVisibleRect().Size;Vector2 minimum=new Vector2(float.MaxValue,float.MaxValue),maximum=new Vector2(float.MinValue,float.MinValue);int points=0;
+   foreach(var node in Car.FindChildren("*","MeshInstance3D",true,false)){
+    var mesh=(MeshInstance3D)node;if(!mesh.IsVisibleInTree()||mesh.Mesh==null)continue;var bounds=mesh.GetAabb();
+    for(int i=0;i<8;i++){var local=bounds.Position+new Vector3((i&1)!=0?bounds.Size.X:0,(i&2)!=0?bounds.Size.Y:0,(i&4)!=0?bounds.Size.Z:0);var world=mesh.GlobalTransform*local;if(Cam.IsPositionBehind(world))throw new System.Exception("Camera framing: car behind near view");var screen=Cam.UnprojectPosition(world);minimum=minimum.Min(screen);maximum=maximum.Max(screen);points++;}
+   }
+   if(points==0||minimum.X<size.X*.02f||minimum.Y<size.Y*.02f||maximum.X>size.X*.98f||maximum.Y>size.Y*.98f)throw new System.Exception("Camera framing crops assembled car: "+minimum+".."+maximum+" viewport "+size);
+   GD.Print("PASS complete gameplay car framing ",minimum,"..",maximum);
+  }
   var image=GetViewport().GetTexture().GetImage();var error=image.SavePng(path);GD.Print("SCREENSHOT_END ",error," size=",image.GetWidth(),"x",image.GetHeight());if(error!=Error.Ok)throw new System.IO.IOException("Screenshot failed: "+error);
  }
  ulong lastHeartbeat; double worstRenderMs;
@@ -161,7 +170,7 @@ AudioStreamPlayer engineSnd, whineSnd; AudioStreamPlayer[] sfxPool; int sfxNext;
   if (System.Environment.GetEnvironmentVariable("MYSIM_TREEVIEW") != null) { if (treeTarget == null) { int want = int.Parse(System.Environment.GetEnvironmentVariable("MYSIM_TREEVIEW")); var cands = new System.Collections.Generic.List<(float, MeshInstance3D)>(); foreach (var tn in GetTree().Root.FindChildren("*", "MeshInstance3D", true, false)) { var tmi = (MeshInstance3D)tn; string tnm = tmi.Name.ToString().ToLowerInvariant(); if (!tnm.StartsWith("org_tree")) continue; var tab = tmi.GlobalTransform * tmi.GetAabb(); if (tab.Size.Y < 3f) continue; cands.Add(((tab.GetCenter() - Car.GlobalPosition).Length(), tmi)); } cands.Sort((x, y) => x.Item1.CompareTo(y.Item1)); if (cands.Count > 0) { treeTarget = cands[Mathf.Min(want, cands.Count - 1)].Item2; var tb = treeTarget.GlobalTransform * treeTarget.GetAabb(); { var tm = treeTarget.Mesh; for (int si = 0; si < tm.GetSurfaceCount(); si++) { var arr = tm.SurfaceGetArrays(si); var vv = (Vector3[])arr[(int)Mesh.ArrayType.Vertex]; var mt = treeTarget.GetActiveMaterial(si) as StandardMaterial3D; GD.Print("TREESURF ", si, " verts=", vv.Length, " tex=", mt?.AlbedoTexture?.ResourcePath, " transp=", mt?.Transparency, " scissor=", mt?.AlphaScissorThreshold, " cull=", mt?.CullMode, " vis=", treeTarget.Visible, " layers=", treeTarget.Layers); } } GD.Print("TREEVIEW ", treeTarget.Name, " dist=", cands[Mathf.Min(want, cands.Count - 1)].Item1, " size=", tb.Size, " center=", tb.GetCenter()); } } if (treeTarget != null) { var tab2 = treeTarget.GlobalTransform * treeTarget.GetAabb(); var tc = tab2.GetCenter(); float dist = Mathf.Max(tab2.Size.Y * 1.8f, 12f); Cam.GlobalPosition = tc + new Vector3(dist * 0.7f, tab2.Size.Y * 0.1f, dist * 0.7f); Cam.LookAt(tc); } }
   float speed = Player.speed; float look = Mathf.Clamp(speed / 20f, 0, 1) * 4f + 3f;
   if (CamMode == 0 || CamMode == 1) {
-   float len = Mathf.Max(CarSize.Z, 3.5f), hgt = Mathf.Max(CarSize.Y, 1.0f); float back = CamMode == 0 ? len * 0.95f : len * 1.8f, up = CamMode == 0 ? hgt * 1.15f + 0.2f : hgt * 2.2f; var target = ObstructCam(Car.Position + Vector3.Up * (hgt * 0.8f), Car.Position - fwd * back + Vector3.Up * up);
+   float len = Mathf.Max(CarSize.Z, 3.5f), hgt = Mathf.Max(CarSize.Y, 1.0f); float back = CamMode == 0 ? len * 1.5f : len * 2.1f, up = CamMode == 0 ? Mathf.Clamp(hgt * 1.7f + 0.3f,2.2f,3.2f) : hgt * 2.2f; var target = ObstructCam(Car.Position + Vector3.Up * (hgt * 0.8f), Car.Position - fwd * back + Vector3.Up * up);
    // Smooth the offset, not absolute world translation: position lerp creates speed/rate metres of lag.
    if (!camInit) { chaseOffset = target-Car.Position; camInit = true; }
    chaseOffset = chaseOffset.Lerp(target-Car.Position, 1f-Mathf.Exp(-6f*(float)delta));
