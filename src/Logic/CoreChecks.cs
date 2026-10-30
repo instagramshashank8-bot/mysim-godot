@@ -19,7 +19,7 @@ namespace MySimulator.Verification
             float previousWeatherGrip=1;
             for(int wi=0;wi<=10;wi++){float grip=weatherPlanner.PlanningWeatherGrip(wi/10f);Check(float.IsFinite(grip)&&grip<=previousWeatherGrip+.00001f,"slick wet planning grip is nonfinite or rises with water");previousWeatherGrip=grip;}
             Check(Math.Abs(previousWeatherGrip-.38f)<.00001f,"slick planner ignores tyre weather loss");
-            foreach(var tyre in weatherPlanner.tyres)tyre.Replace(Compound.Wet);
+            foreach(var planningTyre in weatherPlanner.tyres)planningTyre.Replace(Compound.Wet);
             Check(Math.Abs(weatherPlanner.PlanningWeatherGrip(1)-1)<.00001f,"wet tyres received an unvalidated planning bonus");
             weatherPlanner.tyres[0].Replace(Compound.Soft);
             Check(Math.Abs(weatherPlanner.PlanningWeatherGrip(1)-.38f)<.00001f,"planner ignored weakest mixed tyre");
