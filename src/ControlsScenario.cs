@@ -8,6 +8,10 @@ public partial class ControlsScenario : Node {
  public override async void _Ready(){
   var original=new Key[ControlBindings.Actions.Length];for(int i=0;i<original.Length;i++)original[i]=ControlBindings.Get(i);
   try {
+   var wheelRoot=new Node3D();AddChild(wheelRoot);var wheelPivots=new Node3D[4];
+   for(int i=0;i<4;i++){float baseYaw=i%2==0?0:Mathf.Pi;var pivot=new Node3D {Rotation=new Vector3(0,baseYaw,0)};pivot.SetMeta("steer_base_yaw",baseYaw);pivot.SetMeta("radius",.33f);pivot.AddChild(new Node3D {Name="Spin"});wheelRoot.AddChild(pivot);wheelPivots[i]=pivot;}
+   foreach(float steering in new[]{0f,.52f,-.52f,0f}){WheelAnimation.Update(wheelPivots,2,steering);for(int i=0;i<4;i++){var pivot=wheelPivots[i];float expected=pivot.GetMeta("steer_base_yaw").AsSingle()+(i<2?steering:0);Check(Mathf.Abs(Mathf.Wrap(pivot.Rotation.Y-expected,-Mathf.Pi,Mathf.Pi))<.0001f,"wheel side orientation or steering travel changed");var spin=pivot.GetNode<Node3D>("Spin");Check(spin.Rotation.X*Mathf.Cos(pivot.GetMeta("steer_base_yaw").AsSingle())>0,"forward rolling wheel spins backwards");}}
+   wheelRoot.QueueFree();GD.Print("PASS mirrored wheel bases preserved, full steering and forward spin on both sides");
    ControlBindings.Reset();var panel=new ControlsPanel();AddChild(panel);
    await ToSignal(GetTree(),SceneTree.SignalName.ProcessFrame);
    var content=panel.GetNode<Control>("Content");var size=GetViewport().GetVisibleRect().Size;Check(content.Position.X>=0&&content.Position.Y>=0&&content.Position.Y+700*content.Scale.Y<=size.Y+1,"controls extend outside viewport");
