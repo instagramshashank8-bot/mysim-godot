@@ -16,6 +16,13 @@ def run(label,values,args=None,timeout=300):
   (out/(label+f'-{attempt}-process.json')).write_text(json.dumps({'returncode':code,'timed_out':timed_out,'elapsed_seconds':time.monotonic()-started,'timeout_seconds':timeout,'screenshot_exists':shot.exists() if shot else None,'error_lines':[line for line in text.splitlines() if 'ERROR:' in line]},indent=2))
   if code==0 and 'ERROR:' not in text:return text
  raise RuntimeError(label+' failed; see saved logs')
+if os.environ.get('CAR_ASSEMBLY_AUDIT')=='1':
+ car=(1,6,16)[shard]
+ for view,camera in enumerate(('4,2.5,4','-4,2.5,-4')):
+  label=f'assembly-audit-car-{car:02}-view-{view}';shot=out/(label+'.png');metadata=out/(label+'.json')
+  text=run(label,{'MYSIM_CARVIEW':str(car),'MYSIM_CAR_ASSEMBLY_AUDIT':str(metadata),'MYSIM_FITVIEW':'1','MYSIM_CAMPOS':camera,'MYSIM_SHOT':str(shot)})
+  assert shot.exists() and metadata.exists() and 'PASS read-only car assembly evidence' in text
+ print('COMPLETE read-only assembly diagnostics; visual acceptance remains separate',flush=True);sys.exit(0)
 if os.environ.get('REBUILT_RIM_REVIEW')=='1':
  car=(1,6,16)[shard]
  for view,camera in ((1,'0,1.1,-6'),): # New close-up coverage only; completed whole-car views are retained.
