@@ -18,7 +18,7 @@ def run(label,values,args=None,timeout=300):
  raise RuntimeError(label+' failed; see saved logs')
 if os.environ.get('REBUILT_RIM_REVIEW')=='1':
  car=(1,6,16)[shard]
- for view,camera in enumerate(('4,1,0','0,1.1,-6')):
+ for view,camera in ((1,'0,1.1,-6'),): # New close-up coverage only; completed whole-car views are retained.
   label=f'rebuilt-rim-car-{car:02}-view-{view}';shot=out/(label+'.png')
   values={'MYSIM_CARVIEW':str(car),'MYSIM_REBUILT_RIMS':'1','MYSIM_FITVIEW':'1','MYSIM_CAMPOS':camera,'MYSIM_SHOT':str(shot)}
   if view==1:values['MYSIM_WHEEL_CLOSEUP']='0'

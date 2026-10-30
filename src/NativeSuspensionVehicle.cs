@@ -10,7 +10,7 @@ public partial class NativeSuspensionVehicle : RigidBody3D {
  public float WheelRadius=.33f,RestLength=.18f,StaticSag=.07f,DampingRatio=.7f;public int Contacts;public float WheelAngle;
  Vector3[] mounts=new Vector3[4];Tyre[] tyres={new Tyre(),new Tyre(),new Tyre(),new Tyre()};float power,drag,brakeDecel;
  public override void _Ready(){
-  CarIndex=Math.Clamp(CarIndex,0,23);Mass=RecoveredVehicleProfiles.Mass[CarIndex];CanSleep=false;LinearDamp=0;AngularDamp=.15f;CollisionLayer=4;CollisionMask=7;
+  CarIndex=Math.Clamp(CarIndex,0,23);Mass=RecoveredVehicleProfiles.Mass[CarIndex];CanSleep=false;ContinuousCd=true;LinearDamp=0;AngularDamp=.15f;CollisionLayer=4;CollisionMask=7;
   CenterOfMassMode=CenterOfMassModeEnum.Custom;CenterOfMass=new Vector3(0,-.3f,0);
   float wheelbase=RecoveredGeometry.Wheelbase[CarIndex],track=VehicleDimensions.Width[CarIndex]*.8f;
   for(int i=0;i<4;i++){mounts[i]=new Vector3(i%2==0?-track*.5f:track*.5f,-.32f+RestLength-StaticSag,i<2?wheelbase*.5f:-wheelbase*.5f);tyres[i].Replace(Compound);}
