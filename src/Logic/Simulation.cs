@@ -257,7 +257,14 @@ namespace MySimulator.Rebuild
             }
         }
         static float PhysicalSteeringLimit(float speed){float[] speeds={0,15,40,70},factors={1,.6f,.28f,.16f};int i=0;while(i<2&&speed>speeds[i+1])i++;float t=MathUtil.Clamp((speed-speeds[i])/(speeds[i+1]-speeds[i]),0,1);t=t*t*(3-2*t);return (32*MathUtil.Pi/180)*MathUtil.Lerp(factors[i],factors[i+1],t);}
-        public int recoveries;public float dbgA,dbgB,dbgC,dbgAcc,dbgRes,dbgDriveF,dbgBrakeF,dbgLong,dbgPush;public DriverInput Autopilot(Circuit track,float pace=1,List<Vehicle> traffic=null)
+        // Use the weakest tyre's weather loss for planning, sharing the actual tyre model.
+        // A wet compound must not gain an unvalidated speed bonus over the dry planner.
+        public float PlanningWeatherGrip(float wetness){
+            float scale=1;wetness=MathUtil.Clamp(wetness,0,1);
+            foreach(var tyre in tyres)scale=Math.Min(scale,tyre.Grip(wetness)/Math.Max(.001f,tyre.Grip(0)));
+            return MathUtil.Clamp(scale,.05f,1);
+        }
+        public int recoveries;public float dbgA,dbgB,dbgC,dbgAcc,dbgRes,dbgDriveF,dbgBrakeF,dbgLong,dbgPush;public DriverInput Autopilot(Circuit track,float pace=1,List<Vehicle> traffic=null,float wetness=0)
         {
             float look=MathUtil.Clamp(4+speed*.5f,4,40),offset=0;
             string aiProbe=Environment.GetEnvironmentVariable("MYSIM_PRECISE_AI");
@@ -280,7 +287,7 @@ namespace MySimulator.Rebuild
             if((aiProbe=="3"||aiProbe=="4")&&UseDynamics&&!externalPhysics)steer=Dynamics.SteeringCommand(desiredSteer,Vec.Dot(velocity,Forward));
             float turn=Math.Abs(MathUtil.Wrap(track.Heading(progress+.04f)-track.Heading(progress)))/(.04f*track.length);
             for(int j=0;j<6;j++){float p=progress+j*.012f;turn=Math.Max(turn,Math.Abs(MathUtil.Wrap(track.Heading(p+.012f)-track.Heading(p)))/(.012f*track.length));}
-            int cm=Math.Max(0,Math.Min(RecoveredVehicleProfiles.Count-1,carModel));float gripMul=Dynamics.GripMul(cm),paceCap=MathUtil.Lerp(.75f,.97f,MathUtil.Clamp((gripMul-1)/.45f,0,1)),latAcc=CornerLateralAccel*gripMul*Math.Min(pace,paceCap);if(aiProbe=="4")latAcc*=.85f;float aDown=Dynamics.DownK(cm)/RecoveredVehicleProfiles.Mass[cm]*latAcc/9.81f;float topAi=Math.Max(TopAiSpeed,RecoveredVehicleProfiles.Speed[cm]*.44704f*.92f);float planDecel=MathUtil.Clamp(26.82f*26.82f/(2*RecoveredVehicleProfiles.Brakes[cm]*.3048f)*PlanDecelK,5f,14f);float desired=MathUtil.Clamp(SpeedAhead(track,progress,latAcc,planDecel,aDown),10,topAi);
+            int cm=Math.Max(0,Math.Min(RecoveredVehicleProfiles.Count-1,carModel));float weatherGrip=PlanningWeatherGrip(wetness);float gripMul=Dynamics.GripMul(cm),paceCap=MathUtil.Lerp(.75f,.97f,MathUtil.Clamp((gripMul-1)/.45f,0,1)),latAcc=CornerLateralAccel*gripMul*Math.Min(pace,paceCap)*weatherGrip;if(aiProbe=="4")latAcc*=.85f;float aDown=Dynamics.DownK(cm)/RecoveredVehicleProfiles.Mass[cm]*latAcc/9.81f;float topAi=Math.Max(TopAiSpeed,RecoveredVehicleProfiles.Speed[cm]*.44704f*.92f);float planDecel=MathUtil.Clamp(26.82f*26.82f/(2*RecoveredVehicleProfiles.Brakes[cm]*.3048f)*PlanDecelK,5f,14f)*weatherGrip;float desired=MathUtil.Clamp(SpeedAhead(track,progress,latAcc,planDecel,aDown),10,topAi);
             desired=Math.Max(4,desired*AiRaceCalibration.Scale(carModel,track.variant));
             // Limit speed for the turn actually requested, including recovery from lateral error.
             float wheelbase=RecoveredGeometry.Wheelbase[Math.Max(0,Math.Min(RecoveredGeometry.Wheelbase.Length-1,carModel))];
@@ -326,7 +333,7 @@ namespace MySimulator.Rebuild
             Vehicle occupied=null;foreach(var candidate in cars)if(candidate.servicing){occupied=candidate;break;}
             foreach(Vehicle v in cars)
             {
-                if(!v.human||v.pitActive||v.finished||v.retired)v.input=v.Autopilot(track,pace*MathUtil.Lerp(1,.7f,wetness),cars);
+                if(!v.human||v.pitActive||v.finished||v.retired)v.input=v.Autopilot(track,pace*MathUtil.Lerp(1,.7f,wetness),cars,wetness);
                 if(!v.human&&v.Wear>.55f&&!v.pitRequested&&track.PitValid){v.pitRequested=true;v.nextCompound=wetness>.5f?Compound.Wet:Compound.Hard;}
                 bool boxAvailable=occupied==null||occupied==v;
                 if(!boxAvailable&&v.pitActive&&!v.pitDone&&(v.position-track.PitBox).Magnitude<8)v.input=new DriverInput(0,1,0);

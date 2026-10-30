@@ -14,6 +14,15 @@ namespace MySimulator.Verification
             count=0;var log=new List<string>();
             var seriesTracks=new[]{0,1,0};var series=new RaceSeries(seriesTracks,0,2);seriesTracks[0]=3;Check(series.CurrentTrack==0,"Series aliases mutable setup input");series.FinishRound(2);Check(series.CurrentTrack==1&&series.Places[0]==2,"Series did not advance/preserve result");var resumedSeries=RaceSeries.Restore(series.Save());Check(resumedSeries.Round==1&&resumedSeries.CurrentTrack==1&&resumedSeries.Car==0&&resumedSeries.Laps==2&&resumedSeries.Places[0]==2,"Series resume lost configuration/progress");series.FinishRound(1);Check(series.CurrentTrack==0,"Repeated track round lost");series.FinishRound(3);Check(series.Complete&&series.Places.Count==3,"Series completion incorrect");bool extraRound=false;try{series.FinishRound(1);}catch(InvalidOperationException){extraRound=true;}Check(extraRound,"Completed series accepted another result");
 
+            var weatherPlanner=new Vehicle();
+            Check(Math.Abs(weatherPlanner.PlanningWeatherGrip(0)-1)<.00001f,"dry planner changed");
+            float previousWeatherGrip=1;
+            for(int wi=0;wi<=10;wi++){float grip=weatherPlanner.PlanningWeatherGrip(wi/10f);Check(float.IsFinite(grip)&&grip<=previousWeatherGrip+.00001f,"slick wet planning grip is nonfinite or rises with water");previousWeatherGrip=grip;}
+            Check(Math.Abs(previousWeatherGrip-.38f)<.00001f,"slick planner ignores tyre weather loss");
+            foreach(var tyre in weatherPlanner.tyres)tyre.Replace(Compound.Wet);
+            Check(Math.Abs(weatherPlanner.PlanningWeatherGrip(1)-1)<.00001f,"wet tyres received an unvalidated planning bonus");
+            weatherPlanner.tyres[0].Replace(Compound.Soft);
+            Check(Math.Abs(weatherPlanner.PlanningWeatherGrip(1)-.38f)<.00001f,"planner ignored weakest mixed tyre");
             var water=new SurfaceWeather(0);water.Step(100,.01f,0);Check(water.Water>0&&water.Water<1,"rain did not accumulate surface water");float accumulatedWater=water.Water;water.Step(100,0,.01f);Check(water.Water<accumulatedWater,"dry weather did not drain surface water");var whole=new SurfaceWeather(.3f);var split=new SurfaceWeather(.3f);whole.Step(10,.005f,.002f);for(int i=0;i<100;i++)split.Step(.1f,.005f,.002f);Check(Math.Abs(whole.Water-split.Water)<.0001f,"weather evolution depends on frame rate");
             for(int wheel=0;wheel<4;wheel++){
                 Check(PitServiceTimeline.Loosen(wheel)<PitServiceTimeline.Remove(wheel)&&PitServiceTimeline.Remove(wheel)<PitServiceTimeline.Fit(wheel)&&PitServiceTimeline.Fit(wheel)<PitServiceTimeline.Secure(wheel),"pit wheel order invalid");
