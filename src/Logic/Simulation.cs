@@ -148,7 +148,7 @@ namespace MySimulator.Rebuild
             recoveryRemaining=Math.Max(0,recoveryRemaining-dt);input=input.Safe();float oldProgress=progress;progress=circuit.Find(position,out lateral);
             if(running&&!finished&&!retired&&pitRequested&&!pitDone&&circuit.PitValid&&(position-circuit.PitRoute[0]).Magnitude<16)pitActive=true;
             if(serviceAllowed&&running&&!finished&&!retired&&pitActive&&!pitDone&&!servicing&&(position-circuit.PitBox).Magnitude<1.2f&&speed<1.2f)
-            {servicing=true;serviceRemaining=7.5f;position=circuit.PitBox;Vec pitDirection=(circuit.PitPoint(circuit.PitServiceIndex+2)-circuit.PitPoint(circuit.PitServiceIndex-2)).Normalized;heading=(float)Math.Atan2(pitDirection.x,pitDirection.z);velocity=new Vec();yawRate=0;}
+            {servicing=true;serviceRemaining=PitServiceTimeline.Duration;position=circuit.PitBox;Vec pitDirection=(circuit.PitPoint(circuit.PitServiceIndex+2)-circuit.PitPoint(circuit.PitServiceIndex-2)).Normalized;heading=(float)Math.Atan2(pitDirection.x,pitDirection.z);velocity=new Vec();yawRate=0;}
             if(!running){velocity=new Vec();yawRate=0;return;}
             if(servicing)
             {

@@ -51,7 +51,7 @@ AudioStreamPlayer engineSnd, whineSnd; AudioStreamPlayer[] sfxPool; int sfxNext;
   if (engineSnd.Stream != null) { engineSnd.PitchScale = Mathf.Clamp(0.55f + rpm / 2600f, 0.6f, 4.2f); engineSnd.VolumeDb = Mathf.Lerp(-22f, -8f, thr * 0.8f + Mathf.Clamp(rpm / 10000f, 0, 1) * 0.2f); }
   if (whineSnd.Stream != null) { whineSnd.PitchScale = Mathf.Clamp(0.5f + Player.speed / 40f, 0.5f, 3f); whineSnd.VolumeDb = Player.speed < 3f ? -60f : Mathf.Lerp(-34f, -22f, Mathf.Clamp(Player.speed / 70f, 0, 1)); }
   if (e >= 0 && lastE < 0) { PlaySfx("jack_engage.wav"); }
-  if (e >= 0) { for (int i = 0; i < 4; i++) { float off=PitServiceTimeline.Loosen(i),on=PitServiceTimeline.Fit(i); if (lastE < off && e >= off) PlaySfx("wheel_gun_loosen.wav"); if (PitServiceTimeline.Crossed(lastE,e,PitServiceTimeline.Remove(i))) PlaySfx("wheel_set_down.wav"); if (PitServiceTimeline.Crossed(lastE,e,PitServiceTimeline.Secure(i))) PlaySfx("wheel_gun_tighten.wav"); } if (lastE < 6.6f && e >= 6.6f) PlaySfx("jack_release.wav"); }
+  if (e >= 0) { for (int i = 0; i < 4; i++) { float off=PitServiceTimeline.Loosen(i),on=PitServiceTimeline.Fit(i); if (lastE < off && e >= off) PlaySfx("wheel_gun_loosen.wav"); if (PitServiceTimeline.Crossed(lastE,e,PitServiceTimeline.Remove(i))) PlaySfx("wheel_set_down.wav"); if (PitServiceTimeline.Crossed(lastE,e,PitServiceTimeline.Secure(i))) PlaySfx("wheel_gun_tighten.wav"); } if (PitServiceTimeline.Crossed(lastE,e,PitServiceTimeline.LowerStart)) PlaySfx("jack_release.wav"); }
   lastE = e;
  }
  class Rival { public Vehicle V; public Node3D Node; public Node3D[] Pivots; public float LastY, Spin; public Vec Start; }
