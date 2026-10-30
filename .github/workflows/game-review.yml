@@ -9,7 +9,7 @@ on:
       ai_mode: {description: 'Opt-in curvature AI experiment; default game AI is unchanged', type: choice, options: ['1', '2', '3', '4', '5'], default: '1'}
       cars: {description: 'Comma-separated car IDs for native scene laps', type: string, default: '16'}
 permissions: {contents: write}
-concurrency: {group: 'game-art-review-${{ inputs.depth }}-${{ inputs.cars || ''16'' }}', cancel-in-progress: false}
+concurrency: {group: 'game-art-review-${{ inputs.depth }}-${{ inputs.cars || ''16'' }}-${{ inputs.case_set || ''default'' }}-${{ inputs.native_ai && inputs.ai_mode || ''default'' }}', cancel-in-progress: false}
 jobs:
   render:
     runs-on: ubuntu-latest
