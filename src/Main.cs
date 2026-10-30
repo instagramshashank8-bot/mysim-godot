@@ -19,6 +19,7 @@ public partial class Main : Node3D {
   Settings.ApplyAudio(); lastTrack = Settings.Get("track", 0); lastCar = Settings.Get("car", 0); lastLaps = Settings.Get("laps", 3);
   var bakeT = System.Environment.GetEnvironmentVariable("MYSIM_BAKECOL"); if (bakeT != null) { BakeCollision(int.Parse(bakeT)); return; }
   var crashT = System.Environment.GetEnvironmentVariable("MYSIM_CRASHMAP"); if (crashT != null) { CrashWorld(int.Parse(crashT)); return; }
+  if(System.Environment.GetEnvironmentVariable("MYSIM_NAVCHECKS")!=null){AddChild(new NavigationScenario());return;}
   if(System.Environment.GetEnvironmentVariable("MYSIM_SETTINGSCHECKS")!=null){AddChild(new SettingsScenario());return;}
   if(System.Environment.GetEnvironmentVariable("MYSIM_CONTROLCHECKS")!=null){AddChild(new ControlsScenario());return;}
   var t = System.Environment.GetEnvironmentVariable("MYSIM_TRACK");
@@ -112,6 +113,7 @@ public partial class Main : Node3D {
   var start = new Button { Text = "START RACE", Position = new Vector2(1060, 200), Size = new Vector2(180, 56) };
   start.Pressed += () => { Ui("swoosh"); var ts = tracks.GetSelectedItems(); var cs = cars.GetSelectedItems(); StartRace(ts.Length > 0 ? ts[0] : 0, cs.Length > 0 ? cs[0] : 0, (int)laps.Value); };
   var options=new Button {Text="SESSION OPTIONS",Position=new Vector2(1040,590),Size=new Vector2(200,36)};options.Pressed+=()=>AddChild(new RaceSettingsPanel());ui.AddChild(options);
+  var back=new Button {Text="BACK",Position=new Vector2(48,600),Size=new Vector2(180,36)};back.Pressed+=ShowMenu;ui.AddChild(back);
   tracks.GrabFocus(); menuStart = start;
   var controls=new Button {Text="CONTROLS / KEY BINDINGS",Position=new Vector2(600,590),Size=new Vector2(420,36)};controls.Pressed+=()=>AddChild(new ControlsPanel());ui.AddChild(controls);
   ui.AddChild(start); var raceTheme=MySimTheme.Build();foreach(var child in ui.GetChildren())if(child is Control control)control.Theme=raceTheme; tracks.ItemActivated += i => start.EmitSignal(BaseButton.SignalName.Pressed); cars.ItemActivated += i => start.EmitSignal(BaseButton.SignalName.Pressed);
@@ -167,7 +169,7 @@ public partial class Main : Node3D {
  public override void _Process(double delta) {
   PauseUi();
   if (drive != null && !resultsShown && drive.Race != null && drive.Player != null && drive.Player.finished) { finShown += (float)GetProcessDeltaTime(); if (drive.Race.cars.Count <= 1 || drive.Race.AllFinished || finShown > 12f) ShowResults(); }
-  if (ui != null && menuStart != null && IsInstanceValid(menuStart) && !resultsShown && (drive == null || !IsInstanceValid(drive) || drive.GetParent() == null)) { var pd0 = Input.GetConnectedJoypads(); bool go = Input.IsKeyPressed(Key.Enter) || (pd0.Count > 0 && Input.IsJoyButtonPressed(pd0[0], JoyButton.Start)); if (go && !menuGoWas && menuAge > 0.4f && GetTree().Root.FindChildren("*","ControlsPanel",true,false).Count==0) menuStart.EmitSignal(BaseButton.SignalName.Pressed); menuGoWas = go; menuAge += (float)GetProcessDeltaTime(); }
+  if (ui != null && menuStart != null && IsInstanceValid(menuStart) && !resultsShown && (drive == null || !IsInstanceValid(drive) || drive.GetParent() == null)) { var pd0 = Input.GetConnectedJoypads(); bool go = Input.IsKeyPressed(Key.Enter) || (pd0.Count > 0 && Input.IsJoyButtonPressed(pd0[0], JoyButton.Start)); if (go && !menuGoWas && menuAge > 0.4f && GetTree().Root.FindChildren("*","ControlsPanel",true,false).Count==0 && GetTree().Root.FindChildren("*","RaceSettingsPanel",true,false).Count==0 && GetTree().Root.FindChildren("*","SeriesSetupPanel",true,false).Count==0 && GetTree().Root.FindChildren("*","LanRoomPanel",true,false).Count==0) menuStart.EmitSignal(BaseButton.SignalName.Pressed); menuGoWas = go; menuAge += (float)GetProcessDeltaTime(); }
   { bool padA = false, padB = false; var pads = Input.GetConnectedJoypads(); if (pads.Count > 0) { padA = Input.IsJoyButtonPressed(pads[0], JoyButton.A); padB = Input.IsJoyButtonPressed(pads[0], JoyButton.B); }
     bool escNow = Input.IsKeyPressed(Key.Escape) || padB;
     if (resultsShown && resultsArmed > 0.6f) { if (Input.IsKeyPressed(Key.Enter) || padA) { ContinueResult(); } else if (escNow && !escWas) { ShowMenu(); } }

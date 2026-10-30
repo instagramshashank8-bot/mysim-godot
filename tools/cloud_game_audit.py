@@ -42,6 +42,9 @@ if os.environ.get('GUI_REVIEW')=='1':
  for resolution in ('960x540','1280x720','1600x900'):
   label='settings-'+resolution;shot=out/(label+'.png')
   text=run(label,{'MYSIM_SETTINGSCHECKS':'1','MYSIM_SHOT':str(shot)},['--resolution',resolution]);assert 'PASS race settings real controls' in text and shot.exists()
+ for resolution in ('960x540','1280x720','1600x900'):
+  label='navigation-'+resolution;shot=out/(label+'.png')
+  text=run(label,{'MYSIM_NAVCHECKS':'1','MYSIM_SHOT':str(shot)},['--resolution',resolution]);assert 'PASS mode-first navigation routing' in text
  print('COMPLETE actual settings signals and resolution captures; manual layout review separate',flush=True);sys.exit(0)
 if os.environ.get('WEATHER_REVIEW')=='1':
  for track in range(shard,60,6):
