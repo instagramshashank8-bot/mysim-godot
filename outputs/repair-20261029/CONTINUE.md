@@ -346,3 +346,10 @@ MonacoproductionAI41093409420FAIL24/24wallcontacts; brakingfixnotAIcorneringfix.
 30597d6fixesabsolute-worldcamerasmoothingcreating speed/6metreslag: immediatevehicletranslation, smoothedrelativeoffset, finalocclusioncast. Actualscene41097459256running. Mistypedmainpushremotefailedthenfixedonce.
 Groundcomparison41094342825PASS4captures. Manuallyviewedtrack0both+track5authored; originalUVmodeflat/stretchedtoo, rejectedglobalpromotion. NeedUV/materialscale/channelinspection. Carassembly/fencealpha/nightstillfailedvisualgates.
 FutureGUI-onlyworkflowisolatesassetsrootandskipsunrelatedencryptedrestore/parity: sameUI/pit/touch/menuchecks/captures; no3Dacceptanceclaimed. No runningjobduplicated.
+
+## Readable checkpoint and latest active runs
+Read CURRENT_VERIFIED_STATUS.md for the current concise state. New isolated AI mapping mode5 raw results are1435PASS/5FAIL, despite green workflow41098418532: missingpipefail allowedtee to mask failed dotnet exits. Distinct3aae583 fixespipeline; rawfailures AI_MAPPING_ONLY_FAILURES.json retained. Earlier commentary claiming1440pass was corrected explicitly. No production promotion.
+Curvature-aware mode3 + stable solver native Monaco41097075244 verified24/24PASS with0hits/0damage. Full1440logic mode3regression41099407474running; nativeMode5comparison41098900936running.
+Contextual pit/multi-touch GUI41096996396PASS. Immediate-translation chase camera actualscene41097459256PASS, manuallyreviewedtoo-close/croppedrearandmapoverlap. 3aae583retunesdistance/height,movesminimaptopright,andrequireswhole-carprojectioninside2%viewportmargin;41099180035running.
+Read-only trackgeometry/lightingname audit41098653061running2tracks; no meshvisibility/collisionchanges. Repeatedroof/fence/crowdpatterns couldbeoverlap/LOD/materialsampling; hypothesisnotproven. Auditmustidentifyactualcandidatesbeforechanges.
+Older wet/camera6capture41092519455stillrunning; preserve/adopt, no duplicate. Scenevariants havehistorically~33minrendercost. Currentrawframecoverage16033, manual256overview/2fullres nativeframes, distinct8resizedframes reviewedearlier; neverclaimallframes reviewedfromextraction. Allotherfull-gamegatesremainopen.

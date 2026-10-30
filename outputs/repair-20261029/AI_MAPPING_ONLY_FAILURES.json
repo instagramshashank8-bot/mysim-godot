@@ -1,0 +1,45 @@
+{
+  "run": 41098418532,
+  "cases": 1440,
+  "pass": 1435,
+  "fail": 5,
+  "workflowConclusionWasMisleading": "tee masked exit before pipefail fix3aae583",
+  "productionPromoted": false,
+  "failures": [
+    {
+      "track": 54,
+      "car": 23,
+      "ok": false,
+      "lap": 737.2,
+      "why": "no valid lap (off-track during the lap)"
+    },
+    {
+      "track": 54,
+      "car": 15,
+      "ok": false,
+      "lap": 222.5,
+      "why": "no valid lap (off-track during the lap)"
+    },
+    {
+      "track": 54,
+      "car": 16,
+      "ok": false,
+      "lap": 221.9,
+      "why": "no valid lap (off-track during the lap)"
+    },
+    {
+      "track": 54,
+      "car": 17,
+      "ok": false,
+      "lap": 222.5,
+      "why": "no valid lap (off-track during the lap)"
+    },
+    {
+      "track": 54,
+      "car": 18,
+      "ok": false,
+      "lap": 221.9,
+      "why": "no valid lap (off-track during the lap)"
+    }
+  ]
+}
