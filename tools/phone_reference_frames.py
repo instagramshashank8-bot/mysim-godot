@@ -16,5 +16,12 @@ for clip in clips:
   sheet.save(out/(clip.stem+f'-sheet-{start//12:02}.jpg'))
  # A short motion sequence permits direct inspection of wheel/body/camera continuity.
  burst=min(30,max(0,duration-4));subprocess.run(['ffmpeg','-v','error','-ss',str(burst),'-i',str(clip),'-t','3','-vf',"fps=2,scale='min(1280,iw)':-2",'-q:v','3',str(folder/'motion-%02d.jpg')],check=True)
- manifest.append({'clip':clip.name,'duration_seconds':duration,'sampled_frames':len(frames),'motion_burst_start_seconds':burst,'scope':'Observed video frames only; no force constants, exact telemetry, driving quality or lap completion inferred'})
+ # Consecutive original frames at an inspected driving moment (no fps resampling).
+ # Earlier 30s bursts landed in a setup menu in Monoposto part2; preserve those
+ # exploratory outputs and explicitly target actual driving for this review.
+ native_start={'monoposto-part-2':148,'monoposto-part-3':12,'f1-clash-wet':88}.get(clip.stem)
+ if native_start is not None:
+  subprocess.run(['ffmpeg','-v','error','-ss',str(native_start),'-i',str(clip),'-frames:v','8','-fps_mode','passthrough','-vf',"scale='min(1280,iw)':-2",'-q:v','2',str(folder/'consecutive-%02d.jpg')],check=True)
+  assert len(list(folder.glob('consecutive-*.jpg')))==8
+ manifest.append({'clip':clip.name,'duration_seconds':duration,'sampled_frames':len(frames),'motion_burst_start_seconds':burst,'consecutive_original_frame_start_seconds':native_start,'consecutive_original_frames':8 if native_start is not None else 0,'scope':'Observed video frames only; no force constants, exact telemetry, driving quality or lap completion inferred'})
 (out/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n');print('REFERENCE_FRAME_EXTRACTION_COMPLETE',len(clips),'clips; manual review remains required')
