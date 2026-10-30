@@ -1,0 +1,23 @@
+{
+  "cloudRun": 41094609674,
+  "clip": "monoposto-part-3",
+  "sourceSeekSeconds": 12,
+  "reviewedFiles": [
+    "consecutive-01.jpg",
+    "consecutive-02.jpg",
+    "consecutive-03.jpg",
+    "consecutive-04.jpg",
+    "consecutive-05.jpg",
+    "consecutive-06.jpg",
+    "consecutive-07.jpg",
+    "consecutive-08.jpg"
+  ],
+  "scope": "Eight consecutive extracted frames inspected individually; full original-frame ledger matching pending. Not whole video coverage.",
+  "findings": [
+    "Car silhouette and four wheel positions stay coherent through this straight sequence; no visible model-part separation in these frames.",
+    "Track edges, palm poles, barriers and road grain shift progressively relative to a stable chase camera; this short straight does not validate cornering or suspension.",
+    "Contact shadow and tyre placement give grounded presentation.",
+    "Reference contains visible bloom/softness; user explicitly rejects copying that softness. MySim bloom defaults off, vector controls stay crisp."
+  ],
+  "acceptedPhysicsConstants": 0
+}

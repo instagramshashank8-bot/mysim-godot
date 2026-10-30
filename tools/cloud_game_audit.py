@@ -16,6 +16,11 @@ def run(label,values,args=None,timeout=300):
   (out/(label+f'-{attempt}-process.json')).write_text(json.dumps({'returncode':code,'timed_out':timed_out,'elapsed_seconds':time.monotonic()-started,'timeout_seconds':timeout,'screenshot_exists':shot.exists() if shot else None,'error_lines':[line for line in text.splitlines() if 'ERROR:' in line]},indent=2))
   if code==0 and 'ERROR:' not in text:return text
  raise RuntimeError(label+' failed; see saved logs')
+if os.environ.get('CONTROLS_GAMEPLAY')=='1':
+ label='controls-gameplay-crisp';shot=out/(label+'.png')
+ text=run(label,{'MYSIM_TRACK':'0','MYSIM_CAR':'16','MYSIM_TOD':'0','MYSIM_WET':'0','MYSIM_AI':'1','MYSIM_AUTODRIVE':'1','MYSIM_NOPIT':'1','MYSIM_RIVALS':'0','MYSIM_SECONDS':'4','MYSIM_CAMERA_CYCLE_CHECK':'1','MYSIM_CAM':'0','MYSIM_TOUCH':'1','MYSIM_SHOT':str(shot)})
+ assert shot.exists() and 'PASS full camera cycle restores all four wheels' in text
+ print('COMPLETE crisp controls in real track scene; visual review separate',flush=True);sys.exit(0)
 if os.environ.get('GROUND_REVIEW')=='1':
  track=(0,5)[shard]
  for authored in (0,1):
