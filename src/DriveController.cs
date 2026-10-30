@@ -127,6 +127,7 @@ AudioStreamPlayer engineSnd, whineSnd; AudioStreamPlayer[] sfxPool; int sfxNext;
   bool padSteer = Input.GetConnectedJoypads().Count > 0 && Mathf.Abs(Input.GetJoyAxis(Input.GetConnectedJoypads()[0], JoyAxis.LeftX)) > 0.08f;
   steer=steeringInput.Step(steer,(float)delta,padSteer||AutoDrive);steerCmd=steer;
   Player.input = pedals.Update(thr, brk, steer, ControlBindings.Held(4), Vec.Dot(Player.velocity, Player.Forward), (float)delta, !AutoDrive && !AiTest && Player.human);
+  if(Player.human&&!AutoDrive&&!AiTest)Player.input.steer=SteeringInput.ToSimulation(Player.input.steer);
 
   var startPos = Player.position; foreach(var rival in rivals) rival.Start=rival.V.position; Race.Advance((float)delta); if (Player.dbgPush > 0.002f) pushFrames++; frames++; ResolveWalls(startPos); UpdateRivals((float)delta);
   var space = GetWorld3D().DirectSpaceState; var w = ToWorld(Player.position, 0);

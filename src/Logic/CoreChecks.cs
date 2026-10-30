@@ -23,6 +23,11 @@ namespace MySimulator.Verification
                 for(int i=0;i<rate;i++)keys.Step(-1,1f/rate,false);
                 Check(Math.Abs(keys.Command+1)<.00001f,"Opposite steering lost full authority");
             }
+            for(int carIndex=0;carIndex<24;carIndex++)foreach(float intent in new[]{-1f,1f}){
+                var turning=new Vehicle {carModel=carIndex,human=true,onDrivingSurface=true,velocity=new Vec(0,8),speed=8,input=new DriverInput(.1f,0,SteeringInput.ToSimulation(intent))};
+                var flatRoad=new Circuit(0);for(int step=0;step<120;step++)Dynamics.Step(turning,1f/120f,0,flatRoad);
+                Check(turning.position.x*intent<-.01f,"Human steering turns opposite the screen-right convention, car "+carIndex);
+            }
             var weatherPlanner=new Vehicle();
             Check(Math.Abs(weatherPlanner.PlanningWeatherGrip(0)-1)<.00001f,"dry planner changed");
             float previousWeatherGrip=1;

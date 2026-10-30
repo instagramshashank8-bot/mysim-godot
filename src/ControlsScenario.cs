@@ -26,6 +26,8 @@ public partial class ControlsScenario : Node {
    try {
     var car=new MySimulator.Rebuild.Race(0,1,0);var player=car.Add("Input test",true,MySimulator.Rebuild.Compound.Medium);
     var drive=new DriveController {Race=car,Player=player};
+    var hud=new Hud {Race=car,Player=player};AddChild(hud);drive.Hud=hud;
+    var view=new Camera3D {Position=new Vector3(0,3,-8)};AddChild(view);view.LookAt(new Vector3(0,3,0),Vector3.Up);Check(view.GlobalBasis.X.X<-.99f,"Native chase camera horizontal convention changed");view.QueueFree();
     var oldControls=new TouchControls {Drive=drive};AddChild(oldControls);
     var newControls=new TouchControls {Drive=drive};AddChild(newControls);oldControls.QueueFree();
     await ToSignal(GetTree(),SceneTree.SignalName.ProcessFrame);
@@ -33,10 +35,13 @@ public partial class ControlsScenario : Node {
     Button Find(string name) { foreach(var node in newControls.FindChildren("*","Button",true,false))if(node.Name==name)return (Button)node;throw new Exception("Missing GUI control "+name); }
     Find("GAS").EmitSignal(BaseButton.SignalName.ButtonDown);Check(TouchControls.Throttle==1,"screen throttle did not engage");Find("GAS").EmitSignal(BaseButton.SignalName.ButtonUp);Check(TouchControls.Throttle==0,"screen throttle stuck");
     Find("LEFT").EmitSignal(BaseButton.SignalName.ButtonDown);Find("RIGHT").EmitSignal(BaseButton.SignalName.ButtonDown);Check(TouchControls.Steer==0,"opposite steering buttons conflict");Find("LEFT").EmitSignal(BaseButton.SignalName.ButtonUp);Check(TouchControls.Steer==1,"steering release loses other held button");Find("RIGHT").EmitSignal(BaseButton.SignalName.ButtonUp);
-    Find("PIT").EmitSignal(BaseButton.SignalName.Pressed);Check(player.pitRequested,"GUI pit request missing");
+    Find("PIT").EmitSignal(BaseButton.SignalName.Pressed);await ToSignal(GetTree(),SceneTree.SignalName.ProcessFrame);await ToSignal(GetTree(),SceneTree.SignalName.ProcessFrame);
+    var strategy=(PitStrategyPanel)hud.FindChildren("*","PitStrategyPanel",true,false)[0];Check(strategy.Open&&strategy.Visible,"GUI pit options failed to open");
+    var compound=(OptionButton)strategy.FindChild("COMPOUND",true,false);compound.Select(3);compound.EmitSignal(OptionButton.SignalName.ItemSelected,3L);
+    ((Button)strategy.FindChild("REQUEST",true,false)).EmitSignal(BaseButton.SignalName.Pressed);Check(player.pitRequested&&player.nextCompound==MySimulator.Rebuild.Compound.Wet&&!strategy.Open,"GUI pit request/compound/close flow failed");
     Find("PAUSE").EmitSignal(BaseButton.SignalName.Pressed);Check(car.paused&&TouchControls.Throttle==0&&TouchControls.Steer==0,"GUI pause did not clear pedals");
     Find("PAUSE").EmitSignal(BaseButton.SignalName.Pressed);Check(!car.paused&&TouchControls.Throttle==0,"GUI resume did not restore racing safely");
-    newControls.QueueFree();await ToSignal(GetTree(),SceneTree.SignalName.ProcessFrame);Check(!TouchControls.Active&&TouchControls.Throttle==0,"screen controls leak after exit");drive.Free();
+    newControls.QueueFree();await ToSignal(GetTree(),SceneTree.SignalName.ProcessFrame);Check(!TouchControls.Active&&TouchControls.Throttle==0,"screen controls leak after exit");hud.QueueFree();drive.Free();
     GD.Print("PASS screen controls throttle/release, simultaneous steering, pit, pause and restart lifecycle");
    }finally{Settings.Set("screen_controls",originalScreen);}
    GD.Print("PASS controls dialog rebinding, persistence, physical input, conflict rejection, reserved pause, cancel, defaults and back");GetTree().Quit();
