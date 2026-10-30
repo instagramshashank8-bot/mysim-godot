@@ -1,0 +1,35 @@
+name: exhaustive-monoposto-frame-index
+on: {workflow_dispatch: {}}
+permissions: {contents: write}
+defaults:
+  run: {shell: bash}
+jobs:
+  frames:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix: {part: [1, 2, 3]}
+    env:
+      REFERENCE_PART: ${{ matrix.part }}
+      GH_TOKEN: ${{ github.token }}
+      MYSIM_INTAKE_KEY: ${{ secrets.MYSIM_INTAKE_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Restore private reference recordings
+        run: |
+          pip install cryptography Pillow
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg
+          gh release download reference-phone-20261030 --pattern phone-reference-recordings.enc --dir /tmp
+          python tools/cloud_decrypt.py /tmp/phone-reference-recordings.enc /tmp/phone-reference
+      - name: Index every original frame and preserve encrypted review batches
+        run: python tools/monoposto_full_frames.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: monoposto-frame-coverage-part-${{ matrix.part }}-attempt-${{ github.run_attempt }}
+          path: outputs/monoposto-full/*.json
+          retention-days: 30
