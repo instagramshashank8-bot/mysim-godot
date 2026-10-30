@@ -96,5 +96,25 @@
         0.64
       ]
     }
-  ]
+  ],
+  "rainVisual": {
+    "spawnHalfWidth": 28,
+    "spawnHeight": 12,
+    "fallSpeedMin": 24,
+    "fallSpeedMax": 30,
+    "lifetime": 0.9,
+    "dropWidth": 0.004,
+    "dropLength": 0.12,
+    "opacity": 0.22,
+    "tint": [
+      0.55,
+      0.62,
+      0.7
+    ],
+    "wind": [
+      1.5,
+      0,
+      0.4
+    ]
+  }
 }

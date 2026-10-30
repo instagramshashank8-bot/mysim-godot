@@ -31,9 +31,6 @@ public static class Conditions {
   sun.RotationDegrees = rot; sun.LightColor = sunCol; sun.LightEnergy = sunE;
   sky.SkyTopColor = top; sky.SkyHorizonColor = hor; sky.GroundHorizonColor = hor; sky.GroundBottomColor = hor.Darkened(0.3f);
  }
- public static void AddRain(Node3D parent) {
-  var mat = new ParticleProcessMaterial { EmissionShape = ParticleProcessMaterial.EmissionShapeEnum.Box, EmissionBoxExtents = new Vector3(28, 0.2f, 28), Direction = new Vector3(0.08f, -1, 0), Spread = 2f, InitialVelocityMin = 24f, InitialVelocityMax = 30f, Gravity = new Vector3(0, -6, 0) };
-  var mesh = new BoxMesh { Size = new Vector3(0.012f, 0.55f, 0.012f), Material = new StandardMaterial3D { ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded, AlbedoColor = new Color(0.8f, 0.85f, 0.95f, 0.45f), Transparency = BaseMaterial3D.TransparencyEnum.Alpha } };
-  parent.AddChild(new GpuParticles3D { Amount = (int)Value("rainAmount"), Lifetime = 0.9, ProcessMaterial = mat, DrawPass1 = mesh, Position = new Vector3(0, 14, 0), VisibilityAabb = new Aabb(new Vector3(-40, -20, -40), new Vector3(80, 40, 80)), LocalCoords = false });
- }
+ public static void AddRain(Node3D parent) {parent.AddChild(new RainVolume {Amount=(int)Value("rainAmount")});}
+ public static System.Text.Json.JsonElement RainVisual=>catalogue.RootElement.GetProperty("rainVisual");
 }}

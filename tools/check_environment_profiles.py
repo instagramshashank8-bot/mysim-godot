@@ -23,3 +23,11 @@ for filename in ('weather_profiles.json','lighting_profiles.json'):
    for key in ('sunEnergy','ambientEnergy','exposure'):number(profile[key],name+' '+key)
  assert 'data/'+filename in (root/'export_presets.cfg').read_text(),filename+' excluded from player'
  print('PASS',filename,len(profiles),'valid editable profiles and player export inclusion')
+
+rain=json.loads((root/'data/weather_profiles.json').read_text())['rainVisual']
+for key in ('spawnHalfWidth','spawnHeight','fallSpeedMin','fallSpeedMax','lifetime','dropWidth','dropLength'):number(rain[key],'rain '+key,0.00001)
+assert rain['fallSpeedMax']>=rain['fallSpeedMin']
+number(rain['opacity'],'rain opacity',0,1);colour(rain['tint'],'rain tint')
+assert len(rain['wind'])==3
+for component in rain['wind']:number(component,'rain wind',-100,100)
+print('PASS editable world-rain visual profile')
