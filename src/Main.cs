@@ -26,11 +26,20 @@ public partial class Main : Node3D {
  }
  async void MenuShot(string path) { for (int i = 0; i < 20; i++) await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame); GetViewport().GetTexture().GetImage().SavePng(path); GetTree().Quit(); }
  void Ui(string n) { var st = GD.Load<AudioStream>("res://assets/Resources/RecoveredGUI/Audio/" + n + ".wav"); if (st == null) return; var pl = new AudioStreamPlayer { Stream = st, VolumeDb = -6f }; AddChild(pl); pl.Finished += () => pl.QueueFree(); pl.Play(); }
- async void CarView(int ci) {
+ void FitCarView(Camera3D camera,Node3D car) {
+   var points=new System.Collections.Generic.List<Vector3>();
+   foreach(var n in car.FindChildren("*","MeshInstance3D",true,false)){var mesh=(MeshInstance3D)n;if(!mesh.IsVisibleInTree()||mesh.Mesh==null)continue;var bounds=mesh.GetAabb();for(int corner=0;corner<8;corner++)points.Add(mesh.GlobalTransform*bounds.GetEndpoint(corner));}
+   if(points.Count==0)throw new System.InvalidOperationException("Car review has no visible geometry");
+   var size=GetViewport().GetVisibleRect().Size;var target=new Vector3(0,.6f,0);
+   for(int step=0;step<60;step++){bool fits=true;foreach(var point in points){var screen=camera.UnprojectPosition(point);if(camera.IsPositionBehind(point)||screen.X<size.X*.05f||screen.X>size.X*.95f||screen.Y<size.Y*.05f||screen.Y>size.Y*.95f){fits=false;break;}}if(fits){GD.Print("PASS complete visible car framing, corners=",points.Count);return;}camera.Position=target+(camera.Position-target)*1.08f;camera.LookAt(target);}
+   throw new System.InvalidOperationException("Could not frame all visible car geometry");
+  }
+  async void CarView(int ci) {
   var floor = new MeshInstance3D { Mesh = new PlaneMesh { Size = new Vector2(60, 60) }, MaterialOverride = new StandardMaterial3D { AlbedoColor = new Color(0.3f, 0.3f, 0.32f) } }; AddChild(floor);
   var car = CarLoader.Load(CarCatalog.Folders[ci]); AddChild(car); if (System.Environment.GetEnvironmentVariable("MYSIM_UVAUDIT") != null) { foreach (var n in car.FindChildren("*", "MeshInstance3D", true, false)) { var mi = (MeshInstance3D)n; string nm = mi.Name.ToString(); if (!(nm.StartsWith("LOD_A_BODY") || nm.StartsWith("LOD_A_DOOR_LEFT_mm") || nm.StartsWith("LOD_A_HOOD_mm") || nm.StartsWith("LOD_A_CHASSIS"))) continue; for (int s = 0; s < mi.Mesh.GetSurfaceCount(); s++) { var arr = mi.Mesh.SurfaceGetArrays(s); var u0 = (Vector2[])arr[(int)Mesh.ArrayType.TexUV]; var u1 = (Vector2[])arr[(int)Mesh.ArrayType.TexUV2]; string D(Vector2[] u) { if (u == null || u.Length == 0) return "none"; float x0 = 9e9f, y0 = 9e9f, x1 = -9e9f, y1 = -9e9f; foreach (var v in u) { x0 = Mathf.Min(x0, v.X); y0 = Mathf.Min(y0, v.Y); x1 = Mathf.Max(x1, v.X); y1 = Mathf.Max(y1, v.Y); } return "[" + x0.ToString("0.00") + ".." + x1.ToString("0.00") + ", " + y0.ToString("0.00") + ".." + y1.ToString("0.00") + "]"; } GD.Print("UVAUDIT ", nm, " s", s, " UV0=", D(u0), " UV1=", D(u1)); } } GetTree().Quit(); return; }
   CarLoader.ApplyExact(car, ci); var viewWheels=CarLoader.AttachWheels(car, ci);if(int.TryParse(System.Environment.GetEnvironmentVariable("MYSIM_COMPOUND"),out int compound))TyreAppearance.Apply(viewWheels,(Compound)Mathf.Clamp(compound,0,3)); if (System.Environment.GetEnvironmentVariable("MYSIM_UNSHADED") != null) CarLoader.ForceUnshaded(car); car.Position = new Vector3(0, 0.0f, 0);
   var cam = new Camera3D { Fov = 40, Current = true, Position = new Vector3(5.2f, 1.8f, 5.6f) }; var cp = System.Environment.GetEnvironmentVariable("MYSIM_CAMPOS"); if (cp != null) { var q = cp.Split(','); cam.Position = new Vector3(float.Parse(q[0], System.Globalization.CultureInfo.InvariantCulture), float.Parse(q[1], System.Globalization.CultureInfo.InvariantCulture), float.Parse(q[2], System.Globalization.CultureInfo.InvariantCulture)); } AddChild(cam); cam.LookAt(new Vector3(0, 0.6f, 0));
+  if(System.Environment.GetEnvironmentVariable("MYSIM_FITVIEW")=="1")FitCarView(cam,car);
   for (int i = 0; i < 25; i++) await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
   GetViewport().GetTexture().GetImage().SavePng(System.Environment.GetEnvironmentVariable("MYSIM_SHOT") ?? "carview.png"); GetTree().Quit();
  }

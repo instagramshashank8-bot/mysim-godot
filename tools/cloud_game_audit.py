@@ -32,13 +32,13 @@ if os.environ.get('ASSEMBLY_REVIEW')=='1':
  for car in range(shard,24,6):
   for view,camera in enumerate(('0,1.15,6','4,1,0','0,1.15,-6')):
    label=f'assembled-car-{car:02}-view-{view}';shot=out/(label+'.png')
-   text=run(label,{'MYSIM_CARVIEW':str(car),'MYSIM_CAMPOS':camera,'MYSIM_SHOT':str(shot)});assert shot.exists() and 'CARMAP car=' in text
+   text=run(label,{'MYSIM_CARVIEW':str(car),'MYSIM_FITVIEW':'1','MYSIM_CAMPOS':camera,'MYSIM_SHOT':str(shot)});assert shot.exists() and 'CARMAP car=' in text
  print('COMPLETE assembled front/side/rear evidence; manual approval separate',flush=True);sys.exit(0)
 if os.environ.get('WHEEL_COMPOUNDS')=='1':
  for car in (1,6,16):
   for compound in range(4):
    label=f'wheel-compound-car-{car:02}-{compound}';shot=out/(label+'.png')
-   run(label,{'MYSIM_CARVIEW':str(car),'MYSIM_COMPOUND':str(compound),'MYSIM_CAMPOS':'4,1,0','MYSIM_SHOT':str(shot)});assert shot.exists()
+   run(label,{'MYSIM_CARVIEW':str(car),'MYSIM_FITVIEW':'1','MYSIM_COMPOUND':str(compound),'MYSIM_CAMPOS':'4,1,0','MYSIM_SHOT':str(shot)});assert shot.exists()
  print('COMPLETE assembled wheel/compound captures; visual acceptance pending',flush=True);sys.exit(0)
 if os.environ.get('CAR_PANEL_UV')=='1':
  for view,camera in enumerate(('5.2,1.8,5.6','5.2,1.5,-5.6')):
@@ -100,7 +100,7 @@ if os.environ.get('INPUT_PHYSICS')=='1':
 if os.environ.get('CAR_MATERIAL_REVIEW')=='1':
  for car in (1,6,16):
   for view,camera in enumerate(('5.2,1.8,5.6','6,1.2,0','5.2,1.5,-5.6')):
-   label=f'wheel-material-car-{car:02}-view-{view}';shot=out/(label+'.png');run(label,{'MYSIM_CARVIEW':str(car),'MYSIM_CAMPOS':camera,'MYSIM_WHEELDBG':'1','MYSIM_SHOT':str(shot)});assert shot.exists()
+   label=f'wheel-material-car-{car:02}-view-{view}';shot=out/(label+'.png');run(label,{'MYSIM_CARVIEW':str(car),'MYSIM_FITVIEW':'1','MYSIM_CAMPOS':camera,'MYSIM_WHEELDBG':'1','MYSIM_SHOT':str(shot)});assert shot.exists()
  print('COMPLETE authored wheel material capture; visual acceptance pending',flush=True);sys.exit(0)
 if os.environ.get('COLLISION_PROBE')=='1':
  # Reproduce a heavily flagged layout with fresh source collision, not the obsolete campaign bins.
@@ -143,7 +143,7 @@ for t in range(shard,60,6):
 if shard<3 and os.environ.get('FULL_RACES')!='1':
  camera=['5.2,1.8,5.6','6,1.2,0','5.2,1.5,-5.6'][shard]
  for car in range(24):
-  label=f'car-{car:02}-view-{shard}';shot=out/(label+'.png');run(label,{'MYSIM_CARVIEW':str(car),'MYSIM_CAMPOS':camera,'MYSIM_SHOT':str(shot)});assert shot.exists()
+  label=f'car-{car:02}-view-{shard}';shot=out/(label+'.png');run(label,{'MYSIM_CARVIEW':str(car),'MYSIM_FITVIEW':'1','MYSIM_CAMPOS':camera,'MYSIM_SHOT':str(shot)});assert shot.exists()
 if shard==0 and os.environ.get('FULL_RACES')!='1':
  text=run('controls-dialog',{'MYSIM_CONTROLCHECKS':'1','MYSIM_SHOT':str(out/'controls-dialog.png')});assert 'PASS controls dialog' in text
  for resolution in ('960x540','1600x900'):
