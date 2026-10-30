@@ -12,6 +12,12 @@ namespace MySimulator.Verification
         public static string Run()
         {
             count=0;var log=new List<string>();
+            for(int wheel=0;wheel<4;wheel++){
+                Check(PitServiceTimeline.Loosen(wheel)<PitServiceTimeline.Remove(wheel)&&PitServiceTimeline.Remove(wheel)<PitServiceTimeline.Fit(wheel)&&PitServiceTimeline.Fit(wheel)<PitServiceTimeline.Secure(wheel),"pit wheel order invalid");
+                Check(PitServiceTimeline.Secure(wheel)<PitServiceTimeline.LowerStart,"jack lowers before wheel secured");
+                Check(PitServiceTimeline.WheelOut(-1,wheel)==0&&PitServiceTimeline.WheelOut(PitServiceTimeline.Duration,wheel)==0,"pit leaves wheel off its hub");
+            }
+            Check(PitServiceTimeline.Lift(-1)==0&&PitServiceTimeline.Lift(PitServiceTimeline.Duration)==0,"pit leaves car on jack");
             foreach(float mass in new[]{600f,2000f})foreach(float down in new[]{0f,20000f})foreach(float ax in new[]{-100f,0f,100f})foreach(float ay in new[]{-100f,0f,100f}){
                 var loads=new float[4];Dynamics.NormalLoads(mass,2.8f,1.6f,.35f,down,ax,ay,loads);float sum=0;foreach(float load in loads){Check(float.IsFinite(load)&&load>=0,"negative/nonfinite tyre normal load");sum+=load;}Check(Math.Abs(sum-(mass*9.81f+down))<.02f,"load transfer invented vertical force");
                 var mirror=new float[4];Dynamics.NormalLoads(mass,2.8f,1.6f,.35f,down,ax,-ay,mirror);Check(Math.Abs(loads[0]-mirror[1])<.01f&&Math.Abs(loads[2]-mirror[3])<.01f,"left-right load transfer is asymmetric");

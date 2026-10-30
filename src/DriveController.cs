@@ -30,7 +30,7 @@ float lastLift; Node3D crew; Node3D[] crewFig; Vector3[] crewHome;
  void UpdateCrew(float e) {
   if (WheelPivots == null || Car == null) return; if (crew == null) BuildCrew(); crew.Visible = e >= 0 && e < 7.3f; if (!crew.Visible) return; crew.GlobalTransform = new Transform3D(Car.GlobalTransform.Basis.Orthonormalized(), new Vector3(Car.GlobalPosition.X, Car.GlobalPosition.Y - lastLift, Car.GlobalPosition.Z));
   for (int i = 0; i < 6; i++) {
-   float lean = 0, off = 1.0f + i * 0.6f, on = 3.4f + i * 0.6f;
+   float lean=0,off=PitServiceTimeline.Loosen(i),on=PitServiceTimeline.Fit(i);
    if (i < 4) { if (e > off - 0.5f && e < on + 0.7f) lean = 0.45f; float side = WheelPivots[i].Position.X < 0 ? -1f : 1f; crewFig[i].Rotation = new Vector3(0, 0, side * lean); crewFig[i].Position = crewHome[i] + new Vector3(-side * lean * 0.25f, 0, 0); }
    else { lean = (i == 4 ? (e < 0.8f || e > 6.4f ? 0.5f : 0f) : (e < 7.3f ? 0.0f : 0f)); crewFig[i].Rotation = new Vector3(lean, 0, 0); }
   }
@@ -51,7 +51,7 @@ AudioStreamPlayer engineSnd, whineSnd; AudioStreamPlayer[] sfxPool; int sfxNext;
   if (engineSnd.Stream != null) { engineSnd.PitchScale = Mathf.Clamp(0.55f + rpm / 2600f, 0.6f, 4.2f); engineSnd.VolumeDb = Mathf.Lerp(-22f, -8f, thr * 0.8f + Mathf.Clamp(rpm / 10000f, 0, 1) * 0.2f); }
   if (whineSnd.Stream != null) { whineSnd.PitchScale = Mathf.Clamp(0.5f + Player.speed / 40f, 0.5f, 3f); whineSnd.VolumeDb = Player.speed < 3f ? -60f : Mathf.Lerp(-34f, -22f, Mathf.Clamp(Player.speed / 70f, 0, 1)); }
   if (e >= 0 && lastE < 0) { PlaySfx("jack_engage.wav"); }
-  if (e >= 0) { for (int i = 0; i < 4; i++) { float off = 1.0f + i * 0.6f, on = 3.4f + i * 0.6f; if (lastE < off && e >= off) PlaySfx("wheel_gun_loosen.wav"); if (lastE < off + 0.4f && e >= off + 0.4f) PlaySfx("wheel_set_down.wav"); if (lastE < on && e >= on) PlaySfx("wheel_gun_tighten.wav"); } if (lastE < 6.6f && e >= 6.6f) PlaySfx("jack_release.wav"); }
+  if (e >= 0) { for (int i = 0; i < 4; i++) { float off=PitServiceTimeline.Loosen(i),on=PitServiceTimeline.Fit(i); if (lastE < off && e >= off) PlaySfx("wheel_gun_loosen.wav"); if (PitServiceTimeline.Crossed(lastE,e,PitServiceTimeline.Remove(i))) PlaySfx("wheel_set_down.wav"); if (PitServiceTimeline.Crossed(lastE,e,PitServiceTimeline.Secure(i))) PlaySfx("wheel_gun_tighten.wav"); } if (lastE < 6.6f && e >= 6.6f) PlaySfx("jack_release.wav"); }
   lastE = e;
  }
  class Rival { public Vehicle V; public Node3D Node; public Node3D[] Pivots; public float LastY, Spin; public Vec Start; }
@@ -73,11 +73,14 @@ AudioStreamPlayer engineSnd, whineSnd; AudioStreamPlayer[] sfxPool; int sfxNext;
   }
  }
   float PitSequence(float e) {
-  if (WheelPivots == null) return 0; if (e < 0) { foreach (var wp in WheelPivots) { wp.Visible = true;wp.GetNode<Node3D>("Spin").Visible=true; } return 0; }
-  float lift = e < 0.8f ? 0.14f * (e / 0.8f) : e < 6.4f ? 0.14f : 0.14f * (1f - Mathf.Clamp((e - 6.4f) / 0.8f, 0, 1));
-  // wheels come off one by one 1.0-3.4 s (front-left, front-right, rear-left, rear-right) and go back on 3.4-6.0 s in the same order
-  for (int i = 0; i < 4; i++) { float off = 1.0f + i * 0.6f, on = 3.4f + i * 0.6f; WheelPivots[i].Visible=true;WheelPivots[i].GetNode<Node3D>("Spin").Visible = !(e >= off && e < on); }
-  return lift;
+  if(WheelPivots==null)return 0;
+  for(int i=0;i<4;i++){
+   var pivot=WheelPivots[i];var spin=pivot.GetNode<Node3D>("Spin");pivot.Visible=true;spin.Visible=true;
+   // Move the complete tyre/rim off the hub along its actual mirrored axle; calipers remain fixed.
+   float side=pivot.Position.X<0?-1f:1f;var localOut=pivot.Basis.Inverse()*new Vector3(side,0,0);
+   spin.Position=localOut*(PitServiceTimeline.WheelOut(e,i)*.7f);
+  }
+  return PitServiceTimeline.Lift(e);
  }
  static float DeadZone(float v, float dz) { float a = Mathf.Abs(v); if (a <= dz) return 0; return Mathf.Sign(v) * (a - dz) / (1f - dz); }
  static Vector3 ToWorld(Vec p, float y) => new Vector3(p.x, y, p.z);
@@ -139,7 +142,7 @@ AudioStreamPlayer engineSnd, whineSnd; AudioStreamPlayer[] sfxPool; int sfxNext;
   }
   // Pit stop sequence (service time 7.5 s): jack up, remove and refit each wheel in turn, lower, release. Driven by the real service timer.
   if(WheelPivots!=null&&Player!=null&&(!WheelPivots[0].HasMeta("displayed_compound")||WheelPivots[0].GetMeta("displayed_compound").AsInt32()!=(int)Player.tyres[0].compound))TyreAppearance.Apply(WheelPivots,Player.tyres[0].compound);
-  float lift = PitSequence(Player.servicing ? 7.5f - Player.serviceRemaining : -1f); carPos += new Vector3(0, lift, 0); lastLift = lift; UpdateCrew(Player.servicing ? 7.5f - Player.serviceRemaining : -1f); if (!condsApplied) { condsApplied = true; if (Conditions.Wet == 2) Conditions.AddRain(Cam); if (Conditions.Tod == 3 || Conditions.Wet == 2) { foreach (float sx in new[] { -0.7f, 0.7f }) { var hl = new SpotLight3D { SpotRange = 90f, SpotAngle = 32f, LightEnergy = 45f, SpotAttenuation = 0.6f, LightColor = new Color(1f, 0.96f, 0.85f), ShadowEnabled = false, Position = new Vector3(sx, 0.55f, CarSize.Z * 0.45f), RotationDegrees = new Vector3(-6, 180, 0) }; Car.AddChild(hl); } } } if (!settingsApplied && !AiTest) { settingsApplied = true; Player.abs = Settings.Get("abs", true); Player.traction = Settings.Get("tc", true); } UpdateAudio(Player.servicing ? 7.5f - Player.serviceRemaining : -1f);
+  float lift = PitSequence(Player.servicing ? PitServiceTimeline.Duration - Player.serviceRemaining : -1f); carPos += new Vector3(0, lift, 0); lastLift = lift; UpdateCrew(Player.servicing ? PitServiceTimeline.Duration - Player.serviceRemaining : -1f); if (!condsApplied) { condsApplied = true; if (Conditions.Wet == 2) Conditions.AddRain(Cam); if (Conditions.Tod == 3 || Conditions.Wet == 2) { foreach (float sx in new[] { -0.7f, 0.7f }) { var hl = new SpotLight3D { SpotRange = 90f, SpotAngle = 32f, LightEnergy = 45f, SpotAttenuation = 0.6f, LightColor = new Color(1f, 0.96f, 0.85f), ShadowEnabled = false, Position = new Vector3(sx, 0.55f, CarSize.Z * 0.45f), RotationDegrees = new Vector3(-6, 180, 0) }; Car.AddChild(hl); } } } if (!settingsApplied && !AiTest) { settingsApplied = true; Player.abs = Settings.Get("abs", true); Player.traction = Settings.Get("tc", true); } UpdateAudio(Player.servicing ? PitServiceTimeline.Duration - Player.serviceRemaining : -1f);
   Car.Position = carPos;
   var f2 = (fwd - n * fwd.Dot(n)).Normalized(); var carX = n.Cross(f2).Normalized(); Car.Basis = new Basis(carX, n, f2); /* proper rotation (det +1): nose (+Z local) = travel direction. The old basis was left-handed and Orthonormalized() left it mirrored, so the nose faced the camera. */
   if (WheelPivots != null) { spinAngle += Vec.Dot(Player.velocity, Player.Forward) * (float)delta; for (int wi = 0; wi < 4; wi++) { var sp = WheelPivots[wi].GetNode<Node3D>("Spin"); float sgn = WheelPivots[wi].Position.X < 0 ? -1f : 1f; sp.Rotation = new Vector3(spinAngle * sgn / (WheelPivots[wi].HasMeta("radius") ? WheelPivots[wi].GetMeta("radius").AsSingle() : .34f), 0, 0); if (wi < 2) { var rot = WheelPivots[wi].Position.X < 0 ? Mathf.Pi : 0f; WheelPivots[wi].Rotation = new Vector3(0, rot + Mathf.Clamp(Player.steering, -0.34f, 0.34f), 0); } } }
