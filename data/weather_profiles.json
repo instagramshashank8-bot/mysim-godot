@@ -1,0 +1,100 @@
+{
+  "scope": "Game calibration, not measured meteorology. Surface-water rates are independent of visual cloud cover and editable without source changes.",
+  "profiles": [
+    {
+      "name": "Clear",
+      "initialWater": 0,
+      "rainRate": 0,
+      "dryingRate": 0.0015,
+      "rainAmount": 0,
+      "sunScale": 1,
+      "fogDensity": 0.00012,
+      "skyTint": [
+        0.38,
+        0.55,
+        0.82
+      ],
+      "horizonTint": [
+        0.72,
+        0.8,
+        0.88
+      ]
+    },
+    {
+      "name": "Overcast",
+      "initialWater": 0,
+      "rainRate": 0,
+      "dryingRate": 0.0006,
+      "rainAmount": 0,
+      "sunScale": 0.5,
+      "fogDensity": 0.0007,
+      "skyTint": [
+        0.55,
+        0.58,
+        0.63
+      ],
+      "horizonTint": [
+        0.66,
+        0.68,
+        0.7
+      ]
+    },
+    {
+      "name": "Rain",
+      "initialWater": 0.55,
+      "rainRate": 0.0015,
+      "dryingRate": 0.0003,
+      "rainAmount": 2400,
+      "sunScale": 0.25,
+      "fogDensity": 0.0018,
+      "skyTint": [
+        0.34,
+        0.36,
+        0.4
+      ],
+      "horizonTint": [
+        0.46,
+        0.48,
+        0.5
+      ]
+    },
+    {
+      "name": "Heavy rain",
+      "initialWater": 0.8,
+      "rainRate": 0.004,
+      "dryingRate": 0.0002,
+      "rainAmount": 4000,
+      "sunScale": 0.15,
+      "fogDensity": 0.0025,
+      "skyTint": [
+        0.24,
+        0.27,
+        0.31
+      ],
+      "horizonTint": [
+        0.36,
+        0.39,
+        0.43
+      ]
+    },
+    {
+      "name": "Fog",
+      "initialWater": 0.1,
+      "rainRate": 0,
+      "dryingRate": 0.0002,
+      "rainAmount": 0,
+      "sunScale": 0.3,
+      "fogDensity": 0.004,
+      "skyTint": [
+        0.48,
+        0.51,
+        0.55
+      ],
+      "horizonTint": [
+        0.58,
+        0.61,
+        0.64
+      ]
+    }
+  ]
+}

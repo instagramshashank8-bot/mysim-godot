@@ -4,6 +4,7 @@ namespace MySim {
 public partial class SkyDome : Node3D {
  Node3D dome;
  public static void Add(Node3D parent, string map) {
+  if(Conditions.IsNight||Conditions.Wet>0){GD.Print("SKY procedural conditions selected; daytime panorama suppressed");return;}
   string dir = "res://assets/RealRacing/Source/" + map + "/processed/"; string fbx = null; string png = null;
   { foreach (var f in Assets.Files(dir)) { if (f.EndsWith("_sky.fbx")) fbx = f; if (f.EndsWith(".png")) png = f; } }
   if (fbx == null) { GD.Print("SKY no fbx"); return; }

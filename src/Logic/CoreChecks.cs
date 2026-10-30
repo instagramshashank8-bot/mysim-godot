@@ -12,6 +12,7 @@ namespace MySimulator.Verification
         public static string Run()
         {
             count=0;var log=new List<string>();
+            var water=new SurfaceWeather(0);water.Step(100,.01f,0);Check(water.Water>0&&water.Water<1,"rain did not accumulate surface water");float wet=water.Water;water.Step(100,0,.01f);Check(water.Water<wet,"dry weather did not drain surface water");var whole=new SurfaceWeather(.3f);var split=new SurfaceWeather(.3f);whole.Step(10,.005f,.002f);for(int i=0;i<100;i++)split.Step(.1f,.005f,.002f);Check(Math.Abs(whole.Water-split.Water)<.0001f,"weather evolution depends on frame rate");
             for(int wheel=0;wheel<4;wheel++){
                 Check(PitServiceTimeline.Loosen(wheel)<PitServiceTimeline.Remove(wheel)&&PitServiceTimeline.Remove(wheel)<PitServiceTimeline.Fit(wheel)&&PitServiceTimeline.Fit(wheel)<PitServiceTimeline.Secure(wheel),"pit wheel order invalid");
                 Check(PitServiceTimeline.Secure(wheel)<PitServiceTimeline.LowerStart,"jack lowers before wheel secured");
