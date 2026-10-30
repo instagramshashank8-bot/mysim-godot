@@ -16,6 +16,13 @@ def run(label,values,args=None,timeout=300):
   (out/(label+f'-{attempt}-process.json')).write_text(json.dumps({'returncode':code,'timed_out':timed_out,'elapsed_seconds':time.monotonic()-started,'timeout_seconds':timeout,'screenshot_exists':shot.exists() if shot else None,'error_lines':[line for line in text.splitlines() if 'ERROR:' in line]},indent=2))
   if code==0 and 'ERROR:' not in text:return text
  raise RuntimeError(label+' failed; see saved logs')
+if os.environ.get('RAIN_FOCUS')=='1':
+ for car in (6,16):
+  for tod,wet in ((0,2),(3,0),(3,3)):
+   label=f'rain-focus-track-00-car-{car:02}-tod-{tod}-wet-{wet}';shot=out/(label+'.png')
+   run(label,{'MYSIM_TRACK':'0','MYSIM_CAR':str(car),'MYSIM_TOD':str(tod),'MYSIM_WET':str(wet),'MYSIM_AI':'1','MYSIM_AUTODRIVE':'1','MYSIM_NOPIT':'1','MYSIM_RIVALS':'0','MYSIM_SECONDS':'8','MYSIM_SHOT':str(shot)})
+   assert shot.exists()
+ print('COMPLETE first-track rain/light comparison; no full weather or track acceptance',flush=True);sys.exit(0)
 if os.environ.get('REAR_PANEL_UV')=='1':
  for view,camera in enumerate(('4,1,0','0,1.15,-6')):
   for node in ('baseline','LOD_A_BODY_mm_ext','LOD_A_BODY_mm_misc','LOD_A_REARBUMPER_mm_ext','LOD_A_REARBUMPER_mm_misc'):

@@ -1,7 +1,7 @@
 """Limit only isolated diagnostics' importer scope; full-game/Windows campaigns stay complete."""
 import os,json,pathlib,re
 root=pathlib.Path.cwd();depth=os.environ.get('IMPORT_REVIEW_DEPTH','');out=root/'outputs/cloud-game';out.mkdir(parents=True,exist_ok=True)
-scopes={'rear_panel_uv':([6],[]),'livery_uv':([0,6,12,18],[]),'gui_review':([],[]),'wheel_compounds':([1,6,16],[]),'car_panel_uv':([6],[]),'car_uv_roles':([1,6,16],[]),'car_uv':([1,6,16],[]),'precise_ai':([16],[43,15]),'contact_trace':([16],[43,15]),'geometry':(list(range(24)),[])}
+scopes={'rain_focus':([6,16],[0]),'rear_panel_uv':([6],[]),'livery_uv':([0,6,12,18],[]),'gui_review':([],[]),'wheel_compounds':([1,6,16],[]),'car_panel_uv':([6],[]),'car_uv_roles':([1,6,16],[]),'car_uv':([1,6,16],[]),'precise_ai':([16],[43,15]),'contact_trace':([16],[43,15]),'geometry':(list(range(24)),[])}
 if depth=='weather_review':scopes[depth]=([16],list(range(int(os.environ.get('SHARD','0')),60,6)))
 if depth=='assembly_review':scopes[depth]=(list(range(int(os.environ.get('SHARD','0')),24,6)),[])
 if depth=='native_focus':
