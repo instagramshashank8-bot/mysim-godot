@@ -16,6 +16,13 @@ def run(label,values,args=None,timeout=300):
   (out/(label+f'-{attempt}-process.json')).write_text(json.dumps({'returncode':code,'timed_out':timed_out,'elapsed_seconds':time.monotonic()-started,'timeout_seconds':timeout,'screenshot_exists':shot.exists() if shot else None,'error_lines':[line for line in text.splitlines() if 'ERROR:' in line]},indent=2))
   if code==0 and 'ERROR:' not in text:return text
  raise RuntimeError(label+' failed; see saved logs')
+if os.environ.get('WEATHER_REVIEW')=='1':
+ for track in range(shard,60,6):
+  for tod,wet in ((0,0),(3,0),(0,2),(3,3),(0,4)):
+   label=f'weather-track-{track:02}-tod-{tod}-wet-{wet}';shot=out/(label+'.png')
+   run(label,{'MYSIM_TRACK':str(track),'MYSIM_CAR':'16','MYSIM_TOD':str(tod),'MYSIM_WET':str(wet),'MYSIM_AI':'1','MYSIM_AUTODRIVE':'1','MYSIM_NOPIT':'1','MYSIM_RIVALS':'0','MYSIM_SECONDS':'3','MYSIM_SHOT':str(shot)})
+   assert shot.exists(),label+' missing render evidence'
+ print('COMPLETE track lighting/weather captures; manual acceptance separate',flush=True);sys.exit(0)
 if os.environ.get('ASSEMBLY_REVIEW')=='1':
  for car in range(shard,24,6):
   for view,camera in enumerate(('0,1.15,6','4,1,0','0,1.15,-6')):
