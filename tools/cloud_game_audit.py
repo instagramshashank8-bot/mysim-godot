@@ -16,6 +16,13 @@ def run(label,values,args=None,timeout=300):
   (out/(label+f'-{attempt}-process.json')).write_text(json.dumps({'returncode':code,'timed_out':timed_out,'elapsed_seconds':time.monotonic()-started,'timeout_seconds':timeout,'screenshot_exists':shot.exists() if shot else None,'error_lines':[line for line in text.splitlines() if 'ERROR:' in line]},indent=2))
   if code==0 and 'ERROR:' not in text:return text
  raise RuntimeError(label+' failed; see saved logs')
+if os.environ.get('ALPHA_POLICY_REVIEW')=='1':
+ track=(0,5)[shard]
+ for source_policy in (0,1):
+  label=f'alpha-track-{track:02}-source-policy-{source_policy}';shot=out/(label+'.png')
+  run(label,{'MYSIM_TRACK':str(track),'MYSIM_CAR':'16','MYSIM_TOD':'0','MYSIM_WET':'0','MYSIM_AI':'1','MYSIM_AUTODRIVE':'1','MYSIM_NOPIT':'1','MYSIM_RIVALS':'0','MYSIM_SECONDS':'3','MYSIM_SOURCE_ALPHA_POLICY':str(source_policy),'MYSIM_SHOT':str(shot)})
+  assert shot.exists()
+ print('COMPLETE alpha policy comparison; no production change accepted',flush=True);sys.exit(0)
 if os.environ.get('TRACK_SCENE_AUDIT')=='1':
  track=(0,5)[shard];label=f'track-scene-audit-{track:02}'
  text=run(label,{'MYSIM_TRACK':str(track),'MYSIM_TRACK_SCENE_AUDIT':str(out/(label+'.json'))},['--headless'])

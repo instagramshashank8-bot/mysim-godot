@@ -12,6 +12,7 @@ public static class UnityMaterialBinder {
   alphaCache[path]=alpha;return alpha;
  }
 
+ static readonly System.Text.RegularExpressions.Regex CutoutClass=new System.Text.RegularExpressions.Regex(@"(^org_|(^|[_/ .-])(fence|crowd|tree|leaf|leaves|foliage|bush|hedge|wire|net|grate)([_/ .-]|$))",System.Text.RegularExpressions.RegexOptions.IgnoreCase);
  static readonly Dictionary<string, Material> cache = new Dictionary<string, Material>();
  static readonly Shader GroundShader = new Shader { Code = @"shader_type spatial; render_mode cull_disabled; global uniform float mysim_surface_water; uniform float wet_darkening = 0.12; uniform float wet_roughness = 0.18; uniform float wet_specular = 0.45;
 uniform sampler2D tex : source_color, repeat_enable, filter_linear_mipmap_anisotropic; uniform vec4 tint : source_color = vec4(1.0);
@@ -55,11 +56,17 @@ void fragment() { vec3 wp0 = (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz; vec2 tuv
    bool ground = nm.ToLowerInvariant().StartsWith("gnd_") || nm.ToLowerInvariant().StartsWith("road") || nm.ToLowerInvariant().StartsWith("geo_terrain");
    for (int s = 0; s < mi.Mesh.GetSurfaceCount(); s++) {
     total++; if (guids.Count == 0) continue; string g = guids[s < guids.Count ? s : guids.Count - 1].AsString(); string key = g + (ground ? "|g" : "") + (nm.StartsWith("org_",System.StringComparison.OrdinalIgnoreCase)||nm.StartsWith("crowd",System.StringComparison.OrdinalIgnoreCase)?"|organic":"|structure");
+    if(System.Environment.GetEnvironmentVariable("MYSIM_SOURCE_ALPHA_POLICY")=="1")key+=CutoutClass.IsMatch(nm)?"|cutout_candidate":"|solid_candidate";
     if (!cache.TryGetValue(key, out var mat)) {
      mat = null; if (mats.ContainsKey(g)) { var mi2 = mats[g].AsGodotDictionary(); string tp = mi2.ContainsKey("tex") ? Res(NoSkid(mi2["tex"].AsString())) : null; Texture2D tex = tp != null && ResourceLoader.Exists(tp) ? GD.Load<Texture2D>(tp) : null;
       Color col = Colors.White; if (mi2.ContainsKey("color")) { var c = mi2["color"].AsGodotArray(); col = new Color((float)c[0], (float)c[1], (float)c[2], (float)c[3]); }
       if (tp != null && System.Text.RegularExpressions.Regex.IsMatch(System.IO.Path.GetFileName(tp).ToLowerInvariant(), "^(mat_branding_[a-z_]*base(_[a-z])?|rr3(white|black)_(banners|billboard_[a-z]|concrete\\.rgb))\\.png$")) { tex = null; col = new Color(0.66f, 0.67f, 0.69f); }
-      if (col.R + col.G + col.B < 0.06f) col = new Color(1, 1, 1, col.A < 0.01f ? 1f : col.A); bool texAlpha = HasAlpha(tex); bool clip = texAlpha || mi2.ContainsKey("alphaClip") && mi2["alphaClip"].AsBool(); bool trans = mi2.ContainsKey("transparent") && mi2["transparent"].AsBool(); float cut = mi2.ContainsKey("cutoff") ? (float)mi2["cutoff"].AsDouble() : 0.5f; if (cut <= 0.01f) cut = 0.5f;
+      if (col.R + col.G + col.B < 0.06f) col = new Color(1, 1, 1, col.A < 0.01f ? 1f : col.A); bool texAlpha = HasAlpha(tex); bool authoredClip=mi2.ContainsKey("alphaClip")&&mi2["alphaClip"].AsBool();bool clip=texAlpha||authoredClip;
+      if(System.Environment.GetEnvironmentVariable("MYSIM_SOURCE_ALPHA_POLICY")=="1"){
+       int queue=mi2.ContainsKey("queue")?mi2["queue"].AsInt32():-1;
+       clip=authoredClip||(queue>=2450&&queue<2500)||(texAlpha&&CutoutClass.IsMatch(nm+"/"+(tp??"")));
+      }
+ bool trans = mi2.ContainsKey("transparent") && mi2["transparent"].AsBool(); float cut = mi2.ContainsKey("cutoff") ? (float)mi2["cutoff"].AsDouble() : 0.5f; if (cut <= 0.01f) cut = 0.5f;
       if (tex != null || col != Colors.White) {
        if (ground && tex != null) { var sm = new ShaderMaterial { Shader = GroundShader }; Conditions.ConfigureWetGround(sm); sm.SetShaderParameter("tex", tex); GroundClass(sm, tp); sm.SetShaderParameter("tint", new Color(col.R, col.G, col.B)); mat = sm; }
        else { var st = new StandardMaterial3D { AlbedoTexture = tex, AlbedoColor = col, Roughness = 1f, MetallicSpecular = 0.12f, TextureFilter = BaseMaterial3D.TextureFilterEnum.LinearWithMipmapsAnisotropic }; if (clip) { st.Transparency = BaseMaterial3D.TransparencyEnum.AlphaScissor; st.AlphaScissorThreshold = cut > 0 ? cut : 0.5f; st.AlphaAntialiasingMode = BaseMaterial3D.AlphaAntiAliasing.AlphaToCoverage; st.AlphaAntialiasingEdge = 0.3f; st.CullMode = BaseMaterial3D.CullModeEnum.Disabled; } else if (trans) st.Transparency = BaseMaterial3D.TransparencyEnum.Alpha; if (System.Environment.GetEnvironmentVariable("MYSIM_NOUVFIX") != "1" && !(nm.ToLowerInvariant().StartsWith("org_") || nm.ToLowerInvariant().StartsWith("crowd") || (tp != null && System.IO.Path.GetFileName(tp).ToLowerInvariant().StartsWith("org_")))) { st.Uv1Scale = new Vector3(-1f, -1f, 1f); st.Uv1Offset = new Vector3(1f, 1f, 0f); } mat = st; }
