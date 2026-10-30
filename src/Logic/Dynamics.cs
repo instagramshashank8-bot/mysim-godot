@@ -39,6 +39,15 @@ namespace MySimulator.Rebuild
         }
         public static void Step(Vehicle v,float dt,float wetness,Circuit circuit)
         {
+            if(!MathUtil.Finite(dt)||dt<=0)return;
+            // Resolve stiff tyre/body coupling below the 120 Hz race clock. The wheel
+            // update alone is implicit; explicit body integration still needs a bounded step.
+            int steps=Math.Max(1,(int)Math.Ceiling(dt/(1f/480f)));
+            float substep=dt/steps;
+            for(int i=0;i<steps;i++)Integrate(v,substep,wetness,circuit);
+        }
+        static void Integrate(Vehicle v,float dt,float wetness,Circuit circuit)
+        {
             int m=Math.Max(0,Math.Min(RecoveredVehicleProfiles.Count-1,v.carModel));
             float mass=RecoveredVehicleProfiles.Mass[m],vmax=RecoveredVehicleProfiles.Speed[m]*.44704f,t60=RecoveredVehicleProfiles.Acceleration[m],stop60=RecoveredVehicleProfiles.Brakes[m]*.3048f,df=RecoveredVehicleProfiles.Downforce[m];
             float L=RecoveredGeometry.Wheelbase[Math.Max(0,Math.Min(RecoveredGeometry.Wheelbase.Length-1,v.carModel))],a=L*.48f,b=L*.52f,track=Math.Max(1.4f,L*.5f),h=.29f+L*.02f;
