@@ -149,6 +149,7 @@ public partial class Main : Node3D {
   string mp = tl["map"].AsString(), lay = tl["layout"].AsString(), scn = tl["scene"].AsString();
   var trackScene=await LoadSceneAsync("res://assets/RealRacing/Source/" + mp + "/" + scn); var track=trackScene.Instantiate<Node3D>(); track.Scale = new Vector3(100f, 100f, 100f); world.AddChild(track);
   var layers = new System.Collections.Generic.List<Node3D> { track }; foreach (var vp in tl["variationPaths"].AsGodotArray()) { string rp = "res://" + vp.AsString().Replace("Assets/RealRacing/Source/", "assets/RealRacing/Source/"); if (EmptyVariations.Paths.Contains(rp)) { GD.Print("VARIATION empty source layer ", rp); continue; } if (!ResourceLoader.Exists(rp)) { GD.Print("VARIATION missing ", rp); continue; } var vps = await LoadSceneAsync(rp); if (vps == null) { GD.Print("VARIATION import failed ", rp); continue; } var vn = vps.Instantiate<Node3D>(); vn.Scale = new Vector3(100f, 100f, 100f); world.AddChild(vn); layers.Add(vn); GD.Print("VARIATION loaded ", rp); }
+  string sceneAudit=System.Environment.GetEnvironmentVariable("MYSIM_TRACK_SCENE_AUDIT");if(sceneAudit!=null){TrackSceneAudit.Write(layers,trackIdx,sceneAudit);CleanExit.Request(this);return;}
   loading.Text="PREPARING CAR";await ToSignal(GetTree(),SceneTree.SignalName.ProcessFrame);
   string carDir="res://assets/RealRacing/Source/"+CarCatalog.Folders[carIdx]+"/";
   foreach(var part in Assets.Files(carDir))if(part.EndsWith(".fbx"))await LoadSceneAsync(carDir+part);
