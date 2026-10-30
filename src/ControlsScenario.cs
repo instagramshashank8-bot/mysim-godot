@@ -36,7 +36,7 @@ public partial class ControlsScenario : Node {
     Find("GAS").EmitSignal(BaseButton.SignalName.ButtonDown);Check(TouchControls.Throttle==1,"screen throttle did not engage");Find("GAS").EmitSignal(BaseButton.SignalName.ButtonUp);Check(TouchControls.Throttle==0,"screen throttle stuck");
     Find("LEFT").EmitSignal(BaseButton.SignalName.ButtonDown);Find("RIGHT").EmitSignal(BaseButton.SignalName.ButtonDown);Check(TouchControls.Steer==0,"opposite steering buttons conflict");Find("LEFT").EmitSignal(BaseButton.SignalName.ButtonUp);Check(TouchControls.Steer==1,"steering release loses other held button");Find("RIGHT").EmitSignal(BaseButton.SignalName.ButtonUp);
     Find("PIT").EmitSignal(BaseButton.SignalName.Pressed);await ToSignal(GetTree(),SceneTree.SignalName.ProcessFrame);await ToSignal(GetTree(),SceneTree.SignalName.ProcessFrame);
-    var strategy=(PitStrategyPanel)hud.FindChildren("*","PitStrategyPanel",true,false)[0];Check(strategy.Open&&strategy.Visible,"GUI pit options failed to open");
+    var strategy=hud.PitStrategy;Check(strategy.Open&&strategy.Visible,"GUI pit options failed to open");
     var compound=(OptionButton)strategy.FindChild("COMPOUND",true,false);compound.Select(3);compound.EmitSignal(OptionButton.SignalName.ItemSelected,3L);
     ((Button)strategy.FindChild("REQUEST",true,false)).EmitSignal(BaseButton.SignalName.Pressed);Check(player.pitRequested&&player.nextCompound==MySimulator.Rebuild.Compound.Wet&&!strategy.Open,"GUI pit request/compound/close flow failed");
     Find("PAUSE").EmitSignal(BaseButton.SignalName.Pressed);Check(car.paused&&TouchControls.Throttle==0&&TouchControls.Steer==0,"GUI pause did not clear pedals");

@@ -4,6 +4,7 @@ namespace MySim {
 // Minimal in-game HUD: speed km/h, gear, rpm, lap/target, lap time, tyre wear. Real UI nodes (not a camera render).
 public partial class Hud : CanvasLayer {
  public bool Paused; public Race Race; public Vehicle Player; Label speed, info, gear;PitServiceDisplay pitDisplay;PitStrategyPanel strategy;RaceStandingsPanel standings;
+ public PitStrategyPanel PitStrategy=>strategy;
  public void TogglePitStrategy()=>strategy?.Toggle();
  public override void _Ready() {
   var root = new Control { AnchorRight = 1, AnchorBottom = 1, MouseFilter = Control.MouseFilterEnum.Ignore }; AddChild(root);
