@@ -16,6 +16,14 @@ def run(label,values,args=None,timeout=300):
   (out/(label+f'-{attempt}-process.json')).write_text(json.dumps({'returncode':code,'timed_out':timed_out,'elapsed_seconds':time.monotonic()-started,'timeout_seconds':timeout,'screenshot_exists':shot.exists() if shot else None,'error_lines':[line for line in text.splitlines() if 'ERROR:' in line]},indent=2))
   if code==0 and 'ERROR:' not in text:return text
  raise RuntimeError(label+' failed; see saved logs')
+if os.environ.get('LIVERY_UV')=='1':
+ for car in (0,6,12,18):
+  for view,camera in enumerate(('4,1,0','0,1.15,-6')):
+   for mode in ('baseline','none','u','v'):
+    label=f'livery-car-{car:02}-view-{view}-{mode}';shot=out/(label+'.png');values={'MYSIM_CARVIEW':str(car),'MYSIM_FITVIEW':'1','MYSIM_CAMPOS':camera,'MYSIM_SHOT':str(shot)}
+    if mode!='baseline':values.update(MYSIM_CAR_UV=mode,MYSIM_CAR_UV_SCOPE='livery')
+    text=run(label,values);assert shot.exists() and 'PASS complete visible car framing' in text
+ print('COMPLETE isolated livery UV comparison; production unchanged',flush=True);sys.exit(0)
 if os.environ.get('GUI_REVIEW')=='1':
  for resolution in ('960x540','1280x720','1600x900'):
   label='settings-'+resolution;shot=out/(label+'.png')
