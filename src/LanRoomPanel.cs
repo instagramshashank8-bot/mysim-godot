@@ -15,5 +15,7 @@ public partial class LanRoomPanel : CanvasLayer {
  void BeginJoin(){try{session?.Dispose();string target=address.Text.Trim();int split=target.LastIndexOf(':');if(split<0)target+=":"+LanChannel.Port;var race=new Race(0,3,0);session=new GameSession(race);session.Join(new LanChannel(false),target,"PLAYER");connect.Disabled=true;}catch(Exception e){status.Text="Could not join: "+e.Message;}}
  public override void _Process(double delta){if(session==null)return;try{session.Tick((float)delta);if(session.connected)status.Text="CONNECTED / "+session.race.cars.Count+" players / "+session.race.track.name;else if(session.role==SessionRole.Client)status.Text=session.status;if(connect!=null&&session.silence>5&&!session.connected){connect.Disabled=false;status.Text="No host response. Check the address and network, then retry.";}}catch(Exception e){status.Text="Room connection error: "+e.Message;session.Dispose();session=null;if(connect!=null)connect.Disabled=false;}}
  public override void _ExitTree(){session?.Dispose();}
+ public override void _UnhandledInput(InputEvent input){if(input is InputEventKey key&&key.Pressed&&key.Keycode==Key.Escape){GetViewport().SetInputAsHandled();QueueFree();}}
+
 }
 }

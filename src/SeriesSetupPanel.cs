@@ -9,5 +9,7 @@ public partial class SeriesSetupPanel : CanvasLayer {
  void AddButton(Node parent,string text,Action action){var button=new Button {Text=text,CustomMinimumSize=new Vector2(0,42)};button.Pressed+=()=>action();parent.AddChild(button);}
  void Refresh(){rounds.Clear();for(int i=0;i<selected.Count;i++)rounds.AddItem((i+1)+"  "+SourceRoutes.Names[selected[i]]);status.Text=selected.Count+" rounds selected";}
  void Move(int direction){var items=rounds.GetSelectedItems();if(items.Length==0)return;int i=items[0],next=i+direction;if(next<0||next>=selected.Count)return;(selected[i],selected[next])=(selected[next],selected[i]);Refresh();rounds.Select(next);}
+ public override void _UnhandledInput(InputEvent input){if(input is InputEventKey key&&key.Pressed&&key.Keycode==Key.Escape){GetViewport().SetInputAsHandled();QueueFree();}}
+
 }
 }

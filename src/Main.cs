@@ -94,7 +94,8 @@ public partial class Main : Node3D {
  RaceSeries activeSeries;
  void ShowMenu() {
   activeSeries=null;EndRace();ClearUi();menuStart=null;resultsShown=false;ui=new CanvasLayer();AddChild(ui);
-  var modes=new ModeMenu {QuickRace=ShowRaceSetup,Series=()=>{var setup=new SeriesSetupPanel();setup.StartSeries+=series=>{activeSeries=series;StartRace(series.CurrentTrack,series.Car,series.Laps);};AddChild(setup);},CreateRoom=()=>AddChild(new LanRoomPanel {Hosting=true}),JoinRoom=()=>AddChild(new LanRoomPanel {Hosting=false})};ui.AddChild(modes);
+  RaceSeries savedSeries=null;try{string saved=Settings.Get("series_resume","");if(!string.IsNullOrEmpty(saved))savedSeries=RaceSeries.Restore(saved);}catch(System.Exception e){GD.PrintErr("SERIES_RESTORE_FAILED ",e.Message);}
+  var modes=new ModeMenu {ResumeSeries=savedSeries!=null&&!savedSeries.Complete?()=>StartSeriesSession(savedSeries):null,QuickRace=ShowRaceSetup,Series=()=>{var setup=new SeriesSetupPanel();setup.StartSeries+=StartSeriesSession;AddChild(setup);},CreateRoom=()=>AddChild(new LanRoomPanel {Hosting=true}),JoinRoom=()=>AddChild(new LanRoomPanel {Hosting=false})};ui.AddChild(modes);
  }
  void ShowRaceSetup() {
   EndRace(); ClearUi(); ui = new CanvasLayer(); AddChild(ui); resultsShown = false; menuAge = 0;
@@ -175,7 +176,8 @@ public partial class Main : Node3D {
     if (resultsShown && resultsArmed > 0.6f) { if (Input.IsKeyPressed(Key.Enter) || padA) { ContinueResult(); } else if (escNow && !escWas) { ShowMenu(); } }
     if (resultsShown) resultsArmed += (float)GetProcessDeltaTime(); else resultsArmed = 0; escWas = escNow; }
  }
- void ContinueResult(){if(activeSeries==null){StartRace(lastTrack,lastCar,lastLaps);return;}if(activeSeries.Complete){ShowMenu();return;}int place=drive.Race.Standings().IndexOf(drive.Player)+1;activeSeries.FinishRound(place);if(activeSeries.Complete){ShowMenu();return;}StartRace(activeSeries.CurrentTrack,activeSeries.Car,activeSeries.Laps);}
+ void StartSeriesSession(RaceSeries series){activeSeries=series;Settings.Set("series_resume",series.Save());StartRace(series.CurrentTrack,series.Car,series.Laps);}
+ void ContinueResult(){if(activeSeries==null){StartRace(lastTrack,lastCar,lastLaps);return;}if(activeSeries.Complete){ShowMenu();return;}int place=drive.Race.Standings().IndexOf(drive.Player)+1;activeSeries.FinishRound(place);Settings.Set("series_resume",activeSeries.Complete?"":activeSeries.Save());if(activeSeries.Complete){ShowMenu();return;}StartRace(activeSeries.CurrentTrack,activeSeries.Car,activeSeries.Laps);}
  void ShowResults() {
   resultsShown = true; var layer = new CanvasLayer(); world.AddChild(layer);
   var p = drive.Player; var panel = new ColorRect { Color = new Color(0, 0, 0, 0.7f), AnchorRight = 1, AnchorBottom = 1 }; layer.AddChild(panel);
