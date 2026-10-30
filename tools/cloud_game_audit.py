@@ -16,6 +16,13 @@ def run(label,values,args=None,timeout=300):
   (out/(label+f'-{attempt}-process.json')).write_text(json.dumps({'returncode':code,'timed_out':timed_out,'elapsed_seconds':time.monotonic()-started,'timeout_seconds':timeout,'screenshot_exists':shot.exists() if shot else None,'error_lines':[line for line in text.splitlines() if 'ERROR:' in line]},indent=2))
   if code==0 and 'ERROR:' not in text:return text
  raise RuntimeError(label+' failed; see saved logs')
+if os.environ.get('REAR_PANEL_UV')=='1':
+ for view,camera in enumerate(('4,1,0','0,1.15,-6')):
+  for node in ('baseline','LOD_A_BODY_mm_ext','LOD_A_BODY_mm_misc','LOD_A_REARBUMPER_mm_ext','LOD_A_REARBUMPER_mm_misc'):
+   label=f'rear-panel-{view}-{node}';shot=out/(label+'.png');values={'MYSIM_CARVIEW':'6','MYSIM_FITVIEW':'1','MYSIM_CAMPOS':camera,'MYSIM_SHOT':str(shot)}
+   if node!='baseline':values.update(MYSIM_CAR_UV='v',MYSIM_CAR_UV_NODE=node)
+   text=run(label,values);assert shot.exists() and 'PASS complete visible car framing' in text
+ print('COMPLETE isolated rear panel material comparison; no production repair accepted',flush=True);sys.exit(0)
 if os.environ.get('LIVERY_UV')=='1':
  for car in (0,6,12,18):
   for view,camera in enumerate(('4,1,0','0,1.15,-6')):
