@@ -41,6 +41,9 @@ if os.environ.get('LIVERY_UV')=='1':
  print('COMPLETE isolated livery UV comparison; production unchanged',flush=True);sys.exit(0)
 if os.environ.get('GUI_REVIEW')=='1':
  for resolution in ('960x540','1280x720','1600x900'):
+  label='touch-'+resolution;shot=out/(label+'.png')
+  text=run(label,{'MYSIM_TOUCHCHECKS':'1','MYSIM_TOUCH':'1','MYSIM_SHOT':str(shot)},['--resolution',resolution]);assert 'PASS independent touch fingers and focus clearing' in text
+ for resolution in ('960x540','1280x720','1600x900'):
   label='settings-'+resolution;shot=out/(label+'.png')
   text=run(label,{'MYSIM_SETTINGSCHECKS':'1','MYSIM_SHOT':str(shot)},['--resolution',resolution]);assert 'PASS race settings real controls' in text and shot.exists()
  for resolution in ('960x540','1280x720','1600x900'):
