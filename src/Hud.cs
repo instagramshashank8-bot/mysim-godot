@@ -20,7 +20,7 @@ public partial class Hud : CanvasLayer {
  }
 partial class MiniMap : Control {
   public Hud H; Vector2[] pts; Vector2 mn, mx;
-  public void TogglePitStrategy()=>strategy?.Toggle();
+ 
  public override void _Ready() { MouseFilter = MouseFilterEnum.Ignore; }
   void Build() { var c = H.Race.track; int n = c.points.Length; pts = new Vector2[n + 1]; mn = new Vector2(1e9f, 1e9f); mx = new Vector2(-1e9f, -1e9f); for (int i = 0; i < n; i++) { var p = c.points[i]; pts[i] = new Vector2(p.x, -p.z); mn = new Vector2(Mathf.Min(mn.X, pts[i].X), Mathf.Min(mn.Y, pts[i].Y)); mx = new Vector2(Mathf.Max(mx.X, pts[i].X), Mathf.Max(mx.Y, pts[i].Y)); } pts[n] = pts[0]; }
   Vector2 Map(Vector2 w) { float pad = 10f, sw = Size.X - 2 * pad, sh = Size.Y - 2 * pad; float sc = Mathf.Min(sw / Mathf.Max(1f, mx.X - mn.X), sh / Mathf.Max(1f, mx.Y - mn.Y)); var ctr = (mn + mx) * 0.5f; return new Vector2(Size.X * 0.5f, Size.Y * 0.5f) + (w - ctr) * sc; }
