@@ -17,6 +17,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
         with: {dotnet-version: '8.0.x'}
+      - run: python tools/check_environment_profiles.py
       - run: dotnet run --project tools/CoreRunner -c Release | tee core.log
       - run: dotnet run --project tools/RepairChecks -c Release | tee repair.log
       - uses: actions/upload-artifact@v4
