@@ -116,5 +116,10 @@
       0,
       0.4
     ]
+  },
+  "surfaceVisual": {
+    "wet_darkening": 0.12,
+    "wet_roughness": 0.18,
+    "wet_specular": 0.45
   }
 }

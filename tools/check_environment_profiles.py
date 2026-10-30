@@ -31,3 +31,7 @@ number(rain['opacity'],'rain opacity',0,1);colour(rain['tint'],'rain tint')
 assert len(rain['wind'])==3
 for component in rain['wind']:number(component,'rain wind',-100,100)
 print('PASS editable world-rain visual profile')
+
+surface=json.loads((root/"data/weather_profiles.json").read_text())["surfaceVisual"]
+for key in ("wet_darkening","wet_roughness","wet_specular"):number(surface[key],"wet ground "+key,0,1)
+print("PASS editable water-driven ground material profile")

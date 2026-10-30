@@ -19,7 +19,12 @@ public static class Conditions {
  public static int Tod => Mathf.Clamp(System.Environment.GetEnvironmentVariable("MYSIM_TOD") != null ? int.Parse(System.Environment.GetEnvironmentVariable("MYSIM_TOD")) : Settings.Get("tod", 0), 0, LightingProfiles.GetArrayLength()-1);
  public static int Wet => Mathf.Clamp(System.Environment.GetEnvironmentVariable("MYSIM_WET") != null ? int.Parse(System.Environment.GetEnvironmentVariable("MYSIM_WET")) : Settings.Get("wet", 0), 0, Profiles.GetArrayLength()-1);
  public static float WetnessValue => Value("initialWater");
+ public static void ConfigureWetGround(ShaderMaterial material){
+  var profile=Profiles;profile=catalogue.RootElement.GetProperty("surfaceVisual");
+  foreach(var key in new[]{"wet_darkening","wet_roughness","wet_specular"})material.SetShaderParameter(key,profile.GetProperty(key).GetSingle());
+ }
  public static void Apply(Godot.Environment env, DirectionalLight3D sun, ProceduralSkyMaterial sky) {
+  RenderingServer.GlobalShaderParameterSet("mysim_surface_water",WetnessValue);
   int tod = Tod, wet = Wet;
   Color amb=LightTint("ambientColor"),fog=LightTint("fogColor"),top=LightTint("skyTop"),hor=LightTint("horizon"),sunCol=LightTint("sunColor");
   float sunE=Lighting.GetProperty("sunEnergy").GetSingle(),ambE=Lighting.GetProperty("ambientEnergy").GetSingle(),expo=Lighting.GetProperty("exposure").GetSingle();

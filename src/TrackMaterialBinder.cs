@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace MySim {
 // Binds the original recovered textures to the track's FBX materials (name -> texture via recovered Unity material names).
 public static class TrackMaterialBinder {
- static readonly Shader GroundShader = new Shader { Code = "shader_type spatial; render_mode cull_disabled; uniform sampler2D tex : source_color, repeat_enable, filter_linear_mipmap_anisotropic; void fragment() { ALBEDO = texture(tex, UV).rgb; ROUGHNESS = 1.0; SPECULAR = 0.04;  }" };
+ static readonly Shader GroundShader = new Shader { Code = "shader_type spatial; render_mode cull_disabled; global uniform float mysim_surface_water; uniform float wet_darkening = 0.12; uniform float wet_roughness = 0.18; uniform float wet_specular = 0.45; uniform sampler2D tex : source_color, repeat_enable, filter_linear_mipmap_anisotropic; void fragment() { ALBEDO = texture(tex, UV).rgb; float water = clamp(mysim_surface_water, 0.0, 1.0); ALBEDO *= 1.0 - water * wet_darkening; ROUGHNESS = mix(1.0, wet_roughness, water); SPECULAR = mix(0.04, wet_specular, water);  }" };
  public static readonly System.Collections.Generic.List<string> UnboundNames = new System.Collections.Generic.List<string>();
  public static void Apply(Node3D track, string dir) {
   var map = new Dictionary<string, string>();
@@ -23,7 +23,7 @@ public static class TrackMaterialBinder {
      cache[name] = mat;
     }
     if(mat!=null&&mat.AlbedoTexture==null)missing.Add(new {renderer=m.Name.ToString(),surface=s,material=name});
-    if (mat != null) { string mn2 = m.Name.ToString().ToLowerInvariant(); if (mat.AlbedoTexture!=null && (mn2.StartsWith("gnd_") || mn2.StartsWith("road"))) { var sm2 = new ShaderMaterial { Shader = GroundShader }; sm2.SetShaderParameter("tex", mat.AlbedoTexture); m.SetSurfaceOverrideMaterial(s, sm2); bound++; continue; } 
+    if (mat != null) { string mn2 = m.Name.ToString().ToLowerInvariant(); if (mat.AlbedoTexture!=null && (mn2.StartsWith("gnd_") || mn2.StartsWith("road"))) { var sm2 = new ShaderMaterial { Shader = GroundShader }; sm2.SetShaderParameter("tex", mat.AlbedoTexture); Conditions.ConfigureWetGround(sm2); m.SetSurfaceOverrideMaterial(s, sm2); bound++; continue; } 
     m.SetSurfaceOverrideMaterial(s, mat); bound++; }
    }
   }

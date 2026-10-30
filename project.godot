@@ -14,3 +14,6 @@ lights_and_shadows/directional_shadow/soft_shadow_filter_quality=3
 anti_aliasing/quality/msaa_3d=3
 [audio]
 buses/default_bus_layout=""
+
+[shader_globals]
+mysim_surface_water={"type": "float", "value": 0.0}

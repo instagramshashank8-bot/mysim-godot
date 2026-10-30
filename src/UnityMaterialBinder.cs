@@ -13,7 +13,7 @@ public static class UnityMaterialBinder {
  }
 
  static readonly Dictionary<string, Material> cache = new Dictionary<string, Material>();
- static readonly Shader GroundShader = new Shader { Code = @"shader_type spatial; render_mode cull_disabled;
+ static readonly Shader GroundShader = new Shader { Code = @"shader_type spatial; render_mode cull_disabled; global uniform float mysim_surface_water; uniform float wet_darkening = 0.12; uniform float wet_roughness = 0.18; uniform float wet_specular = 0.45;
 uniform sampler2D tex : source_color, repeat_enable, filter_linear_mipmap_anisotropic; uniform vec4 tint : source_color = vec4(1.0);
 uniform float world_scale = 0.0; uniform float detail_scale = 24.0; uniform float detail_amp = 0.12; uniform float macro_scale = 0.35; uniform float macro_amp = 0.10; uniform vec3 macro_tint = vec3(1.0, 1.0, 1.0);
 float h21(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
@@ -22,7 +22,7 @@ float fbm(vec2 p) { float a = 0.5, s = 0.0; for (int i = 0; i < 4; i++) { s += a
 void fragment() { vec3 wp0 = (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz; vec2 tuv = world_scale > 0.0 ? wp0.xz * world_scale : UV; vec3 base = texture(tex, tuv).rgb * tint.rgb;
  vec3 wp = (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz; float det = fbm(wp.xz * (detail_scale / 24.0) * 1.3) - 0.5; float mac = fbm(wp.xz * (macro_scale / 0.35) * 0.045 + 7.3) - 0.5;
  vec3 c = base * (1.0 + det * detail_amp * 2.0); c = mix(c, c * macro_tint, clamp(mac * macro_amp * 4.0 + 0.5, 0.0, 1.0) * 0.5); c *= (1.0 + mac * macro_amp);
- ALBEDO = c; ROUGHNESS = 1.0; SPECULAR = 0.04;  }" };
+ ALBEDO = c; float water = clamp(mysim_surface_water, 0.0, 1.0); ALBEDO *= 1.0 - water * wet_darkening; ROUGHNESS = mix(1.0, wet_roughness, water); SPECULAR = mix(0.04, wet_specular, water);  }" };
 // RR3-style clean track: no skid-mark / dust / oil / wall-scuff decal overlays, and every asphalt uses its no-skids variant.
  static readonly System.Text.RegularExpressions.Regex DirtDecal = new System.Text.RegularExpressions.Regex("skid|dust|dirt_|oil|stain|scuff|grime|wall_damage|tyre_mark|rubber|ripple", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
  static void CleanTrack(Node3D layer) { int hidden = 0; foreach (var node in layer.FindChildren("*", "MeshInstance3D", true, false)) { var mi = (MeshInstance3D)node; string nm = mi.Name.ToString(); if (nm.ToLowerInvariant().StartsWith("overlay") && (DirtDecal.IsMatch(nm) || (System.Environment.GetEnvironmentVariable("MYSIM_NOOVERLAY") != null && !nm.ToLowerInvariant().Contains("start")))) { mi.Visible = false; hidden++; } } GD.Print("CLEANTRACK hidden dirt decals=", hidden); }
@@ -61,7 +61,7 @@ void fragment() { vec3 wp0 = (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz; vec2 tuv
       if (tp != null && System.Text.RegularExpressions.Regex.IsMatch(System.IO.Path.GetFileName(tp).ToLowerInvariant(), "^(mat_branding_[a-z_]*base(_[a-z])?|rr3(white|black)_(banners|billboard_[a-z]|concrete\\.rgb))\\.png$")) { tex = null; col = new Color(0.66f, 0.67f, 0.69f); }
       if (col.R + col.G + col.B < 0.06f) col = new Color(1, 1, 1, col.A < 0.01f ? 1f : col.A); bool texAlpha = HasAlpha(tex); bool clip = texAlpha || mi2.ContainsKey("alphaClip") && mi2["alphaClip"].AsBool(); bool trans = mi2.ContainsKey("transparent") && mi2["transparent"].AsBool(); float cut = mi2.ContainsKey("cutoff") ? (float)mi2["cutoff"].AsDouble() : 0.5f; if (cut <= 0.01f) cut = 0.5f;
       if (tex != null || col != Colors.White) {
-       if (ground && tex != null) { var sm = new ShaderMaterial { Shader = GroundShader }; sm.SetShaderParameter("tex", tex); GroundClass(sm, tp); sm.SetShaderParameter("tint", new Color(col.R, col.G, col.B)); mat = sm; }
+       if (ground && tex != null) { var sm = new ShaderMaterial { Shader = GroundShader }; Conditions.ConfigureWetGround(sm); sm.SetShaderParameter("tex", tex); GroundClass(sm, tp); sm.SetShaderParameter("tint", new Color(col.R, col.G, col.B)); mat = sm; }
        else { var st = new StandardMaterial3D { AlbedoTexture = tex, AlbedoColor = col, Roughness = 1f, MetallicSpecular = 0.12f, TextureFilter = BaseMaterial3D.TextureFilterEnum.LinearWithMipmapsAnisotropic }; if (clip) { st.Transparency = BaseMaterial3D.TransparencyEnum.AlphaScissor; st.AlphaScissorThreshold = cut > 0 ? cut : 0.5f; st.AlphaAntialiasingMode = BaseMaterial3D.AlphaAntiAliasing.AlphaToCoverage; st.AlphaAntialiasingEdge = 0.3f; st.CullMode = BaseMaterial3D.CullModeEnum.Disabled; } else if (trans) st.Transparency = BaseMaterial3D.TransparencyEnum.Alpha; if (System.Environment.GetEnvironmentVariable("MYSIM_NOUVFIX") != "1" && !(nm.ToLowerInvariant().StartsWith("org_") || nm.ToLowerInvariant().StartsWith("crowd") || (tp != null && System.IO.Path.GetFileName(tp).ToLowerInvariant().StartsWith("org_")))) { st.Uv1Scale = new Vector3(-1f, -1f, 1f); st.Uv1Offset = new Vector3(1f, 1f, 0f); } mat = st; }
       } }
      cache[key] = mat;
