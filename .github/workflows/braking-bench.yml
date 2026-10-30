@@ -1,0 +1,21 @@
+name: controlled-tyre-braking-bench
+on: {workflow_dispatch: {}}
+permissions: {contents: read}
+jobs:
+  braking:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix: {shard: [0, 1, 2]}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with: {dotnet-version: '8.0.x'}
+      - run: dotnet run -c Release --project tools/BrakeBench -- ${{ matrix.shard }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: controlled-braking-${{ matrix.shard }}-attempt-${{ github.run_attempt }}
+          path: braking-*.json
+          retention-days: 14
