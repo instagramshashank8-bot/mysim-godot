@@ -1,7 +1,7 @@
 """Limit only isolated diagnostics' importer scope; full-game/Windows campaigns stay complete."""
 import os,json,pathlib,re
 root=pathlib.Path.cwd();depth=os.environ.get('IMPORT_REVIEW_DEPTH','');out=root/'outputs/cloud-game';out.mkdir(parents=True,exist_ok=True)
-scopes={'car_panel_uv':([6],[]),'car_uv_roles':([1,6,16],[]),'car_uv':([1,6,16],[]),'precise_ai':([16],[43,15]),'contact_trace':([16],[43,15]),'geometry':(list(range(24)),[])}
+scopes={'wheel_compounds':([1,6,16],[]),'car_panel_uv':([6],[]),'car_uv_roles':([1,6,16],[]),'car_uv':([1,6,16],[]),'precise_ai':([16],[43,15]),'contact_trace':([16],[43,15]),'geometry':(list(range(24)),[])}
 if depth=='native_focus':
  caseSet=os.environ.get('IMPORT_CASE_SET','shutdown');assert caseSet in ('shutdown','bridge','monaco_ai3','ai4_regression')
  manifest={'bridge':'data/native_bridge_regression.json','shutdown':'data/native_shutdown_recovery.json','monaco_ai3':'data/native_monaco_ai3.json','ai4_regression':'data/native_ai4_regression.json'}[caseSet]

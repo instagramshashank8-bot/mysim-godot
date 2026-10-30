@@ -16,6 +16,12 @@ def run(label,values,args=None,timeout=300):
   (out/(label+f'-{attempt}-process.json')).write_text(json.dumps({'returncode':code,'timed_out':timed_out,'elapsed_seconds':time.monotonic()-started,'timeout_seconds':timeout,'screenshot_exists':shot.exists() if shot else None,'error_lines':[line for line in text.splitlines() if 'ERROR:' in line]},indent=2))
   if code==0 and 'ERROR:' not in text:return text
  raise RuntimeError(label+' failed; see saved logs')
+if os.environ.get('WHEEL_COMPOUNDS')=='1':
+ for car in (1,6,16):
+  for compound in range(4):
+   label=f'wheel-compound-car-{car:02}-{compound}';shot=out/(label+'.png')
+   run(label,{'MYSIM_CARVIEW':str(car),'MYSIM_COMPOUND':str(compound),'MYSIM_CAMPOS':'4,1,0','MYSIM_SHOT':str(shot)});assert shot.exists()
+ print('COMPLETE assembled wheel/compound captures; visual acceptance pending',flush=True);sys.exit(0)
 if os.environ.get('CAR_PANEL_UV')=='1':
  for view,camera in enumerate(('5.2,1.8,5.6','5.2,1.5,-5.6')):
   for mode in ('baseline','hood'):

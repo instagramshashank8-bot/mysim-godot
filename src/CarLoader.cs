@@ -1,5 +1,6 @@
 using Godot;
 using System.Collections.Generic;
+using MySimulator.Rebuild;
 namespace MySim {
 // Loads a recovered car FBX set, keeps LOD_A only, binds PNG textures by material suffix (mm_ext uses the livery).
 public static class CarLoader {
@@ -111,6 +112,7 @@ static Godot.Collections.Dictionary carMap;
   }
   foreach (var w in wheelMeshes) { w.Visible = false; w.SetMeta("wheel_hidden", true); }
   var measuredBounds=MeasureBounds(car);var measured=measuredBounds.Size;var center=measuredBounds.GetCenter();MySimulator.Rebuild.VehicleDimensions.CenterX[carIdx]=center.X;MySimulator.Rebuild.VehicleDimensions.CenterY[carIdx]=center.Y;MySimulator.Rebuild.VehicleDimensions.CenterZ[carIdx]=center.Z; MySimulator.Rebuild.VehicleDimensions.Width[carIdx]=measured.X; MySimulator.Rebuild.VehicleDimensions.Height[carIdx]=measured.Y; MySimulator.Rebuild.VehicleDimensions.Length[carIdx]=measured.Z;
+  TyreAppearance.Apply(pivots,Compound.Medium);
   GD.Print("WHEELS car=", carIdx, " parts=", wheelMeshes.Count);
   return pivots;
  }
