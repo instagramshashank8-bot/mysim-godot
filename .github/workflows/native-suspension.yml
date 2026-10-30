@@ -1,0 +1,37 @@
+name: experimental-native-suspension-and-tyre-forces
+on: {workflow_dispatch: {}}
+permissions: {contents: read}
+defaults:
+  run: {shell: bash}
+jobs:
+  native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with: {dotnet-version: '8.0.x'}
+      - run: dotnet build -v quiet
+      - name: Isolate native physics fixture from unrelated asset imports
+        run: mkdir -p assets outputs/native-suspension && touch assets/.gdignore
+      - name: Install Godot runtime
+        run: |
+          curl --fail -L -o /tmp/godot.zip https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_mono_linux_x86_64.zip
+          unzip -q /tmp/godot.zip -d /tmp/godot
+          G=$(find /tmp/godot -type f -name 'Godot_v4.7.2*mono_linux.x86_64' | head -1)
+          chmod +x "$G"
+          echo "GODOT_BIN=$G" >> "$GITHUB_ENV"
+          "$G" --headless --editor --path . --import > outputs/native-suspension/import.log 2>&1
+      - name: Native rigid body suspension and tyre-force trials
+        env:
+          MYSIM_NATIVE_SUSPENSION_CHECKS: outputs/native-suspension/results.json
+        run: |
+          "$GODOT_BIN" --headless --path . --fixed-fps 120 > outputs/native-suspension/runtime.log 2>&1
+          cat outputs/native-suspension/results.json
+          ! grep -q 'ERROR:' outputs/native-suspension/runtime.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-suspension-attempt-${{ github.run_attempt }}
+          path: outputs/native-suspension
+          retention-days: 14
