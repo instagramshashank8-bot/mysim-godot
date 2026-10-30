@@ -14,6 +14,15 @@ namespace MySimulator.Verification
             count=0;var log=new List<string>();
             var seriesTracks=new[]{0,1,0};var series=new RaceSeries(seriesTracks,0,2);seriesTracks[0]=3;Check(series.CurrentTrack==0,"Series aliases mutable setup input");series.FinishRound(2);Check(series.CurrentTrack==1&&series.Places[0]==2,"Series did not advance/preserve result");var resumedSeries=RaceSeries.Restore(series.Save());Check(resumedSeries.Round==1&&resumedSeries.CurrentTrack==1&&resumedSeries.Car==0&&resumedSeries.Laps==2&&resumedSeries.Places[0]==2,"Series resume lost configuration/progress");series.FinishRound(1);Check(series.CurrentTrack==0,"Repeated track round lost");series.FinishRound(3);Check(series.Complete&&series.Places.Count==3,"Series completion incorrect");bool extraRound=false;try{series.FinishRound(1);}catch(InvalidOperationException){extraRound=true;}Check(extraRound,"Completed series accepted another result");
 
+            foreach(int rate in new[]{30,60,120,240}){
+                var keys=new SteeringInput();for(int i=0;i<rate;i++)keys.Step(1,1f/rate,false);
+                Check(Math.Abs(keys.Command-1)<.00001f,"Digital input lost full steering authority");
+                var pad=new SteeringInput();Check(pad.Step(1,1f/rate,true)==keys.Command,"Device-dependent full-lock command");
+                for(int i=0;i<rate;i++)keys.Step(0,1f/rate,false);
+                Check(Math.Abs(keys.Command)<.00001f,"Released steering stayed held");
+                for(int i=0;i<rate;i++)keys.Step(-1,1f/rate,false);
+                Check(Math.Abs(keys.Command+1)<.00001f,"Opposite steering lost full authority");
+            }
             var weatherPlanner=new Vehicle();
             Check(Math.Abs(weatherPlanner.PlanningWeatherGrip(0)-1)<.00001f,"dry planner changed");
             float previousWeatherGrip=1;
