@@ -5,7 +5,7 @@ namespace MySim {
 // chase camera 7.2 m back / 2.65 m up with speed lookahead (revised Unity values), no artificial shake.
 public partial class DriveController : Node3D {
  public int CarIndex; public Race Race; public Vehicle Player; public Node3D Car; public Camera3D Cam; public bool AutoDrive; public float AutoSeconds = 8; public Hud Hud; float? lastGroundY, prevY; float groundSmooth; bool groundInit; float minY = 1e9f, maxY = -1e9f, maxDy; float steerCmd; public Vector3 CarSize = new Vector3(2, 1.2f, 4.7f); public int TrackIndex; public Node3D[] WheelPivots; float spinAngle; public int Laps = 3; public bool AiTest; string lastSt = ""; float finT;
- int CamMode = int.Parse(System.Environment.GetEnvironmentVariable("MYSIM_CAM") ?? "0"); bool cWas; bool tabWas = true; ulong pausedAt; float t, camYaw; int shownMode = -1; bool camInit;
+ int CamMode = int.Parse(System.Environment.GetEnvironmentVariable("MYSIM_CAM") ?? "0"); bool cWas; bool tabWas = true; ulong pausedAt; float t, camYaw; int shownMode = -1; bool camInit;Vector3 chaseOffset;
  int cameraCycleChecks;
  public void CycleCamera() { CamMode=(CamMode+1)%4; }
  public override void _Ready() {
@@ -162,7 +162,10 @@ AudioStreamPlayer engineSnd, whineSnd; AudioStreamPlayer[] sfxPool; int sfxNext;
   float speed = Player.speed; float look = Mathf.Clamp(speed / 20f, 0, 1) * 4f + 3f;
   if (CamMode == 0 || CamMode == 1) {
    float len = Mathf.Max(CarSize.Z, 3.5f), hgt = Mathf.Max(CarSize.Y, 1.0f); float back = CamMode == 0 ? len * 0.95f : len * 1.8f, up = CamMode == 0 ? hgt * 1.15f + 0.2f : hgt * 2.2f; var target = ObstructCam(Car.Position + Vector3.Up * (hgt * 0.8f), Car.Position - fwd * back + Vector3.Up * up);
-   if (!camInit) { Cam.Position = target; camInit = true; } Cam.Position = ObstructCam(Car.Position + Vector3.Up * (hgt * 0.8f), Cam.Position.Lerp(target, 1f - Mathf.Exp(-6f * (float)delta))); Cam.LookAt(Car.Position + fwd * look + Vector3.Up * 1.0f); Cam.Fov = Mathf.Lerp(Cam.Fov, 46f + Mathf.Clamp(speed / 80f, 0, 1) * 6f, 1f - Mathf.Exp(-3f * (float)delta));
+   // Smooth the offset, not absolute world translation: position lerp creates speed/rate metres of lag.
+   if (!camInit) { chaseOffset = target-Car.Position; camInit = true; }
+   chaseOffset = chaseOffset.Lerp(target-Car.Position, 1f-Mathf.Exp(-6f*(float)delta));
+   Cam.Position = ObstructCam(Car.Position + Vector3.Up * (hgt * 0.8f), Car.Position+chaseOffset); Cam.LookAt(Car.Position + fwd * look + Vector3.Up * 1.0f); Cam.Fov = Mathf.Lerp(Cam.Fov, 46f + Mathf.Clamp(speed / 80f, 0, 1) * 6f, 1f - Mathf.Exp(-3f * (float)delta));
   } else if (CamMode == 2) { Cam.Position = Car.GlobalTransform * new Vector3(-0.35f, 0.88f, 0.05f); Cam.GlobalTransform = new Transform3D(Car.GlobalTransform.Basis.Rotated(Car.GlobalTransform.Basis.Y.Normalized(), Mathf.Pi), Cam.Position); Cam.Fov = 75f; camInit = false; }
   else { Cam.Position = Car.GlobalTransform * new Vector3(0, 0.62f, 1.9f); Cam.GlobalTransform = new Transform3D(Car.GlobalTransform.Basis.Rotated(Car.GlobalTransform.Basis.Y.Normalized(), Mathf.Pi), Cam.Position); Cam.Fov = 70f; camInit = false; }
   if(AutoDrive&&AiTest&&AutoSeconds>250&&t>=AutoSeconds&&!Player.finished){GD.PrintErr("FAIL full-race simulation deadline track=",TrackIndex," progress=",Player.progress," lap=",Player.completedLaps," wallHits=",WallHits," damage=",Player.damage);CleanExit.Request(this,1);return;}
