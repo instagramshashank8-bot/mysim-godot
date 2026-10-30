@@ -13,9 +13,9 @@ public partial class TouchControls : CanvasLayer {
   Make(root,"RIGHT",new Vector2(140,588),new Vector2(96,96),v=>{rightHeld=v;UpdateSteer();});
   Make(root,"GAS",new Vector2(1162,538),new Vector2(86,146),v=>{gasHeld=v;UpdateSteer();});
   Make(root,"BRAKE",new Vector2(1038,588),new Vector2(108,96),v=>{brakeHeld=v;UpdateSteer();});
-  Action(root,"PIT",new Vector2(24,94),()=>{if(Drive?.Player!=null)Drive.Player.pitRequested=true;});
-  Action(root,"CAMERA",new Vector2(112,94),()=>Drive?.CycleCamera());
-  pauseButton=Action(root,"PAUSE",new Vector2(208,94),()=>{if(Drive?.Race!=null){Drive.Race.paused=!Drive.Race.paused;Clear();}});
+  Action(root,"PIT",new Vector2(544,100),()=>{Drive?.Hud?.TogglePitStrategy();});
+  Action(root,"CAMERA",new Vector2(632,100),()=>Drive?.CycleCamera());
+  pauseButton=Action(root,"PAUSE",new Vector2(728,100),()=>{if(Drive?.Race!=null){Drive.Race.paused=!Drive.Race.paused;Clear();}});
  }
  public override void _Process(double delta){if(pauseButton!=null&&Drive?.Race!=null){var button=(RaceControlButton)pauseButton;string kind=Drive.Race.paused?"RESUME":"PAUSE";if(button.Kind!=kind){button.Kind=kind;button.QueueRedraw();}}}
  void UpdateSteer(){
