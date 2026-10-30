@@ -102,8 +102,8 @@ if os.environ.get('WHEEL_ORIENTATION')=='1':
 if os.environ.get('NATIVE_RACES')=='1' or os.environ.get('NATIVE_FOCUS')=='1':
  import re
  cars=[int(x) for x in os.environ.get('NATIVE_CARS','16').split(',')];assert len(set(cars))==len(cars) and all(0<=car<24 for car in cars)
- caseSet=os.environ.get('NATIVE_CASE_SET','shutdown');assert caseSet in ('shutdown','bridge','monaco_ai3','ai4_regression')
- focusPath={'bridge':'data/native_bridge_regression.json','shutdown':'data/native_shutdown_recovery.json','monaco_ai3':'data/native_monaco_ai3.json','ai4_regression':'data/native_ai4_regression.json'}[caseSet]
+ caseSet=os.environ.get('NATIVE_CASE_SET','shutdown');assert caseSet in ('shutdown','bridge','monaco_ai3','ai4_regression','braking_monaco')
+ focusPath={'bridge':'data/native_bridge_regression.json','shutdown':'data/native_shutdown_recovery.json','monaco_ai3':'data/native_monaco_ai3.json','ai4_regression':'data/native_ai4_regression.json','braking_monaco':'data/native_braking_monaco.json'}[caseSet]
  focus=json.loads(pathlib.Path(focusPath).read_text())['cases'] if os.environ.get('NATIVE_FOCUS')=='1' else None
  for track in (sorted(set(x['track'] for x in focus)) if focus else range(shard,60,12)):
   for car in ([x['car'] for x in focus if x['track']==track] if focus else cars):

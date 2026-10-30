@@ -5,8 +5,8 @@ scopes={'rain_focus':([6,16],[0]),'rear_panel_uv':([6],[]),'livery_uv':([0,6,12,
 if depth=='weather_review':scopes[depth]=([16],list(range(int(os.environ.get('SHARD','0')),60,6)))
 if depth=='assembly_review':scopes[depth]=(list(range(int(os.environ.get('SHARD','0')),24,6)),[])
 if depth=='native_focus':
- caseSet=os.environ.get('IMPORT_CASE_SET','shutdown');assert caseSet in ('shutdown','bridge','monaco_ai3','ai4_regression')
- manifest={'bridge':'data/native_bridge_regression.json','shutdown':'data/native_shutdown_recovery.json','monaco_ai3':'data/native_monaco_ai3.json','ai4_regression':'data/native_ai4_regression.json'}[caseSet]
+ caseSet=os.environ.get('IMPORT_CASE_SET','shutdown');assert caseSet in ('shutdown','bridge','monaco_ai3','ai4_regression','braking_monaco')
+ manifest={'bridge':'data/native_bridge_regression.json','shutdown':'data/native_shutdown_recovery.json','monaco_ai3':'data/native_monaco_ai3.json','ai4_regression':'data/native_ai4_regression.json','braking_monaco':'data/native_braking_monaco.json'}[caseSet]
  cases=json.loads((root/manifest).read_text())['cases'];scopes[depth]=(sorted(set(x['car'] for x in cases)),sorted(set(x['track'] for x in cases)))
 if depth not in scopes:
  print('Full source import retained for',depth);raise SystemExit(0)
