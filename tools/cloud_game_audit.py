@@ -16,6 +16,11 @@ def run(label,values,args=None,timeout=300):
   (out/(label+f'-{attempt}-process.json')).write_text(json.dumps({'returncode':code,'timed_out':timed_out,'elapsed_seconds':time.monotonic()-started,'timeout_seconds':timeout,'screenshot_exists':shot.exists() if shot else None,'error_lines':[line for line in text.splitlines() if 'ERROR:' in line]},indent=2))
   if code==0 and 'ERROR:' not in text:return text
  raise RuntimeError(label+' failed; see saved logs')
+if os.environ.get('GUI_REVIEW')=='1':
+ for resolution in ('960x540','1280x720','1600x900'):
+  label='settings-'+resolution;shot=out/(label+'.png')
+  text=run(label,{'MYSIM_SETTINGSCHECKS':'1','MYSIM_SHOT':str(shot)},['--resolution',resolution]);assert 'PASS race settings real controls' in text and shot.exists()
+ print('COMPLETE actual settings signals and resolution captures; manual layout review separate',flush=True);sys.exit(0)
 if os.environ.get('WEATHER_REVIEW')=='1':
  for track in range(shard,60,6):
   for tod,wet in ((0,0),(3,0),(0,2),(3,3),(0,4)):

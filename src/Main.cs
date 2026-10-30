@@ -19,6 +19,7 @@ public partial class Main : Node3D {
   Settings.ApplyAudio(); lastTrack = Settings.Get("track", 0); lastCar = Settings.Get("car", 0); lastLaps = Settings.Get("laps", 3);
   var bakeT = System.Environment.GetEnvironmentVariable("MYSIM_BAKECOL"); if (bakeT != null) { BakeCollision(int.Parse(bakeT)); return; }
   var crashT = System.Environment.GetEnvironmentVariable("MYSIM_CRASHMAP"); if (crashT != null) { CrashWorld(int.Parse(crashT)); return; }
+  if(System.Environment.GetEnvironmentVariable("MYSIM_SETTINGSCHECKS")!=null){AddChild(new SettingsScenario());return;}
   if(System.Environment.GetEnvironmentVariable("MYSIM_CONTROLCHECKS")!=null){AddChild(new ControlsScenario());return;}
   var t = System.Environment.GetEnvironmentVariable("MYSIM_TRACK");
   if (t != null) StartRace(int.Parse(t), int.Parse(System.Environment.GetEnvironmentVariable("MYSIM_CAR") ?? "8"), int.Parse(System.Environment.GetEnvironmentVariable("MYSIM_LAPS") ?? "3")); else { ShowMenu(); var ms = System.Environment.GetEnvironmentVariable("MYSIM_MENUSHOT"); if (ms != null) MenuShot(ms); }
