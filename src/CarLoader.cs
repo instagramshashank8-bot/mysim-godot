@@ -105,6 +105,7 @@ static Godot.Collections.Dictionary carMap;
    // retain the template geometry and centre the complete assembly around that hub before mirroring/spinning.
    foreach (var child in spin.GetChildren()) if (child is MeshInstance3D part) part.Position -= ctr;
    var brakes=pivots[i].GetNode<Node3D>("BrakeAssembly");foreach(var child in brakes.GetChildren())if(child is MeshInstance3D part)part.Position-=ctr;
+   if(System.Environment.GetEnvironmentVariable("MYSIM_REBUILT_TYRES")=="1"){foreach(var child in spin.GetChildren())if(child is MeshInstance3D part&&(part.Name.ToString().ToUpperInvariant().Contains("TYRE")||part.Name.ToString().ToUpperInvariant().Contains("TIRE"))){part.Visible=false;part.SetMeta("wheel_hidden",true);}spin.AddChild(TyreMeshBuilder.Create(outerR,tw,false));}
    bool authoredWheel=false;foreach(var child in spin.GetChildren())if(child is MeshInstance3D part&&part.Name.ToString().ToUpperInvariant().StartsWith("LOD_A_WHEEL"))authoredWheel=true;
    bool rebuild=System.Environment.GetEnvironmentVariable("MYSIM_REBUILT_RIMS")=="1";if(authoredWheel&&!rebuild&&System.Environment.GetEnvironmentVariable("MYSIM_PROCEDURAL_RIMS")!="1")continue;
    foreach (var ch in spin.GetChildren()) if (ch is MeshInstance3D cm2) { string cn2 = cm2.Name.ToString().ToUpperInvariant(); if (cn2.StartsWith("LOD_A_WHEEL")) { cm2.Visible = false; cm2.SetMeta("wheel_hidden", true); } }

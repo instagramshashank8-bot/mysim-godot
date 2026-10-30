@@ -32,7 +32,7 @@ public static class WheelRimBuilder {
   for(int i=0;i<pairs;i++)foreach(float offset in design==2?new[]{0f}:new[]{-.045f,.045f})Add("ForgedSpoke"+i+"_"+(offset<0?"A":"B"),Spoke(radius,width,Mathf.Tau*i/pairs+offset),metal);
   var hubProfile=new[]{new Vector2(-width*.46f,radius*.075f),new Vector2(-width*.48f,radius*.1f),new Vector2(-width*.48f,radius*.18f),new Vector2(-width*.44f,radius*.23f),new Vector2(-width*.35f,radius*.23f),new Vector2(-width*.35f,radius*.075f)};
   Add("MachinedHub",Lathe(hubProfile,128),hubMetal);
-  for(int i=0;i<5;i++){float angle=Mathf.Tau*i/5;root.AddChild(new MeshInstance3D {Name="LugNut"+i,Mesh=new CylinderMesh {TopRadius=radius*.026f,BottomRadius=radius*.026f,Height=radius*.055f,RadialSegments=6},MaterialOverride=edge,Position=new Vector3(-width*.49f,radius*.145f*Mathf.Cos(angle),radius*.145f*Mathf.Sin(angle)),Rotation=new Vector3(0,0,Mathf.Pi*.5f)});}
+  int nuts=design==2?1:5;for(int i=0;i<nuts;i++){float angle=Mathf.Tau*i/5;root.AddChild(new MeshInstance3D {Name="LugNut"+i,Mesh=new CylinderMesh {TopRadius=radius*(design==2?.085f:.026f),BottomRadius=radius*(design==2?.085f:.026f),Height=radius*.055f,RadialSegments=6},MaterialOverride=edge,Position=new Vector3(-width*.49f,(design==2?0:radius*.145f*Mathf.Cos(angle)),(design==2?0:radius*.145f*Mathf.Sin(angle))),Rotation=new Vector3(0,0,Mathf.Pi*.5f)});}
   root.SetMeta("outer_face_axis",-1);root.SetMeta("rim_radius",radius);root.SetMeta("tyre_width",tyreWidth);return root;
  }
 }
