@@ -181,9 +181,11 @@ public partial class Main : Node3D {
   var p = drive.Player; var panel = new ColorRect { Color = new Color(0, 0, 0, 0.7f), AnchorRight = 1, AnchorBottom = 1 }; layer.AddChild(panel);
   var l = new Label { Position = new Vector2(420, 90) }; l.AddThemeFontSizeOverride("font_size", 30);
   var order = drive.Race.Standings();
+  var resultActions=new VBoxContainer {AnchorLeft=1,AnchorRight=1,AnchorTop=1,AnchorBottom=1,OffsetLeft=-290,OffsetRight=-30,OffsetTop=-150,OffsetBottom=-30,Theme=MySimTheme.Build()};layer.AddChild(resultActions);var proceed=new Button {Text=activeSeries==null?"RACE AGAIN":activeSeries.Round+1==activeSeries.Tracks.Length?"FINISH SERIES":"NEXT ROUND",CustomMinimumSize=new Vector2(240,50)};proceed.Pressed+=ContinueResult;resultActions.AddChild(proceed);var home=new Button {Text="MAIN MENU",CustomMinimumSize=new Vector2(240,50)};home.Pressed+=ShowMenu;resultActions.AddChild(home);
+
   string board = ""; for (int i = 0; i < order.Count; i++) { var o = order[i]; string who = o == p ? "YOU" : o.driver; float gapM = (drive.Race.DistanceScore(p) - drive.Race.DistanceScore(o)) * drive.Race.track.length; string tm = o.finished ? o.finishTime.ToString("0.0") + " s" : (o == p ? "" : "+" + (gapM > 0 ? gapM : 0).ToString("0") + " m"); board += (i + 1) + ".  " + who.PadRight(8) + " " + tm + "\n"; }
   int place = order.IndexOf(p) + 1;
-  if(activeSeries!=null){var next=new Button {Text=activeSeries.Round+1==activeSeries.Tracks.Length?"FINISH SERIES":"NEXT ROUND",Position=new Vector2(900,580),Size=new Vector2(240,54),Theme=MySimTheme.Build()};next.Pressed+=ContinueResult;layer.AddChild(next);var summary=new Label {Text="SERIES / ROUND "+(activeSeries.Round+1)+" OF "+activeSeries.Tracks.Length+"\nPrevious finishes: "+string.Join(", ",activeSeries.Places),Position=new Vector2(60,100)};layer.AddChild(summary);}
+  if(activeSeries!=null){var summary=new Label {Text="SERIES / ROUND "+(activeSeries.Round+1)+" OF "+activeSeries.Tracks.Length+"\nPrevious finishes: "+string.Join(", ",activeSeries.Places),Position=new Vector2(60,100)};layer.AddChild(summary);}
 
   l.Text = "RESULTS   P" + place + " of " + order.Count + "\n\n" + (order.Count > 1 ? board + "\n" : "") + "TIME  " + p.finishTime.ToString("0.00") + " s\nBEST LAP  " + p.bestLap.ToString("0.00") + " s\nPENALTY  " + p.penalty.ToString("0.0") + " s\nDAMAGE  " + (int)(p.damage * 100) + "%\n\nENTER restart    ESC menu    (pad: A restart, B menu)"; layer.AddChild(l);
  }

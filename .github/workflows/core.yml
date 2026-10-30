@@ -12,7 +12,12 @@ jobs:
         with: { dotnet-version: '8.0.x' }
       - run: python tools/check_candidate_selection.py
       - run: python tools/check_environment_profiles.py
+      - run: python tools/check_track_route_parity.py > track-route-parity.json
       - run: dotnet run --project tools/CoreRunner | tee core.txt
       - run: grep -qE "^PASS [0-9]+ assertions" core.txt && ! grep -q "^FAIL" core.txt
       - uses: actions/upload-artifact@v4
-        with: { name: core-result, path: core.txt }
+        with:
+          name: core-result
+          path: |
+            core.txt
+            track-route-parity.json
