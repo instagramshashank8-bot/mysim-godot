@@ -20,7 +20,8 @@ if os.environ.get('RAIN_FOCUS')=='1':
  for car in (6,16):
   for tod,wet in ((0,2),(3,0),(3,3)):
    label=f'rain-focus-track-00-car-{car:02}-tod-{tod}-wet-{wet}';shot=out/(label+'.png')
-   run(label,{'MYSIM_TRACK':'0','MYSIM_CAR':str(car),'MYSIM_TOD':str(tod),'MYSIM_WET':str(wet),'MYSIM_AI':'1','MYSIM_AUTODRIVE':'1','MYSIM_NOPIT':'1','MYSIM_RIVALS':'0','MYSIM_SECONDS':'8','MYSIM_SHOT':str(shot)})
+   text=run(label,{'MYSIM_CAMERA_CYCLE_CHECK':'1','MYSIM_CAM':'0','MYSIM_TRACK':'0','MYSIM_CAR':str(car),'MYSIM_TOD':str(tod),'MYSIM_WET':str(wet),'MYSIM_AI':'1','MYSIM_AUTODRIVE':'1','MYSIM_NOPIT':'1','MYSIM_RIVALS':'0','MYSIM_SECONDS':'8','MYSIM_SHOT':str(shot)})
+   assert 'PASS full camera cycle restores all four wheels' in text
    assert shot.exists()
  print('COMPLETE first-track rain/light comparison; no full weather or track acceptance',flush=True);sys.exit(0)
 if os.environ.get('REAR_PANEL_UV')=='1':
