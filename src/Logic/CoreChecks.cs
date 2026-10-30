@@ -12,6 +12,8 @@ namespace MySimulator.Verification
         public static string Run()
         {
             count=0;var log=new List<string>();
+            var seriesTracks=new[]{0,1,0};var series=new RaceSeries(seriesTracks,0,2);seriesTracks[0]=3;Check(series.CurrentTrack==0,"Series aliases mutable setup input");series.FinishRound(2);Check(series.CurrentTrack==1&&series.Places[0]==2,"Series did not advance/preserve result");series.FinishRound(1);Check(series.CurrentTrack==0,"Repeated track round lost");series.FinishRound(3);Check(series.Complete&&series.Places.Count==3,"Series completion incorrect");bool extraRound=false;try{series.FinishRound(1);}catch(InvalidOperationException){extraRound=true;}Check(extraRound,"Completed series accepted another result");
+
             var water=new SurfaceWeather(0);water.Step(100,.01f,0);Check(water.Water>0&&water.Water<1,"rain did not accumulate surface water");float accumulatedWater=water.Water;water.Step(100,0,.01f);Check(water.Water<accumulatedWater,"dry weather did not drain surface water");var whole=new SurfaceWeather(.3f);var split=new SurfaceWeather(.3f);whole.Step(10,.005f,.002f);for(int i=0;i<100;i++)split.Step(.1f,.005f,.002f);Check(Math.Abs(whole.Water-split.Water)<.0001f,"weather evolution depends on frame rate");
             for(int wheel=0;wheel<4;wheel++){
                 Check(PitServiceTimeline.Loosen(wheel)<PitServiceTimeline.Remove(wheel)&&PitServiceTimeline.Remove(wheel)<PitServiceTimeline.Fit(wheel)&&PitServiceTimeline.Fit(wheel)<PitServiceTimeline.Secure(wheel),"pit wheel order invalid");

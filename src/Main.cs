@@ -90,7 +90,12 @@ public partial class Main : Node3D {
   CrashBatch.Run(GetWorld3D().DirectSpaceState, trackIdx, pts, shard, shards, outp); GetTree().Quit();
  }
  void ClearUi() { ui?.QueueFree(); ui = null; }
+ RaceSeries activeSeries;
  void ShowMenu() {
+  activeSeries=null;EndRace();ClearUi();menuStart=null;resultsShown=false;ui=new CanvasLayer();AddChild(ui);
+  var modes=new ModeMenu {QuickRace=ShowRaceSetup,Series=()=>{var setup=new SeriesSetupPanel();setup.StartSeries+=series=>{activeSeries=series;StartRace(series.CurrentTrack,series.Car,series.Laps);};AddChild(setup);},CreateRoom=()=>AddChild(new LanRoomPanel {Hosting=true}),JoinRoom=()=>AddChild(new LanRoomPanel {Hosting=false})};ui.AddChild(modes);
+ }
+ void ShowRaceSetup() {
   EndRace(); ClearUi(); ui = new CanvasLayer(); AddChild(ui); resultsShown = false; menuAge = 0;
   var bg = new ColorRect { Color = new Color(0.04f, 0.05f, 0.07f), AnchorRight = 1, AnchorBottom = 1 }; ui.AddChild(bg);
   var title = new Label { Text = "MYSIM", Position = new Vector2(48, 24) }; title.AddThemeFontSizeOverride("font_size", 56); ui.AddChild(title);
@@ -165,9 +170,10 @@ public partial class Main : Node3D {
   if (ui != null && menuStart != null && IsInstanceValid(menuStart) && !resultsShown && (drive == null || !IsInstanceValid(drive) || drive.GetParent() == null)) { var pd0 = Input.GetConnectedJoypads(); bool go = Input.IsKeyPressed(Key.Enter) || (pd0.Count > 0 && Input.IsJoyButtonPressed(pd0[0], JoyButton.Start)); if (go && !menuGoWas && menuAge > 0.4f && GetTree().Root.FindChildren("*","ControlsPanel",true,false).Count==0) menuStart.EmitSignal(BaseButton.SignalName.Pressed); menuGoWas = go; menuAge += (float)GetProcessDeltaTime(); }
   { bool padA = false, padB = false; var pads = Input.GetConnectedJoypads(); if (pads.Count > 0) { padA = Input.IsJoyButtonPressed(pads[0], JoyButton.A); padB = Input.IsJoyButtonPressed(pads[0], JoyButton.B); }
     bool escNow = Input.IsKeyPressed(Key.Escape) || padB;
-    if (resultsShown && resultsArmed > 0.6f) { if (Input.IsKeyPressed(Key.Enter) || padA) { StartRace(lastTrack, lastCar, lastLaps); } else if (escNow && !escWas) { ShowMenu(); } }
+    if (resultsShown && resultsArmed > 0.6f) { if (Input.IsKeyPressed(Key.Enter) || padA) { ContinueResult(); } else if (escNow && !escWas) { ShowMenu(); } }
     if (resultsShown) resultsArmed += (float)GetProcessDeltaTime(); else resultsArmed = 0; escWas = escNow; }
  }
+ void ContinueResult(){if(activeSeries==null){StartRace(lastTrack,lastCar,lastLaps);return;}if(activeSeries.Complete){ShowMenu();return;}int place=drive.Race.Standings().IndexOf(drive.Player)+1;activeSeries.FinishRound(place);if(activeSeries.Complete){ShowMenu();return;}StartRace(activeSeries.CurrentTrack,activeSeries.Car,activeSeries.Laps);}
  void ShowResults() {
   resultsShown = true; var layer = new CanvasLayer(); world.AddChild(layer);
   var p = drive.Player; var panel = new ColorRect { Color = new Color(0, 0, 0, 0.7f), AnchorRight = 1, AnchorBottom = 1 }; layer.AddChild(panel);
@@ -175,6 +181,8 @@ public partial class Main : Node3D {
   var order = drive.Race.Standings();
   string board = ""; for (int i = 0; i < order.Count; i++) { var o = order[i]; string who = o == p ? "YOU" : o.driver; float gapM = (drive.Race.DistanceScore(p) - drive.Race.DistanceScore(o)) * drive.Race.track.length; string tm = o.finished ? o.finishTime.ToString("0.0") + " s" : (o == p ? "" : "+" + (gapM > 0 ? gapM : 0).ToString("0") + " m"); board += (i + 1) + ".  " + who.PadRight(8) + " " + tm + "\n"; }
   int place = order.IndexOf(p) + 1;
+  if(activeSeries!=null){var next=new Button {Text=activeSeries.Round+1==activeSeries.Tracks.Length?"FINISH SERIES":"NEXT ROUND",Position=new Vector2(900,580),Size=new Vector2(240,54),Theme=MySimTheme.Build()};next.Pressed+=ContinueResult;layer.AddChild(next);var summary=new Label {Text="SERIES / ROUND "+(activeSeries.Round+1)+" OF "+activeSeries.Tracks.Length+"\nPrevious finishes: "+string.Join(", ",activeSeries.Places),Position=new Vector2(60,100)};layer.AddChild(summary);}
+
   l.Text = "RESULTS   P" + place + " of " + order.Count + "\n\n" + (order.Count > 1 ? board + "\n" : "") + "TIME  " + p.finishTime.ToString("0.00") + " s\nBEST LAP  " + p.bestLap.ToString("0.00") + " s\nPENALTY  " + p.penalty.ToString("0.0") + " s\nDAMAGE  " + (int)(p.damage * 100) + "%\n\nENTER restart    ESC menu    (pad: A restart, B menu)"; layer.AddChild(l);
  }
 }}
