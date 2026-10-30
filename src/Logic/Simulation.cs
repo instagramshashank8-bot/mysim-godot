@@ -284,7 +284,7 @@ namespace MySimulator.Rebuild
             float localX=Vec.Dot(diff,Right),d=diff.Magnitude;
             float desiredSteer=(float)Math.Atan2(2*RecoveredGeometry.Wheelbase[Math.Max(0,Math.Min(RecoveredGeometry.Wheelbase.Length-1,carModel))]*localX,Math.Max(1,d*d));
             float steer=desiredSteer/((externalPhysics||physicalHandling)?PhysicalSteeringLimit(speed):Math.Max(.05f,currentMaxSteer));
-            if((aiProbe=="3"||aiProbe=="4")&&UseDynamics&&!externalPhysics)steer=Dynamics.SteeringCommand(desiredSteer,Vec.Dot(velocity,Forward));
+            if((aiProbe=="3"||aiProbe=="4"||aiProbe=="5")&&UseDynamics&&!externalPhysics)steer=Dynamics.SteeringCommand(desiredSteer,Vec.Dot(velocity,Forward));
             float turn=Math.Abs(MathUtil.Wrap(track.Heading(progress+.04f)-track.Heading(progress)))/(.04f*track.length);
             for(int j=0;j<6;j++){float p=progress+j*.012f;turn=Math.Max(turn,Math.Abs(MathUtil.Wrap(track.Heading(p+.012f)-track.Heading(p)))/(.012f*track.length));}
             int cm=Math.Max(0,Math.Min(RecoveredVehicleProfiles.Count-1,carModel));float weatherGrip=PlanningWeatherGrip(wetness);float gripMul=Dynamics.GripMul(cm),paceCap=MathUtil.Lerp(.75f,.97f,MathUtil.Clamp((gripMul-1)/.45f,0,1)),latAcc=CornerLateralAccel*gripMul*Math.Min(pace,paceCap)*weatherGrip;if(aiProbe=="4")latAcc*=.85f;float aDown=Dynamics.DownK(cm)/RecoveredVehicleProfiles.Mass[cm]*latAcc/9.81f;float topAi=Math.Max(TopAiSpeed,RecoveredVehicleProfiles.Speed[cm]*.44704f*.92f);float planDecel=MathUtil.Clamp(26.82f*26.82f/(2*RecoveredVehicleProfiles.Brakes[cm]*.3048f)*PlanDecelK,5f,14f)*weatherGrip;float desired=MathUtil.Clamp(SpeedAhead(track,progress,latAcc,planDecel,aDown),10,topAi);

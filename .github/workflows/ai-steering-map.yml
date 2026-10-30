@@ -1,0 +1,27 @@
+name: isolated-ai-steering-map-regression
+on: {workflow_dispatch: {}}
+permissions: {contents: read}
+jobs:
+  laps:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix: {shard: [0,1,2,3,4,5,6,7,8,9,10,11]}
+    env:
+      MYSIM_PRECISE_AI: '5'
+      FRAMEDT: '0.008333333'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with: {dotnet-version: '8.0.x'}
+      - name: All1440pairs exact inverse steering only, unchanged lookahead and speed policy
+        run: dotnet run -c Release --project tools/LapRunner -- ${{ matrix.shard }} 12 | tee steering-map.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: steering-map-shard-${{ matrix.shard }}-attempt-${{ github.run_attempt }}
+          path: |
+            laps-*.jsonl
+            steering-map.log
+          retention-days: 14
