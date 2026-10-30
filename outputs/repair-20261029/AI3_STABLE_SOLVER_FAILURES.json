@@ -1,0 +1,65 @@
+{
+  "run": 41099407474,
+  "cases": 1440,
+  "pass": 1432,
+  "fail": 8,
+  "productionPromoted": false,
+  "failures": [
+    {
+      "track": 54,
+      "car": 23,
+      "ok": false,
+      "lap": 736.2,
+      "why": "no valid lap (off-track during the lap)"
+    },
+    {
+      "track": 54,
+      "car": 15,
+      "ok": false,
+      "lap": 226.2,
+      "why": "no valid lap (off-track during the lap)"
+    },
+    {
+      "track": 54,
+      "car": 16,
+      "ok": false,
+      "lap": 225.1,
+      "why": "no valid lap (off-track during the lap)"
+    },
+    {
+      "track": 28,
+      "car": 5,
+      "ok": false,
+      "lap": 239.2,
+      "why": "no valid lap (off-track during the lap)"
+    },
+    {
+      "track": 51,
+      "car": 5,
+      "ok": false,
+      "lap": 239.2,
+      "why": "no valid lap (off-track during the lap)"
+    },
+    {
+      "track": 54,
+      "car": 17,
+      "ok": false,
+      "lap": 226.0,
+      "why": "no valid lap (off-track during the lap)"
+    },
+    {
+      "track": 54,
+      "car": 18,
+      "ok": false,
+      "lap": 225.2,
+      "why": "no valid lap (off-track during the lap)"
+    },
+    {
+      "track": 54,
+      "car": 21,
+      "ok": false,
+      "lap": 227.7,
+      "why": "no valid lap (off-track during the lap)"
+    }
+  ]
+}
