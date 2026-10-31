@@ -16,6 +16,11 @@ def run(label,values,args=None,timeout=300):
   (out/(label+f'-{attempt}-process.json')).write_text(json.dumps({'returncode':code,'timed_out':timed_out,'elapsed_seconds':time.monotonic()-started,'timeout_seconds':timeout,'screenshot_exists':shot.exists() if shot else None,'error_lines':[line for line in text.splitlines() if 'ERROR:' in line]},indent=2))
   if code==0 and 'ERROR:' not in text:return text
  raise RuntimeError(label+' failed; see saved logs')
+if os.environ.get('NATIVE_AI_LAP')=='1':
+ track=(0,43)[shard];car=(0,16)[shard];label=f'native-ai-lap-track-{track:02}-car-{car:02}';report=out/(label+'.json')
+ text=run(label,{'MYSIM_TRACK':str(track),'MYSIM_CAR':str(car),'MYSIM_NATIVE_GAMEPLAY':'1','MYSIM_AI':'1','MYSIM_AUTODRIVE':'1','MYSIM_LAPS':'1','MYSIM_SECONDS':'480','MYSIM_RIVALS':'0','MYSIM_PRECISE_AI':'3','MYSIM_NATIVE_GAMEPLAY_REPORT':str(report)},['--headless'],timeout=1200)
+ assert json.loads(report.read_text())['ok'] and 'PASS native force-driven valid lap and results UI' in text
+ print('COMPLETE genuine solo native AI lap/results; full hull/traffic/game gates separate',flush=True);sys.exit(0)
 if os.environ.get('NATIVE_HULL_CONTACT')=='1':
  car=(0,16)[shard];text=run(f'native-hull-contact-car-{car:02}',{'MYSIM_NATIVE_HULL_CONTACT_CHECKS':str(car),'MYSIM_REQUIRE_NATIVE_CAR_HULLS':'1'},['--headless'],timeout=360)
  result=json.loads((out/'native-hull-contact-results.json').read_text());assert result['all'] and 'PASS recovered compound hull bumper coverage' in text

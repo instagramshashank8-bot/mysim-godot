@@ -3,6 +3,7 @@ using MySimulator.Rebuild;
 namespace MySim {
 // Game shell: menu (track/car/laps) -> race -> results -> restart/menu. Env MYSIM_TRACK skips the menu for automated tests.
 public partial class Main : Node3D {
+ public bool ResultsVisible=>resultsShown;
  static readonly float ColorContrast = float.Parse(System.Environment.GetEnvironmentVariable("MYSIM_CONTRAST") ?? "1.14", System.Globalization.CultureInfo.InvariantCulture), ColorSat = float.Parse(System.Environment.GetEnvironmentVariable("MYSIM_SAT") ?? "1.1", System.Globalization.CultureInfo.InvariantCulture); Node3D world; CanvasLayer ui; DriveController drive; int lastTrack, lastCar, lastLaps = 3; Button menuStart; bool menuGoWas; float menuAge; bool resultsShown, escWas; float finShown, resultsArmed;
  public override void _Ready() {
   if(System.Environment.GetEnvironmentVariable("MYSIM_NATIVE_HULL_CONTACT_CHECKS") is string hullContactCar){AddChild(new NativeHullContactChecks {CarIndex=int.Parse(hullContactCar)});return;}
