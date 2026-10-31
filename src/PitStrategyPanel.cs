@@ -7,7 +7,7 @@ public partial class PitStrategyPanel : PanelContainer {
  public override void _Ready(){Theme=MySimTheme.Build();AnchorLeft=AnchorRight=1;OffsetLeft=-294;OffsetRight=-24;OffsetTop=235;Visible=false;
   var stack=new VBoxContainer();stack.AddThemeConstantOverride("separation",12);AddChild(stack);
   var heading=new HBoxContainer();stack.AddChild(heading);heading.AddChild(new Label {Text="PIT STRATEGY",SizeFlagsHorizontal=SizeFlags.ExpandFill});
-  var close=new Button {Name="CLOSE",Text="?",TooltipText="Close pit strategy",CustomMinimumSize=new Vector2(40,40)};close.Pressed+=()=>Open=false;heading.AddChild(close);
+  var close=new Button {Name="CLOSE",Text="\u00d7",TooltipText="Close pit strategy",CustomMinimumSize=new Vector2(40,40)};close.Pressed+=()=>Open=false;heading.AddChild(close);
   stack.AddChild(new Label {Text="NEXT TYRES"});compound=new OptionButton {Name="COMPOUND",CustomMinimumSize=new Vector2(230,44)};
   foreach(string name in new[]{"SOFT / RED","MEDIUM / YELLOW","HARD / WHITE","WET / BLUE"})compound.AddItem(name);
   compound.Selected=1;compound.ItemSelected+=i=>{if(Player!=null&&!Player.servicing)Player.nextCompound=(Compound)(int)i;};stack.AddChild(compound);
