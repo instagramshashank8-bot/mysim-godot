@@ -20,7 +20,8 @@ if os.environ.get('NATIVE_SUSPENSION_TRACK')=='1':
  track=(0,43)[shard];car=(0,16)[shard];label=f'native-suspension-track-{track:02}-car-{car:02}';metadata=out/(label+'.json')
  steer=os.environ.get('NATIVE_SUSPENSION_STEER')=='1';values={'MYSIM_TRACK':str(track),'MYSIM_CAR':str(car),'MYSIM_NATIVE_TRACK_TRIAL':str(metadata)}
  if steer:values.update(MYSIM_NATIVE_TRACK_STEER='right' if shard==0 else 'left',MYSIM_SHOT=str(out/(label+'.png')))
- text=run(label,values,[] if steer else ['--headless'],timeout=360)
+ capture_args=['--rendering-method','gl_compatibility','--rendering-driver','opengl3'] if os.environ.get('NATIVE_CAPTURE_COMPATIBILITY')=='1' else []
+ text=run(label,values,capture_args if steer else ['--headless'],timeout=360)
  if steer:assert (out/(label+'.png')).exists()
  assert metadata.exists() and json.loads(metadata.read_text())['ok'] and 'PASS force-driven native track trial' in text
  print('COMPLETE isolated native real-track force trial; full-game acceptance separate',flush=True);sys.exit(0)

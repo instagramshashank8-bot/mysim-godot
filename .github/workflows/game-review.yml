@@ -94,6 +94,7 @@ jobs:
           REBUILT_WHEEL_REVIEW: ${{ inputs.depth == 'rebuilt_wheel_review' && '1' || '0' }}
           CAR_ASSEMBLY_AUDIT: ${{ (inputs.depth == 'car_assembly_audit' || inputs.depth == 'car_shape_review' || inputs.depth == 'rebuilt_body_review') && '1' || '0' }}
           NATIVE_SUSPENSION_TRACK: ${{ (inputs.depth == 'native_suspension_track' || inputs.depth == 'native_suspension_steer' || inputs.depth == 'native_suspension_capture_recovery') && '1' || '0' }}
+          NATIVE_CAPTURE_COMPATIBILITY: ${{ inputs.depth == 'native_suspension_capture_recovery' && '1' || '0' }}
           NATIVE_SUSPENSION_STEER: ${{ (inputs.depth == 'native_suspension_steer' || inputs.depth == 'native_suspension_capture_recovery') && '1' || '0' }}
           REBUILT_BODY_PAINT: ${{ inputs.depth == 'rebuilt_body_review' && '1' || '0' }}
           NEUTRAL_CAR_REVIEW: ${{ inputs.depth == 'car_shape_review' && '1' || '0' }}
