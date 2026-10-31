@@ -6,12 +6,13 @@ namespace MySim {
 // Not production-integrated until suspension, tyre/contact and real-track gates pass.
 public partial class NativeSuspensionVehicle : RigidBody3D {
  public int CarIndex;public DriverInput Controls;public float Water;public Compound Compound=Compound.Medium;
+ public int ChassisContacts;public readonly Vector3[] ContactForces=new Vector3[4],ContactNormals=new Vector3[4];
  public readonly bool[] Grounded=new bool[4];public readonly float[] Loads=new float[4];public readonly float[] SpringLength=new float[4];
  public Vector3[] RecoveredWheelCentres;public float[] RecoveredWheelRadii;
  public float WheelRadius=.33f,RestLength=.18f,StaticSag=.07f,DampingRatio=.7f;public int Contacts;public float WheelAngle;
  Vector3[] mounts=new Vector3[4];float[] radii=new float[4];Tyre[] tyres={new Tyre(),new Tyre(),new Tyre(),new Tyre()};float power,drag,brakeDecel;
  public override void _Ready(){
-  CarIndex=Math.Clamp(CarIndex,0,23);Mass=RecoveredVehicleProfiles.Mass[CarIndex];CanSleep=false;ContinuousCd=true;LinearDamp=0;AngularDamp=.15f;CollisionLayer=4;CollisionMask=7;
+  CarIndex=Math.Clamp(CarIndex,0,23);Mass=RecoveredVehicleProfiles.Mass[CarIndex];CanSleep=false;ContinuousCd=true;MaxContactsReported=16;LinearDamp=0;AngularDamp=.15f;CollisionLayer=4;CollisionMask=7;
   CenterOfMassMode=CenterOfMassModeEnum.Custom;CenterOfMass=new Vector3(0,-.3f,0);
   float wheelbase=RecoveredGeometry.Wheelbase[CarIndex],track=VehicleDimensions.Width[CarIndex]*.8f;
   if((RecoveredWheelCentres==null)!=(RecoveredWheelRadii==null)||RecoveredWheelCentres!=null&&(RecoveredWheelCentres.Length!=4||RecoveredWheelRadii.Length!=4))throw new InvalidOperationException("Recovered wheel contact configuration incomplete");
@@ -24,12 +25,12 @@ public partial class NativeSuspensionVehicle : RigidBody3D {
   WheelAngle=Mathf.MoveToward(WheelAngle,Dynamics.SteeringTarget(input.steer,longitudinal),3.2f*state.Step);
   float gravity=state.TotalGravity.Length(),spring=Mass*gravity/(4*StaticSag),damper=2*DampingRatio*Mathf.Sqrt(spring*Mass*.25f);
   float engine=input.reverse?-Mass*3.5f*(input.throttle+input.brake)*.5f:Mathf.Min(power/Mathf.Max(Mathf.Abs(longitudinal),6),Mass*gravity*2.2f)*input.throttle;
-  Contacts=0;
+  Contacts=0;ChassisContacts=state.GetContactCount();
   for(int i=0;i<4;i++){
-   Grounded[i]=false;Loads[i]=0;SpringLength[i]=RestLength+.15f;var mount=pose*mounts[i];
+   Grounded[i]=false;Loads[i]=0;ContactForces[i]=Vector3.Zero;ContactNormals[i]=Vector3.Zero;SpringLength[i]=RestLength+.15f;var mount=pose*mounts[i];
    using var query=PhysicsRayQueryParameters3D.Create(mount,mount-up*(radii[i]+RestLength+.15f),1);
    var hit=state.GetSpaceState().IntersectRay(query);if(hit.Count==0)continue;
-   var point=(Vector3)hit["position"];var normal=((Vector3)hit["normal"]).Normalized();hit.Clear();
+   var point=(Vector3)hit["position"];var normal=((Vector3)hit["normal"]).Normalized();ContactNormals[i]=normal;hit.Clear();
    float length=Mathf.Max(0,mount.DistanceTo(point)-radii[i]);SpringLength[i]=length;
    var arm=point-pose.Origin;var velocity=state.GetVelocityAtLocalPosition(arm);
    float load=Mathf.Clamp(spring*(RestLength-length)-damper*velocity.Dot(normal),0,Mass*gravity);if(load<=0)continue;
@@ -44,10 +45,10 @@ public partial class NativeSuspensionVehicle : RigidBody3D {
    float alpha=Mathf.Atan2(side,Mathf.Max(Mathf.Abs(u),1));float fy=-remaining*(float)Math.Tanh(alpha/.12f);
    // Passive contact damping must not reverse a patch's lateral momentum in one solver step.
    // Include angular inertia at the contact lever, then share the budget over all four patches.
-   var lateralLever=arm.Cross(right);float inverseEffectiveMass=state.InverseMass+lateralLever.Dot(state.InverseInertiaTensor*lateralLever);
+   var lateralLever=(arm-state.CenterOfMass).Cross(right);float inverseEffectiveMass=state.InverseMass+lateralLever.Dot(state.InverseInertiaTensor*lateralLever);
    float lateralStop=Mathf.Abs(side)/(4*Mathf.Max(state.Step,.00001f)*Mathf.Max(inverseEffectiveMass,.0000001f));fy=Mathf.Clamp(fy,-lateralStop,lateralStop);
    float roll=Mathf.Min(load*.014f,Mathf.Abs(u)*Mass/(4*Mathf.Max(state.Step,.00001f)));
-   state.ApplyForce(rolling*(fx-Mathf.Sign(u)*roll)+right*fy,arm);
+   var tangentialForce=rolling*(fx-Mathf.Sign(u)*roll)+right*fy;ContactForces[i]=normal*load+tangentialForce;state.ApplyForce(tangentialForce,arm);
    tyres[i].Step(state.Step,Mathf.Abs(u),Mathf.Abs(alpha),load/Mathf.Max(1,Mass*gravity*.25f),Water);
   }
   state.ApplyCentralForce(-state.LinearVelocity*speed*drag-up*(Dynamics.DownK(CarIndex)*speed*speed));
