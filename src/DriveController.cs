@@ -8,7 +8,7 @@ public partial class DriveController : Node3D {
  int CamMode = int.Parse(System.Environment.GetEnvironmentVariable("MYSIM_CAM") ?? "0"); bool cWas; bool tabWas = true; ulong pausedAt; float t, camYaw; int shownMode = -1; bool camInit;Vector3 chaseOffset;
  int cameraCycleChecks;
  readonly SteeringInput steeringInput=new SteeringInput();
- public void CycleCamera() { CamMode=(CamMode+1)%4; }
+ public virtual void CycleCamera() { CamMode=(CamMode+1)%4; }
  public override void _Ready() {
   Race = new Race(TrackIndex, Laps, Conditions.WetnessValue); Player = Race.Add("PLAYER", true, (Compound)Mathf.Clamp(Settings.Get("starting_compound",1),0,3));Player.nextCompound=Player.tyres[0].compound; Player.carModel = CarIndex; Race.countdown = 0; Race.started = true; Player.Place(Race.track, float.Parse(System.Environment.GetEnvironmentVariable("MYSIM_STARTP") ?? "0.988", System.Globalization.CultureInfo.InvariantCulture), 0f); { int nr = System.Environment.GetEnvironmentVariable("MYSIM_RIVALS") != null ? int.Parse(System.Environment.GetEnvironmentVariable("MYSIM_RIVALS")) : (AutoDrive || AiTest ? 0 : Settings.Get("rivals", 5)); { var order = new System.Collections.Generic.List<int>(); for (int ci = 0; ci < CarCatalog.Count; ci++) if (ci != CarIndex && CarCatalog.RaceClass(ci) == CarCatalog.RaceClass(CarIndex)) order.Add(ci); float myS = MySimulator.Rebuild.RecoveredVehicleProfiles.Speed[CarIndex], myA = MySimulator.Rebuild.RecoveredVehicleProfiles.Acceleration[CarIndex]; order.Sort((x, y) => (Mathf.Abs(MySimulator.Rebuild.RecoveredVehicleProfiles.Speed[x] - myS) / 60f + Mathf.Abs(MySimulator.Rebuild.RecoveredVehicleProfiles.Acceleration[x] - myA)).CompareTo(Mathf.Abs(MySimulator.Rebuild.RecoveredVehicleProfiles.Speed[y] - myS) / 60f + Mathf.Abs(MySimulator.Rebuild.RecoveredVehicleProfiles.Acceleration[y] - myA))); RivalModels = order.ToArray(); } for (int ri = 0; ri < nr; ri++) { var rv = Race.Add("AI " + (ri + 1), false, Compound.Medium); rv.carModel = RivalModels[ri % RivalModels.Length]; rivals.Add(new Rival { V = rv, LastY = float.NaN }); } } CallDeferred(nameof(BindHud));
  }
@@ -17,7 +17,7 @@ public partial class DriveController : Node3D {
  MySimulator.Rebuild.SurfaceWeather surfaceWeather;
  public int WallHits; int lastTrace = -1; bool floatScanned, settingsApplied, condsApplied; PedalController pedals = new PedalController(); bool padStartSeen, padStartStuck; float maxDelta, fpsT; int[] RivalModels; float[] basePivotY; float[] wheelTravel = new float[4]; MeshInstance3D treeTarget; int pushFrames, frames;
  Vector3 ObstructCam(Vector3 from, Vector3 want) { using var q = PhysicsRayQueryParameters3D.Create(from, want); q.CollisionMask = 2; q.HitBackFaces = true; var hit = GetWorld3D().DirectSpaceState.IntersectRay(q); if (hit.Count == 0) return want; var p = (Vector3)hit["position"]; var n = (Vector3)hit["normal"]; var dir = (want - from).Normalized(); float dist = Mathf.Max(0f, from.DistanceTo(p) - 0.35f); return from + dir * dist; }
-float lastLift; Node3D crew; Node3D[] crewFig; Vector3[] crewHome;
+protected float lastLift; Node3D crew; Node3D[] crewFig; Vector3[] crewHome;
  void BuildCrew() {
   crew = new Node3D { Visible = false }; AddChild(crew); var inv = Car.GlobalTransform.Basis.Orthonormalized().Transposed(); crewFig = new Node3D[6]; crewHome = new Vector3[6];
   var suit = new StandardMaterial3D { AlbedoColor = new Color(0.78f, 0.12f, 0.1f), Roughness = 0.9f }; var skin = new StandardMaterial3D { AlbedoColor = new Color(0.8f, 0.62f, 0.5f), Roughness = 0.9f }; var helm = new StandardMaterial3D { AlbedoColor = new Color(0.95f, 0.95f, 0.95f), Roughness = 0.4f };
@@ -30,7 +30,7 @@ float lastLift; Node3D crew; Node3D[] crewFig; Vector3[] crewHome;
    crewHome[i] = home; fig.Position = home;
   }
  }
- void UpdateCrew(float e) {
+ protected void UpdateCrew(float e) {
   if (WheelPivots == null || Car == null) return; if (crew == null) BuildCrew(); crew.Visible = e >= 0 && e < 7.3f; if (!crew.Visible) return; crew.GlobalTransform = new Transform3D(Car.GlobalTransform.Basis.Orthonormalized(), new Vector3(Car.GlobalPosition.X, Car.GlobalPosition.Y - lastLift, Car.GlobalPosition.Z));
   for (int i = 0; i < 6; i++) {
    float lean=0,off=PitServiceTimeline.Loosen(i),on=PitServiceTimeline.Fit(i);
@@ -47,7 +47,7 @@ AudioStreamPlayer engineSnd, whineSnd; AudioStreamPlayer[] sfxPool; int sfxNext;
   sfxPool = new AudioStreamPlayer[4]; for (int i = 0; i < 4; i++) { sfxPool[i] = new AudioStreamPlayer { VolumeDb = -4f }; AddChild(sfxPool[i]); }
  }
  void PlaySfx(string file) { var st = GD.Load<AudioStream>("res://assets/Resources/PitAudio/" + file); if (st == null) return; var pl = sfxPool[sfxNext++ % sfxPool.Length]; pl.Stream = st; pl.Play(); }
- void UpdateAudio(float e) {
+ protected void UpdateAudio(float e) {
   EnsureAudio(); if (Race.paused) { engineSnd.VolumeDb = -80f; whineSnd.VolumeDb = -80f; return; }
   bool mNow = ControlBindings.Held(7); if (mNow && !mWas) { Settings.Set("mute", !Settings.Get("mute", true)); Settings.ApplyAudio(); } mWas = mNow;
   float rpm = Mathf.Clamp(Player.rpm, 800f, 10000f), thr = Player.servicing ? 0f : Mathf.Clamp(Player.input.throttle, 0f, 1f);
@@ -75,7 +75,7 @@ AudioStreamPlayer engineSnd, whineSnd; AudioStreamPlayer[] sfxPool; int sfxNext;
    if (r.Pivots != null) { r.Spin += Vec.Dot(v.velocity, v.Forward) * delta; WheelAnimation.Update(r.Pivots,r.Spin,v.steering); }
   }
  }
-  float PitSequence(float e) {
+  protected float PitSequence(float e) {
   if(WheelPivots==null)return 0;
   for(int i=0;i<4;i++){
    var pivot=WheelPivots[i];var spin=pivot.GetNode<Node3D>("Spin");pivot.Visible=true;spin.Visible=true;

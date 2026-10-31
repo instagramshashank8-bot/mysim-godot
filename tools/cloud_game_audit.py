@@ -16,6 +16,11 @@ def run(label,values,args=None,timeout=300):
   (out/(label+f'-{attempt}-process.json')).write_text(json.dumps({'returncode':code,'timed_out':timed_out,'elapsed_seconds':time.monotonic()-started,'timeout_seconds':timeout,'screenshot_exists':shot.exists() if shot else None,'error_lines':[line for line in text.splitlines() if 'ERROR:' in line]},indent=2))
   if code==0 and 'ERROR:' not in text:return text
  raise RuntimeError(label+' failed; see saved logs')
+if os.environ.get('NATIVE_GAMEPLAY')=='1':
+ track=(0,43)[shard];car=(0,16)[shard];label=f'native-gameplay-track-{track:02}-car-{car:02}'
+ text=run(label,{'MYSIM_TRACK':str(track),'MYSIM_CAR':str(car),'MYSIM_NATIVE_GAMEPLAY':'1','MYSIM_AUTODRIVE':'1','MYSIM_SECONDS':'11','MYSIM_RIVALS':'0'},['--headless'],timeout=360)
+ assert 'RACE_READY' in text and 'PASS native integrated race HUD, chassis acceleration and braking' in text
+ print('COMPLETE opt-in integrated native race flow; no full-game or rival acceptance',flush=True);sys.exit(0)
 if os.environ.get('NATIVE_SUSPENSION_TRACK')=='1':
  track=(0,43)[shard];car=(0,16)[shard];label=f'native-suspension-track-{track:02}-car-{car:02}';metadata=out/(label+'.json')
  steer=os.environ.get('NATIVE_SUSPENSION_STEER')=='1';values={'MYSIM_TRACK':str(track),'MYSIM_CAR':str(car),'MYSIM_NATIVE_TRACK_TRIAL':str(metadata)}

@@ -10,6 +10,7 @@ public partial class NativeSuspensionVehicle : RigidBody3D {
  public readonly bool[] Grounded=new bool[4];public readonly float[] Loads=new float[4];public readonly float[] SpringLength=new float[4];
  public Vector3[] RecoveredWheelCentres;public float[] RecoveredWheelRadii;
  public float WheelRadius=.33f,RestLength=.18f,StaticSag=.07f,DampingRatio=.7f;public int Contacts;public float WheelAngle;
+ public Tyre[] Tyres=>tyres;
  Vector3[] mounts=new Vector3[4];float[] radii=new float[4];Tyre[] tyres={new Tyre(),new Tyre(),new Tyre(),new Tyre()};float power,drag,brakeDecel;
  public override void _Ready(){
   CarIndex=Math.Clamp(CarIndex,0,23);Mass=RecoveredVehicleProfiles.Mass[CarIndex];CanSleep=false;ContinuousCd=true;MaxContactsReported=16;LinearDamp=0;AngularDamp=.15f;CollisionLayer=4;CollisionMask=7;
