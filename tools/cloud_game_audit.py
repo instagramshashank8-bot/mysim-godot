@@ -29,14 +29,21 @@ if os.environ.get('NATIVE_HULL_CONTACT')=='1':
  cars=[shard*2,shard*2+1] if os.environ.get('NATIVE_HULL_MATRIX')=='1' else [(0,16)[shard]]
  recovery=json.loads(pathlib.Path('data/native_hull_recovery.json').read_text())['cases'] if os.environ.get('NATIVE_HULL_RECOVERY')=='1' else None
  if recovery:cars=sorted(set(x['car'] for x in recovery))
+ failures=[]
  for car in cars:
   label=f'native-hull-contact-car-{car:02}';values={'MYSIM_NATIVE_HULL_CONTACT_CHECKS':str(car),'MYSIM_REQUIRE_NATIVE_CAR_HULLS':'1'}
   if os.environ.get('NATIVE_HULL_MATRIX')=='1':values['MYSIM_NATIVE_HULL_CONTACT_SPEEDS']='60,120' if car in (0,16) else '20,60,120'
   if recovery:
    cases=[x for x in recovery if x['car']==car];assert len(set(x['hz'] for x in cases))==1
    values.update(MYSIM_NATIVE_HULL_CONTACT_SPEEDS=','.join(map(str,sorted(set(x['speed'] for x in cases)))),MYSIM_NATIVE_HULL_CONTACT_CASES=','.join(str(x['speed'])+(':'+('front' if x['front'] else 'rear')) for x in cases),MYSIM_NATIVE_CONTACT_HZ=str(cases[0]['hz']))
-  text=run(label,values,['--headless'],timeout=360)
-  path=out/'native-hull-contact-results.json';result=json.loads(path.read_text());path.rename(out/(label+'.json'));assert result['all'] and 'PASS recovered compound hull bumper coverage' in text
+  text='';error=None
+  try:text=run(label,values,['--headless'],timeout=360)
+  except RuntimeError as e:error=str(e)
+  path=out/'native-hull-contact-results.json';result=json.loads(path.read_text()) if path.exists() else {}
+  if path.exists():path.rename(out/(label+'.json'))
+  if error or not result.get('all') or 'PASS recovered compound hull bumper coverage' not in text:failures.append({'car':car,'error':error or 'Collision gates failed'})
+  (out/'hull-case-failures.json').write_text(json.dumps(failures,indent=2))
+ assert not failures, 'See preserved per-car results; all selected cars were attempted'
  print('COMPLETE recovered compound body wall impacts; wheel and full-game gates remain open',flush=True);sys.exit(0)
 if os.environ.get('NATIVE_GAMEPLAY')=='1':
  track=(0,43)[shard];car=(0,16)[shard];label=f'native-gameplay-track-{track:02}-car-{car:02}'
