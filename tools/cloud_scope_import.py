@@ -2,7 +2,7 @@
 import os,json,pathlib,re
 root=pathlib.Path.cwd();depth=os.environ.get('IMPORT_REVIEW_DEPTH','');out=root/'outputs/cloud-game';out.mkdir(parents=True,exist_ok=True)
 scopes={'rain_focus':([6,16],[0]),'rear_panel_uv':([6],[]),'livery_uv':([0,6,12,18],[]),'gui_review':([],[]),'wheel_compounds':([1,6,16],[]),'car_panel_uv':([6],[]),'car_uv_roles':([1,6,16],[]),'car_uv':([1,6,16],[]),'precise_ai':([16],[43,15]),'contact_trace':([16],[43,15]),'geometry':(list(range(24)),[])}
-if depth in ('rebuilt_rim_review','car_assembly_audit','rebuilt_wheel_review','car_shape_review'):scopes[depth]=([[1,6,16][int(os.environ.get('SHARD','0'))]],[])
+if depth in ('rebuilt_rim_review','car_assembly_audit','rebuilt_wheel_review','car_shape_review','rebuilt_body_review'):scopes[depth]=([[1,6,16][int(os.environ.get('SHARD','0'))]],[])
 if depth=='alpha_policy_review':scopes[depth]=([16],[[0,5][int(os.environ.get('SHARD','0'))]])
 if depth=='track_scene_audit':scopes[depth]=([],[ [0,5][int(os.environ.get('SHARD','0'))] ])
 if depth=='controls_gameplay':scopes[depth]=([16],[0])

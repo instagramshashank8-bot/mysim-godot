@@ -25,9 +25,9 @@ if os.environ.get('REBUILT_WHEEL_REVIEW')=='1':
  print('COMPLETE replacement wheel/compound closeups; manual acceptance required',flush=True);sys.exit(0)
 if os.environ.get('CAR_ASSEMBLY_AUDIT')=='1':
  car=(1,6,16)[shard]
- for view,camera in enumerate(('4,2.5,4',) if os.environ.get('NEUTRAL_CAR_REVIEW')=='1' else ('4,2.5,4','-4,2.5,-4')):
+ for view,camera in enumerate(('4,2.5,4',) if os.environ.get('NEUTRAL_CAR_REVIEW')=='1' or os.environ.get('REBUILT_BODY_PAINT')=='1' else ('4,2.5,4','-4,2.5,-4')):
   label=f'assembly-audit-car-{car:02}-view-{view}';shot=out/(label+'.png');metadata=out/(label+'.json')
-  text=run(label,{'MYSIM_CARVIEW':str(car),'MYSIM_CAR_ASSEMBLY_AUDIT':str(metadata),'MYSIM_NEUTRAL_CAR_MATERIAL':os.environ.get('NEUTRAL_CAR_REVIEW','0'),'MYSIM_FITVIEW':'1','MYSIM_CAMPOS':camera,'MYSIM_SHOT':str(shot)})
+  text=run(label,{'MYSIM_CARVIEW':str(car),'MYSIM_CAR_ASSEMBLY_AUDIT':str(metadata),'MYSIM_NEUTRAL_CAR_MATERIAL':os.environ.get('NEUTRAL_CAR_REVIEW','0'),'MYSIM_REBUILT_BODY_PAINT':os.environ.get('REBUILT_BODY_PAINT','0'),'MYSIM_FITVIEW':'1','MYSIM_CAMPOS':camera,'MYSIM_SHOT':str(shot)})
   assert shot.exists() and metadata.exists() and 'PASS read-only car assembly evidence' in text
  print('COMPLETE read-only assembly diagnostics; visual acceptance remains separate',flush=True);sys.exit(0)
 if os.environ.get('REBUILT_RIM_REVIEW')=='1':
