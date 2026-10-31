@@ -1,0 +1,202 @@
+{
+  "sourceRun": 41211376672,
+  "scope": "Only failed or unexecuted cases; 240Hz remains explicit experiment, not production default",
+  "cases": [
+    {
+      "car": 2,
+      "speed": 20,
+      "front": true,
+      "hz": 120,
+      "reason": "Unexecuted after preceding bake or impact failure"
+    },
+    {
+      "car": 2,
+      "speed": 20,
+      "front": false,
+      "hz": 120,
+      "reason": "Unexecuted after preceding bake or impact failure"
+    },
+    {
+      "car": 2,
+      "speed": 60,
+      "front": true,
+      "hz": 120,
+      "reason": "Unexecuted after preceding bake or impact failure"
+    },
+    {
+      "car": 2,
+      "speed": 60,
+      "front": false,
+      "hz": 120,
+      "reason": "Unexecuted after preceding bake or impact failure"
+    },
+    {
+      "car": 2,
+      "speed": 120,
+      "front": true,
+      "hz": 120,
+      "reason": "Unexecuted after preceding bake or impact failure"
+    },
+    {
+      "car": 2,
+      "speed": 120,
+      "front": false,
+      "hz": 120,
+      "reason": "Unexecuted after preceding bake or impact failure"
+    },
+    {
+      "car": 3,
+      "speed": 20,
+      "front": true,
+      "hz": 120,
+      "reason": "Unexecuted after preceding bake or impact failure"
+    },
+    {
+      "car": 3,
+      "speed": 20,
+      "front": false,
+      "hz": 120,
+      "reason": "Unexecuted after preceding bake or impact failure"
+    },
+    {
+      "car": 3,
+      "speed": 60,
+      "front": true,
+      "hz": 120,
+      "reason": "Unexecuted after preceding bake or impact failure"
+    },
+    {
+      "car": 3,
+      "speed": 60,
+      "front": false,
+      "hz": 120,
+      "reason": "Unexecuted after preceding bake or impact failure"
+    },
+    {
+      "car": 3,
+      "speed": 120,
+      "front": true,
+      "hz": 120,
+      "reason": "Unexecuted after preceding bake or impact failure"
+    },
+    {
+      "car": 3,
+      "speed": 120,
+      "front": false,
+      "hz": 120,
+      "reason": "Unexecuted after preceding bake or impact failure"
+    },
+    {
+      "car": 9,
+      "speed": 20,
+      "front": true,
+      "hz": 120,
+      "reason": "Unexecuted after preceding bake or impact failure"
+    },
+    {
+      "car": 9,
+      "speed": 20,
+      "front": false,
+      "hz": 120,
+      "reason": "Unexecuted after preceding bake or impact failure"
+    },
+    {
+      "car": 9,
+      "speed": 60,
+      "front": true,
+      "hz": 120,
+      "reason": "Unexecuted after preceding bake or impact failure"
+    },
+    {
+      "car": 9,
+      "speed": 60,
+      "front": false,
+      "hz": 120,
+      "reason": "Unexecuted after preceding bake or impact failure"
+    },
+    {
+      "car": 9,
+      "speed": 120,
+      "front": true,
+      "hz": 120,
+      "reason": "Unexecuted after preceding bake or impact failure"
+    },
+    {
+      "car": 9,
+      "speed": 120,
+      "front": false,
+      "hz": 120,
+      "reason": "Unexecuted after preceding bake or impact failure"
+    },
+    {
+      "car": 15,
+      "speed": 20,
+      "front": true,
+      "hz": 120,
+      "reason": "Unexecuted after preceding bake or impact failure"
+    },
+    {
+      "car": 15,
+      "speed": 20,
+      "front": false,
+      "hz": 120,
+      "reason": "Unexecuted after preceding bake or impact failure"
+    },
+    {
+      "car": 15,
+      "speed": 60,
+      "front": true,
+      "hz": 120,
+      "reason": "Unexecuted after preceding bake or impact failure"
+    },
+    {
+      "car": 15,
+      "speed": 60,
+      "front": false,
+      "hz": 120,
+      "reason": "Unexecuted after preceding bake or impact failure"
+    },
+    {
+      "car": 15,
+      "speed": 120,
+      "front": true,
+      "hz": 120,
+      "reason": "Unexecuted after preceding bake or impact failure"
+    },
+    {
+      "car": 15,
+      "speed": 120,
+      "front": false,
+      "hz": 120,
+      "reason": "Unexecuted after preceding bake or impact failure"
+    },
+    {
+      "car": 8,
+      "speed": 120,
+      "front": true,
+      "hz": 240,
+      "reason": "Distinct temporal-resolution experiment for excess penetration"
+    },
+    {
+      "car": 13,
+      "speed": 120,
+      "front": true,
+      "hz": 240,
+      "reason": "Distinct temporal-resolution experiment for excess penetration"
+    },
+    {
+      "car": 14,
+      "speed": 120,
+      "front": false,
+      "hz": 120,
+      "reason": "Rebound-aware maximum-travel assertion; retain same5cm penetration and actual contact gates"
+    },
+    {
+      "car": 17,
+      "speed": 120,
+      "front": true,
+      "hz": 120,
+      "reason": "Rebound-aware maximum-travel assertion; retain same5cm penetration and actual contact gates"
+    }
+  ]
+}
