@@ -6,6 +6,14 @@ namespace MySim {
 // Explicit reconstruction experiment: mount separate source templates, rather
 // than delete low-lying geometry or change tyre/contact acceptance thresholds.
 public static class RecoveredComponentMounts {
+ public static void AttachToHubs(Node3D car,Node3D[] pivots){
+  if(System.Environment.GetEnvironmentVariable("MYSIM_COMPONENT_MOUNTS")!="1")return;
+  var nodes=car.FindChildren("*","MeshInstance3D",true,false);foreach(var node in nodes){var mesh=(MeshInstance3D)node;if(!mesh.HasMeta("mounted_hub_index"))continue;int hub=mesh.GetMeta("mounted_hub_index").AsInt32();if(hub<0)continue;
+   // Keep the reconstructed rest pose. The hub's existing base mirror is
+   // cancelled by reparenting with the global transform preserved.
+   mesh.Reparent(pivots[hub].GetNode<Node3D>("BrakeAssembly"),true);
+  }nodes.Clear();
+ }
  public static void Apply(Node3D car,int index){
   if(System.Environment.GetEnvironmentVariable("MYSIM_COMPONENT_MOUNTS")!="1")return;
   using var profiles=JsonDocument.Parse(FileAccess.GetFileAsString("res://data/component_mount_profiles.json"));
