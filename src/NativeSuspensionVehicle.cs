@@ -42,6 +42,10 @@ public partial class NativeSuspensionVehicle : RigidBody3D {
    float fx=(i>=2?engine*.5f:0)-Mathf.Sign(u)*service;
    fx=Mathf.Clamp(fx,-capacity,capacity);float remaining=Mathf.Sqrt(Mathf.Max(0,capacity*capacity-fx*fx));
    float alpha=Mathf.Atan2(side,Mathf.Max(Mathf.Abs(u),1));float fy=-remaining*(float)Math.Tanh(alpha/.12f);
+   // Passive contact damping must not reverse a patch's lateral momentum in one solver step.
+   // Include angular inertia at the contact lever, then share the budget over all four patches.
+   var lateralLever=arm.Cross(right);float inverseEffectiveMass=state.InverseMass+lateralLever.Dot(state.InverseInertiaTensor*lateralLever);
+   float lateralStop=Mathf.Abs(side)/(4*Mathf.Max(state.Step,.00001f)*Mathf.Max(inverseEffectiveMass,.0000001f));fy=Mathf.Clamp(fy,-lateralStop,lateralStop);
    float roll=Mathf.Min(load*.014f,Mathf.Abs(u)*Mass/(4*Mathf.Max(state.Step,.00001f)));
    state.ApplyForce(rolling*(fx-Mathf.Sign(u)*roll)+right*fy,arm);
    tyres[i].Step(state.Step,Mathf.Abs(u),Mathf.Abs(alpha),load/Mathf.Max(1,Mass*gravity*.25f),Water);
