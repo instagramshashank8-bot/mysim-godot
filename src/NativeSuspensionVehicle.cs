@@ -7,13 +7,15 @@ namespace MySim {
 public partial class NativeSuspensionVehicle : RigidBody3D {
  public int CarIndex;public DriverInput Controls;public float Water;public Compound Compound=Compound.Medium;
  public readonly bool[] Grounded=new bool[4];public readonly float[] Loads=new float[4];public readonly float[] SpringLength=new float[4];
+ public Vector3[] RecoveredWheelCentres;public float[] RecoveredWheelRadii;
  public float WheelRadius=.33f,RestLength=.18f,StaticSag=.07f,DampingRatio=.7f;public int Contacts;public float WheelAngle;
- Vector3[] mounts=new Vector3[4];Tyre[] tyres={new Tyre(),new Tyre(),new Tyre(),new Tyre()};float power,drag,brakeDecel;
+ Vector3[] mounts=new Vector3[4];float[] radii=new float[4];Tyre[] tyres={new Tyre(),new Tyre(),new Tyre(),new Tyre()};float power,drag,brakeDecel;
  public override void _Ready(){
   CarIndex=Math.Clamp(CarIndex,0,23);Mass=RecoveredVehicleProfiles.Mass[CarIndex];CanSleep=false;ContinuousCd=true;LinearDamp=0;AngularDamp=.15f;CollisionLayer=4;CollisionMask=7;
   CenterOfMassMode=CenterOfMassModeEnum.Custom;CenterOfMass=new Vector3(0,-.3f,0);
   float wheelbase=RecoveredGeometry.Wheelbase[CarIndex],track=VehicleDimensions.Width[CarIndex]*.8f;
-  for(int i=0;i<4;i++){mounts[i]=new Vector3(i%2==0?-track*.5f:track*.5f,-.32f+RestLength-StaticSag,i<2?wheelbase*.5f:-wheelbase*.5f);tyres[i].Replace(Compound);}
+  if((RecoveredWheelCentres==null)!=(RecoveredWheelRadii==null)||RecoveredWheelCentres!=null&&(RecoveredWheelCentres.Length!=4||RecoveredWheelRadii.Length!=4))throw new InvalidOperationException("Recovered wheel contact configuration incomplete");
+  for(int i=0;i<4;i++){radii[i]=RecoveredWheelRadii==null?WheelRadius:RecoveredWheelRadii[i];if(!float.IsFinite(radii[i])||radii[i]<.15f||radii[i]>.6f)throw new InvalidOperationException("Recovered wheel radius invalid");mounts[i]=RecoveredWheelCentres==null?new Vector3(i%2==0?-track*.5f:track*.5f,-.32f+RestLength-StaticSag,i<2?wheelbase*.5f:-wheelbase*.5f):RecoveredWheelCentres[i]+Vector3.Up*(RestLength-StaticSag);tyres[i].Replace(Compound);}
   AddChild(new CollisionShape3D {Shape=new BoxShape3D {Size=new Vector3(track,.5f,wheelbase+.5f)}});
   float vmax=RecoveredVehicleProfiles.Speed[CarIndex]*.44704f;power=Mass*26.82f*26.82f/(2*RecoveredVehicleProfiles.Acceleration[CarIndex])*1.35f;drag=power/(vmax*vmax*vmax);brakeDecel=26.82f*26.82f/(2*RecoveredVehicleProfiles.Brakes[CarIndex]*.3048f);
  }
@@ -25,10 +27,10 @@ public partial class NativeSuspensionVehicle : RigidBody3D {
   Contacts=0;
   for(int i=0;i<4;i++){
    Grounded[i]=false;Loads[i]=0;SpringLength[i]=RestLength+.15f;var mount=pose*mounts[i];
-   using var query=PhysicsRayQueryParameters3D.Create(mount,mount-up*(WheelRadius+RestLength+.15f),1);
+   using var query=PhysicsRayQueryParameters3D.Create(mount,mount-up*(radii[i]+RestLength+.15f),1);
    var hit=state.GetSpaceState().IntersectRay(query);if(hit.Count==0)continue;
    var point=(Vector3)hit["position"];var normal=((Vector3)hit["normal"]).Normalized();hit.Clear();
-   float length=Mathf.Max(0,mount.DistanceTo(point)-WheelRadius);SpringLength[i]=length;
+   float length=Mathf.Max(0,mount.DistanceTo(point)-radii[i]);SpringLength[i]=length;
    var arm=point-pose.Origin;var velocity=state.GetVelocityAtLocalPosition(arm);
    float load=Mathf.Clamp(spring*(RestLength-length)-damper*velocity.Dot(normal),0,Mass*gravity);if(load<=0)continue;
    Grounded[i]=true;Loads[i]=load;Contacts++;state.ApplyForce(normal*load,arm);
