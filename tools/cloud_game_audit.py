@@ -18,7 +18,8 @@ def run(label,values,args=None,timeout=300):
  raise RuntimeError(label+' failed; see saved logs')
 if os.environ.get('NATIVE_GAMEPLAY')=='1':
  track=(0,43)[shard];car=(0,16)[shard];label=f'native-gameplay-track-{track:02}-car-{car:02}'
- text=run(label,{'MYSIM_TRACK':str(track),'MYSIM_CAR':str(car),'MYSIM_NATIVE_GAMEPLAY':'1','MYSIM_AUTODRIVE':'1','MYSIM_SECONDS':'11','MYSIM_RIVALS':'0'},['--headless'],timeout=360)
+ text=run(label,{'MYSIM_TRACK':str(track),'MYSIM_CAR':str(car),'MYSIM_NATIVE_GAMEPLAY':'1','MYSIM_NATIVE_GAMEPLAY_CHECKS':'1','MYSIM_AUTODRIVE':'1','MYSIM_SECONDS':'11','MYSIM_RIVALS':'0'},['--headless'],timeout=360)
+ assert 'PASS integrated native pause, clock, resume, pit options and four camera modes' in text
  assert 'RACE_READY' in text and 'PASS native integrated race HUD, chassis acceleration and braking' in text
  print('COMPLETE opt-in integrated native race flow; no full-game or rival acceptance',flush=True);sys.exit(0)
 if os.environ.get('NATIVE_SUSPENSION_TRACK')=='1':

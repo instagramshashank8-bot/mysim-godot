@@ -6,11 +6,12 @@ namespace MySim {
 // Rival native authority and full-race acceptance are still required before production promotion.
 public partial class NativeRaceController : DriveController {
  NativeSuspensionVehicle body;readonly SteeringInput steering=new();readonly PedalController pedalsNative=new();readonly Vector3[] homes=new Vector3[4];SurfaceWeather weather;float elapsed,travel;int mode,shown=-1;bool pauseWas=true,cameraWas,pitWas,parked,ending;Vector3 spawn,pausedVelocity,pausedAngular;bool pausedBody,padSeen,padStartBlocked;
- public NativeSuspensionVehicle Chassis=>body;
+ public NativeSuspensionVehicle Chassis=>body;public int CameraMode=>mode;NativeGameplayChecks gameplayChecks;
  public override void CycleCamera(){mode=(mode+1)%4;}
  public override void _Ready(){
   int rivals=int.Parse(System.Environment.GetEnvironmentVariable("MYSIM_RIVALS")??Settings.Get("rivals",5).ToString());if(rivals!=0)throw new InvalidOperationException("Native gameplay integration currently requires explicit zero rivals; multiplayer contact validation is pending");
   Engine.PhysicsTicksPerSecond=120;Race=new Race(TrackIndex,Laps,Conditions.WetnessValue);Player=Race.Add("PLAYER",true,(Compound)Mathf.Clamp(Settings.Get("starting_compound",1),0,3));Player.carModel=CarIndex;Player.externalPhysics=true;Player.traction=Settings.Get("tc",true);Player.abs=Settings.Get("abs",true);Player.Place(Race.track,.988f,0);Player.externalResetRequested=false;Race.countdown=0;Race.started=true;weather=Conditions.BeginWeather();
+  if(System.Environment.GetEnvironmentVariable("MYSIM_NATIVE_GAMEPLAY_CHECKS")=="1"){gameplayChecks=new NativeGameplayChecks {Drive=this};AddChild(gameplayChecks);}
   if(Hud!=null){Hud.Race=Race;Hud.Player=Player;}if(Conditions.Raining)Conditions.AddRain(Cam);
  }
  bool PlaceBody(string reason="spawn"){var point=new Vector3(Player.position.x,200,Player.position.z);using var query=PhysicsRayQueryParameters3D.Create(point,point-Vector3.Up*400,1);query.HitBackFaces=true;var hit=GetWorld3D().DirectSpaceState.IntersectRay(query);if(hit.Count==0)return false;var ground=(Vector3)hit["position"];hit.Clear();
@@ -36,9 +37,9 @@ public partial class NativeRaceController : DriveController {
   float service=Player.servicing?PitServiceTimeline.Duration-Player.serviceRemaining:-1;lastLift=PitSequence(service);Car.GlobalTransform=new Transform3D(body.GlobalBasis,body.GlobalPosition-body.GlobalBasis.Y*.65f+Vector3.Up*lastLift);UpdateCrew(service);UpdateAudio(service);
   travel+=body.LinearVelocity.Dot(body.GlobalBasis.Z)*(float)delta;WheelAnimation.Update(WheelPivots,travel,body.WheelAngle);for(int i=0;i<4;i++)WheelPivots[i].Position=homes[i]+Vector3.Up*(body.RestLength-body.StaticSag-body.SpringLength[i]);
   bool camera=ControlBindings.Held(6)||(pads.Count>0&&Input.IsJoyButtonPressed(pads[0],JoyButton.Y));if(camera&&!cameraWas)CycleCamera();cameraWas=camera;UpdateView();
-  if(AutoDrive&&elapsed>=AutoSeconds){bool ok=Player.speed<1&&(body.GlobalPosition-spawn).Length()>10&&Hud.Player==Player&&Hud.Race==Race;GD.Print(ok?"PASS native integrated race HUD, chassis acceleration and braking":"FAIL native integrated gameplay");ending=true;CleanExit.Request(this,ok?0:1);}
+  if(AutoDrive&&elapsed>=AutoSeconds){bool ok=Player.speed<1&&(body.GlobalPosition-spawn).Length()>10&&Hud.Player==Player&&Hud.Race==Race&&(gameplayChecks==null||gameplayChecks.Completed);GD.Print(ok?"PASS native integrated race HUD, chassis acceleration and braking":"FAIL native integrated gameplay");ending=true;CleanExit.Request(this,ok?0:1);}
  }catch(Exception e){GD.PushError(e.ToString());ending=true;CleanExit.Request(this,1);}}
- void UpdateView(){if(shown!=mode){shown=mode;var meshes=Car.FindChildren("*","MeshInstance3D",true,false);foreach(var node in meshes){var mesh=(MeshInstance3D)node;if(mesh.HasMeta("grp"))mesh.Visible=!mesh.HasMeta("wheel_hidden")&&(mesh.GetMeta("grp").AsString()=="int"?mode==2:mode!=2);}meshes.Clear();}
+ void UpdateView(){if(shown!=mode){shown=mode;CarViewVisibility.Apply(Car,WheelPivots,CarIndex,mode==2);}CarViewVisibility.SetWheels(WheelPivots,CarIndex,mode==2);
   var forward=body.GlobalBasis.Z;var target=Car.GlobalPosition+Vector3.Up*.8f;if(mode<2){var want=target-forward*(mode==0?7:11)+Vector3.Up*(mode==0?2:3.8f);using var query=PhysicsRayQueryParameters3D.Create(target,want,2);query.HitBackFaces=true;var hit=GetWorld3D().DirectSpaceState.IntersectRay(query);if(hit.Count>0){want=target+(want-target).Normalized()*Mathf.Max(0,target.DistanceTo((Vector3)hit["position"])-.35f);hit.Clear();}Cam.GlobalPosition=want;Cam.LookAt(target+forward*3);Cam.Fov=48;}
   else{Cam.GlobalPosition=Car.GlobalTransform*new Vector3(mode==2?-.35f:0,mode==2?.88f:.62f,mode==2?.05f:1.9f);Cam.LookAt(Cam.GlobalPosition+forward*10);Cam.Fov=mode==2?75:70;}
  }
