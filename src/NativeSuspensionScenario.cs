@@ -6,7 +6,7 @@ namespace MySim {
 public partial class NativeSuspensionScenario : Node3D {
  sealed class Trial {public NativeSuspensionVehicle body;public string kind;public Vector3 start;public float distance;public bool settled,airborne,landed;public float initialTurnDisplacement,initialTurnYaw;public bool sampledTurn;public float minHeight=float.PositiveInfinity,maxForward;}
  readonly List<Trial> trials=new();float elapsed;bool launched;
- public override void _Ready(){Engine.PhysicsTicksPerSecond=120;
+ public override void _Ready(){NativePhysicsClock.Configure();
   int slot=0;for(int car=0;car<24;car++)foreach(string kind in new[]{"right","left","dry-brake","wet-brake","airborne","wall"}){
    float x=-350+slot*90;
    void Ground(float y,float z,float length){var ground=new StaticBody3D {CollisionLayer=1,CollisionMask=4,Position=new Vector3(x,y-.5f,z)};ground.AddChild(new CollisionShape3D {Shape=new BoxShape3D {Size=new Vector3(70,1,length)}});AddChild(ground);}
@@ -23,7 +23,7 @@ public partial class NativeSuspensionScenario : Node3D {
   if(elapsed<13)return;
   var results=new List<object>();bool all=true;foreach(var trial in trials){var b=trial.body;float side=b.Position.X-trial.start.X;bool ok=trial.settled&&(trial.kind=="right"?trial.sampledTurn&&trial.initialTurnDisplacement<-.4f&&trial.initialTurnYaw<0:trial.kind=="left"?trial.sampledTurn&&trial.initialTurnDisplacement>.4f&&trial.initialTurnYaw>0:trial.kind=="airborne"?trial.airborne&&trial.landed&&trial.minHeight< -3:trial.kind=="wall"?trial.maxForward<11.5f&&b.Position.Z< -88:b.LinearVelocity.Length()<.5f);all&=ok;results.Add(new {car=b.CarIndex,trial=trial.kind,ok,settled=trial.settled,speed=b.LinearVelocity.Length(),lateralDisplacement=side,trial.initialTurnDisplacement,trial.initialTurnYaw,distance=trial.distance,height=b.Position.Y,contacts=b.Contacts,trial.airborne,trial.landed,trial.minHeight,trial.maxForward});}
   for(int i=0;i<trials.Count;i+=6)all&=trials[i+3].distance>trials[i+2].distance;
-  string path=System.Environment.GetEnvironmentVariable("MYSIM_NATIVE_SUSPENSION_CHECKS");System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(path));System.IO.File.WriteAllText(path,System.Text.Json.JsonSerializer.Serialize(new {all,scope="Experimental 24-car native rigidbody spring/tyre-force, ledge/landing and wall fixture; no production car/track, traffic or real-world calibration acceptance",results},new System.Text.Json.JsonSerializerOptions {WriteIndented=true}));
+  string path=System.Environment.GetEnvironmentVariable("MYSIM_NATIVE_SUSPENSION_CHECKS");System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(path));System.IO.File.WriteAllText(path,System.Text.Json.JsonSerializer.Serialize(new {all,physicsHz=Engine.PhysicsTicksPerSecond,scope="Experimental 24-car native rigidbody spring/tyre-force, ledge/landing and wall fixture; no production car/track, traffic or real-world calibration acceptance",results},new System.Text.Json.JsonSerializerOptions {WriteIndented=true}));
   GD.Print(all?"PASS native suspension, screen direction and wet braking":"FAIL native suspension fixture");SetPhysicsProcess(false);CleanExit.Request(this,all?0:1);
  }catch(Exception e){GD.PushError(e.ToString());SetPhysicsProcess(false);CleanExit.Request(this,1);}}
 }

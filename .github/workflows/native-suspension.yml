@@ -1,5 +1,9 @@
 name: experimental-native-suspension-and-tyre-forces
-on: {workflow_dispatch: {}}
+on:
+  workflow_dispatch:
+    inputs:
+      physics_backend: {description: 'Explicit isolated solver comparison', type: choice, options: [source, jolt], default: source}
+      physics_hz: {description: 'Experimental native time resolution', type: choice, options: ['120', '240'], default: '120'}
 permissions: {contents: read}
 defaults:
   run: {shell: bash}
@@ -14,6 +18,10 @@ jobs:
       - run: dotnet build -v quiet
       - name: Isolate native physics fixture from unrelated asset imports
         run: mkdir -p assets outputs/native-suspension && touch assets/.gdignore
+      - name: Configure isolated backend experiment
+        env:
+          NATIVE_PHYSICS_BACKEND: ${{ inputs.physics_backend || 'source' }}
+        run: python tools/cloud_native_backend.py
       - name: Install Godot runtime
         run: |
           curl --fail -L -o /tmp/godot.zip https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_mono_linux_x86_64.zip
@@ -25,8 +33,9 @@ jobs:
       - name: Native rigid body suspension and tyre-force trials
         env:
           MYSIM_NATIVE_SUSPENSION_CHECKS: outputs/native-suspension/results.json
+          MYSIM_NATIVE_PHYSICS_HZ: ${{ inputs.physics_hz || '120' }}
         run: |
-          "$GODOT_BIN" --headless --path . --fixed-fps 120 > outputs/native-suspension/runtime.log 2>&1
+          "$GODOT_BIN" --headless --path . --fixed-fps "$MYSIM_NATIVE_PHYSICS_HZ" > outputs/native-suspension/runtime.log 2>&1
           cat outputs/native-suspension/results.json
           ! grep -q 'ERROR:' outputs/native-suspension/runtime.log
       - uses: actions/upload-artifact@v4
