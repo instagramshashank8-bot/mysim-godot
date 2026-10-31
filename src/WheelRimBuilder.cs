@@ -9,7 +9,7 @@ public static class WheelRimBuilder {
  static ArrayMesh Lathe(Vector2[] profile,int segments){
   var tool=new SurfaceTool();tool.Begin(Mesh.PrimitiveType.Triangles);
   void V(int circle,int point){int j=(point+profile.Length)%profile.Length;float angle=Mathf.Tau*circle/segments;var p=profile[j];var tangent=profile[(j+1)%profile.Length]-profile[(j-1+profile.Length)%profile.Length];var n=new Vector3(-tangent.Y,tangent.X*Mathf.Cos(angle),tangent.X*Mathf.Sin(angle)).Normalized();Vertex(tool,new Vector3(p.X,p.Y*Mathf.Cos(angle),p.Y*Mathf.Sin(angle)),n,new Vector2(circle/(float)segments,j/(float)profile.Length));}
-  for(int i=0;i<segments;i++)for(int j=0;j<profile.Length;j++){V(i,j);V(i+1,j);V(i,j+1);V(i+1,j);V(i+1,j+1);V(i,j+1);}
+  for(int i=0;i<segments;i++)for(int j=0;j<profile.Length;j++){V(i,j);V(i,j+1);V(i+1,j);V(i+1,j);V(i,j+1);V(i+1,j+1);}
   return tool.Commit();
  }
  static ArrayMesh Spoke(float radius,float width,float angle){
@@ -19,7 +19,7 @@ public static class WheelRimBuilder {
    var tangent=new Vector3(0,-Mathf.Sin(theta),Mathf.Cos(theta));var centre=new Vector3(-width*.42f+(1-t)*radius*.10f,distance*Mathf.Cos(theta),distance*Mathf.Sin(theta));
    var position=centre+Vector3.Right*(halfDepth*Mathf.Cos(phi))+tangent*(halfWidth*Mathf.Sin(phi));var normal=(Vector3.Right*(Mathf.Cos(phi)/halfDepth)+tangent*(Mathf.Sin(phi)/halfWidth)).Normalized();Vertex(tool,position,normal,new Vector2(t,around/(float)sides));
   }
-  for(int i=0;i<steps;i++)for(int j=0;j<sides;j++){V(i,j);V(i+1,j);V(i,j+1);V(i+1,j);V(i+1,j+1);V(i,j+1);}
+  for(int i=0;i<steps;i++)for(int j=0;j<sides;j++){V(i,j);V(i,j+1);V(i+1,j);V(i+1,j);V(i,j+1);V(i+1,j+1);}
   return tool.Commit();
  }
  public static Node3D Build(float radius,float tyreWidth,int design){

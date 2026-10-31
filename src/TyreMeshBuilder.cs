@@ -13,7 +13,7 @@ public static class TyreMeshBuilder {
    if(wet&&Mathf.Abs(p.X)<.40f){float phase=Mathf.PosMod(angle+Mathf.Abs(p.X)*48f,16f);if(phase<2)r-=.005f;}
    var normal=new Vector3(-tangent.Y/width,tangent.X*Mathf.Cos(theta)/radius,tangent.X*Mathf.Sin(theta)/radius).Normalized();tool.SetNormal(normal);tool.SetUV(new Vector2(angle/(float)segments,j/(float)section.Length));tool.AddVertex(new Vector3(p.X*width,r*Mathf.Cos(theta),r*Mathf.Sin(theta)));
   }
-  for(int i=0;i<segments;i++)for(int j=0;j<section.Length;j++){Vertex(i,j);Vertex(i+1,j);Vertex(i,j+1);Vertex(i+1,j);Vertex(i+1,j+1);Vertex(i,j+1);}return tool.Commit();
+  for(int i=0;i<segments;i++)for(int j=0;j<section.Length;j++){Vertex(i,j);Vertex(i,j+1);Vertex(i+1,j);Vertex(i+1,j);Vertex(i,j+1);Vertex(i+1,j+1);}return tool.Commit();
  }
  public static MeshInstance3D Create(float radius,float width,bool wet){var part=new MeshInstance3D {Name="RebuiltRubberTyre",Mesh=Build(radius,width,wet),MaterialOverride=new StandardMaterial3D {AlbedoColor=new Color(.025f,.027f,.029f),Roughness=.88f,Metallic=0,MetallicSpecular=.22f,CullMode=BaseMaterial3D.CullModeEnum.Disabled}};part.SetMeta("radius",radius);part.SetMeta("width",width);part.SetMeta("wet",wet);return part;}
  public static void SetWet(MeshInstance3D part,bool wet){if(part.GetMeta("wet").AsBool()==wet)return;part.Mesh=Build(part.GetMeta("radius").AsSingle(),part.GetMeta("width").AsSingle(),wet);part.SetMeta("wet",wet);}
