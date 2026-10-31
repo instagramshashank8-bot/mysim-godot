@@ -5,7 +5,7 @@ namespace MySim {
 // Experimental force-driven native rigid body. No pose snapping, height clamping or heading assignment.
 // Not production-integrated until suspension, tyre/contact and real-track gates pass.
 public partial class NativeSuspensionVehicle : RigidBody3D {
- public int CarIndex;public DriverInput Controls;public float Water;public Compound Compound=Compound.Medium;
+ public int CarIndex;public DriverInput Controls;public bool TractionControl=true;public float Water;public Compound Compound=Compound.Medium;
  public int ChassisContacts;public readonly Vector3[] ContactForces=new Vector3[4],ContactNormals=new Vector3[4];
  public readonly bool[] Grounded=new bool[4];public readonly float[] Loads=new float[4];public readonly float[] SpringLength=new float[4];
  public Vector3[] RecoveredWheelCentres;public float[] RecoveredWheelRadii;
@@ -40,9 +40,14 @@ public partial class NativeSuspensionVehicle : RigidBody3D {
    float service=input.reverse?0:input.brake*brakeDecel*Mass*(i<2?.29f:.21f);if(input.handbrake&&i>=2)service+=Mass*1.5f;
    // A brake impulse cannot reverse a wheel's supported share of body momentum.
    service=Mathf.Min(service,Mathf.Abs(u)*Mass/(4*Mathf.Max(state.Step,.00001f)));
-   float fx=(i>=2?engine*.5f:0)-Mathf.Sign(u)*service;
-   fx=Mathf.Clamp(fx,-capacity,capacity);float remaining=Mathf.Sqrt(Mathf.Max(0,capacity*capacity-fx*fx));
-   float alpha=Mathf.Atan2(side,Mathf.Max(Mathf.Abs(u),1));float fy=-remaining*(float)Math.Tanh(alpha/.12f);
+   float alpha=Mathf.Atan2(side,Mathf.Max(Mathf.Abs(u),1));float lateralDemand=-capacity*(float)Math.Tanh(alpha/.12f);
+   bool reserveLateral=TractionControl&&i>=2&&engine>0&&input.brake<.01f&&!input.handbrake;
+   float drive=i>=2?engine*.5f:0;
+   // Torque management preserves the grip requested by measured lateral slip instead of
+   // spending the whole rear friction circle on drive and allowing power oversteer.
+   if(reserveLateral)drive=Mathf.Min(drive,Mathf.Sqrt(Mathf.Max(0,capacity*capacity-lateralDemand*lateralDemand)));
+   float fx=Mathf.Clamp(drive-Mathf.Sign(u)*service,-capacity,capacity);float remaining=Mathf.Sqrt(Mathf.Max(0,capacity*capacity-fx*fx));
+   float fy=reserveLateral?lateralDemand:-remaining*(float)Math.Tanh(alpha/.12f);
    // Passive contact damping must not reverse a patch's lateral momentum in one solver step.
    // Include angular inertia at the contact lever, then share the budget over all four patches.
    var lateralLever=(arm-state.CenterOfMass).Cross(right);float inverseEffectiveMass=state.InverseMass+lateralLever.Dot(state.InverseInertiaTensor*lateralLever);
