@@ -6,7 +6,7 @@ namespace MySim {
 // Not production-integrated until suspension, tyre/contact and real-track gates pass.
 public partial class NativeSuspensionVehicle : RigidBody3D {
  public int CarIndex;public DriverInput Controls;public bool TractionControl=true,BrakeStabilityAssist=true;public float Water;public Compound Compound=Compound.Medium;
- public int ChassisContacts;public readonly Vector3[] ContactForces=new Vector3[4],ContactNormals=new Vector3[4];
+ public string[] ContactParts=Array.Empty<string>();public int ChassisContacts;public readonly Vector3[] ContactForces=new Vector3[4],ContactNormals=new Vector3[4];
  public readonly bool[] Grounded=new bool[4];public readonly float[] Loads=new float[4];public readonly float[] SpringLength=new float[4];
  public Vector3[] RecoveredWheelCentres;public float[] RecoveredWheelRadii;
  public float WheelRadius=.33f,RestLength=.18f,StaticSag=.07f,DampingRatio=.7f;public int Contacts;public float WheelAngle;
@@ -26,7 +26,7 @@ public partial class NativeSuspensionVehicle : RigidBody3D {
   WheelAngle=Mathf.MoveToward(WheelAngle,Dynamics.SteeringTarget(input.steer,longitudinal),3.2f*state.Step);
   float gravity=state.TotalGravity.Length(),spring=Mass*gravity/(4*StaticSag),damper=2*DampingRatio*Mathf.Sqrt(spring*Mass*.25f);
   float engine=input.reverse?-Mass*3.5f*(input.throttle+input.brake)*.5f:Mathf.Min(power/Mathf.Max(Mathf.Abs(longitudinal),6),Mass*gravity*2.2f)*input.throttle;
-  Contacts=0;ChassisContacts=state.GetContactCount();
+  Contacts=0;ChassisContacts=state.GetContactCount();ContactParts=new string[ChassisContacts];for(int c=0;c<ChassisContacts;c++){int shape=state.GetContactLocalShape(c);uint owner=ShapeFindOwner(shape);ContactParts[c]=(ShapeOwnerGetOwner(owner) as Node)?.Name.ToString()??"UnknownBodyShape";}
   for(int i=0;i<4;i++){
    Grounded[i]=false;Loads[i]=0;ContactForces[i]=Vector3.Zero;ContactNormals[i]=Vector3.Zero;SpringLength[i]=RestLength+.15f;var mount=pose*mounts[i];
    using var query=PhysicsRayQueryParameters3D.Create(mount,mount-up*(radii[i]+RestLength+.15f),1);
