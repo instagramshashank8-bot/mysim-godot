@@ -31,6 +31,8 @@ public sealed class NativeTraffic {
    b.Water=owner.Race.wetness;b.TractionControl=v.traction;b.BrakeStabilityAssist=v.abs;b.Controls=v.servicing?new DriverInput(0,1,0):v.input;
    e.Model.GlobalTransform=new Transform3D(b.GlobalBasis,b.GlobalPosition-b.GlobalBasis.Y*.65f);e.Travel+=b.LinearVelocity.Dot(b.GlobalBasis.Z)*dt;WheelAnimation.Update(e.Wheels,e.Travel,b.WheelAngle);for(int i=0;i<4;i++)e.Wheels[i].Position=e.Homes[i]+Vector3.Up*(b.RestLength-b.StaticSag-b.SpringLength[i]);
   }}
+ public object Evidence=>entries.ConvertAll(e=>(object)new {car=e.RaceCar.carModel,distance=e.RaceCar.totalDistance,speed=e.RaceCar.speed,contacts=e.Body?.Contacts,positionFinite=e.Body!=null&&e.Body.GlobalPosition.IsFinite()});
+ public bool AdvancedWithoutRescue {get{if(RuleResets!=0)return false;foreach(var e in entries)if(e.Body==null||e.RaceCar.totalDistance<50||!e.Body.GlobalPosition.IsFinite())return false;return true;}}
  public bool AllFrozen {get{foreach(var e in entries)if(e.Body==null||!e.Body.Freeze)return false;return true;}}
 }
 }
