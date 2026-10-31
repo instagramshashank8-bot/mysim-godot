@@ -22,8 +22,12 @@ if os.environ.get('NATIVE_AI_LAP')=='1':
  assert json.loads(report.read_text())['ok'] and 'PASS native force-driven valid lap and results UI' in text
  print('COMPLETE genuine solo native AI lap/results; full hull/traffic/game gates separate',flush=True);sys.exit(0)
 if os.environ.get('NATIVE_HULL_CONTACT')=='1':
- car=(0,16)[shard];text=run(f'native-hull-contact-car-{car:02}',{'MYSIM_NATIVE_HULL_CONTACT_CHECKS':str(car),'MYSIM_REQUIRE_NATIVE_CAR_HULLS':'1'},['--headless'],timeout=360)
- result=json.loads((out/'native-hull-contact-results.json').read_text());assert result['all'] and 'PASS recovered compound hull bumper coverage' in text
+ cars=[shard*2,shard*2+1] if os.environ.get('NATIVE_HULL_MATRIX')=='1' else [(0,16)[shard]]
+ for car in cars:
+  label=f'native-hull-contact-car-{car:02}';values={'MYSIM_NATIVE_HULL_CONTACT_CHECKS':str(car),'MYSIM_REQUIRE_NATIVE_CAR_HULLS':'1'}
+  if os.environ.get('NATIVE_HULL_MATRIX')=='1':values['MYSIM_NATIVE_HULL_CONTACT_SPEEDS']='60,120' if car in (0,16) else '20,60,120'
+  text=run(label,values,['--headless'],timeout=360)
+  path=out/'native-hull-contact-results.json';result=json.loads(path.read_text());path.rename(out/(label+'.json'));assert result['all'] and 'PASS recovered compound hull bumper coverage' in text
  print('COMPLETE recovered compound body wall impacts; wheel and full-game gates remain open',flush=True);sys.exit(0)
 if os.environ.get('NATIVE_GAMEPLAY')=='1':
  track=(0,43)[shard];car=(0,16)[shard];label=f'native-gameplay-track-{track:02}-car-{car:02}'
