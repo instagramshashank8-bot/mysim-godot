@@ -13,7 +13,7 @@ public partial class NativeSuspensionVehicle : RigidBody3D {
  public Tyre[] Tyres=>tyres;
  Vector3[] mounts=new Vector3[4];float[] radii=new float[4];Tyre[] tyres={new Tyre(),new Tyre(),new Tyre(),new Tyre()};float power,drag,brakeDecel;
  public override void _Ready(){
-  CarIndex=Math.Clamp(CarIndex,0,23);Mass=RecoveredVehicleProfiles.Mass[CarIndex];CanSleep=false;ContinuousCd=true;MaxContactsReported=16;LinearDamp=0;AngularDamp=.15f;CollisionLayer=4;CollisionMask=7;
+  CarIndex=Math.Clamp(CarIndex,0,23);NativeCarColliders.ConfigureWheels(this,CarIndex);Mass=RecoveredVehicleProfiles.Mass[CarIndex];CanSleep=false;ContinuousCd=true;MaxContactsReported=16;LinearDamp=0;AngularDamp=.15f;CollisionLayer=4;CollisionMask=7;
   CenterOfMassMode=CenterOfMassModeEnum.Custom;CenterOfMass=new Vector3(0,-.3f,0);
   float wheelbase=RecoveredGeometry.Wheelbase[CarIndex],track=VehicleDimensions.Width[CarIndex]*.8f;
   if((RecoveredWheelCentres==null)!=(RecoveredWheelRadii==null)||RecoveredWheelCentres!=null&&(RecoveredWheelCentres.Length!=4||RecoveredWheelRadii.Length!=4))throw new InvalidOperationException("Recovered wheel contact configuration incomplete");
