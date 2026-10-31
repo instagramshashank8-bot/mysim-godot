@@ -18,7 +18,7 @@ public partial class NativeSuspensionVehicle : RigidBody3D {
   float wheelbase=RecoveredGeometry.Wheelbase[CarIndex],track=VehicleDimensions.Width[CarIndex]*.8f;
   if((RecoveredWheelCentres==null)!=(RecoveredWheelRadii==null)||RecoveredWheelCentres!=null&&(RecoveredWheelCentres.Length!=4||RecoveredWheelRadii.Length!=4))throw new InvalidOperationException("Recovered wheel contact configuration incomplete");
   for(int i=0;i<4;i++){radii[i]=RecoveredWheelRadii==null?WheelRadius:RecoveredWheelRadii[i];if(!float.IsFinite(radii[i])||radii[i]<.15f||radii[i]>.6f)throw new InvalidOperationException("Recovered wheel radius invalid");mounts[i]=RecoveredWheelCentres==null?new Vector3(i%2==0?-track*.5f:track*.5f,-.32f+RestLength-StaticSag,i<2?wheelbase*.5f:-wheelbase*.5f):RecoveredWheelCentres[i]+Vector3.Up*(RestLength-StaticSag);tyres[i].Replace(Compound);}
-  AddChild(new CollisionShape3D {Shape=new BoxShape3D {Size=new Vector3(track,.5f,wheelbase+.5f)}});
+  if(!NativeCarColliders.Install(this,CarIndex)){AddChild(new CollisionShape3D {Shape=new BoxShape3D {Size=new Vector3(track,.5f,wheelbase+.5f)}});GD.Print("NATIVE_COLLISION_FIXTURE_PROXY car=",CarIndex);}
   float vmax=RecoveredVehicleProfiles.Speed[CarIndex]*.44704f;power=Mass*26.82f*26.82f/(2*RecoveredVehicleProfiles.Acceleration[CarIndex])*1.35f;drag=power/(vmax*vmax*vmax);brakeDecel=26.82f*26.82f/(2*RecoveredVehicleProfiles.Brakes[CarIndex]*.3048f);
  }
  public override void _IntegrateForces(PhysicsDirectBodyState3D state){

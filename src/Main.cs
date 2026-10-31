@@ -5,6 +5,7 @@ namespace MySim {
 public partial class Main : Node3D {
  static readonly float ColorContrast = float.Parse(System.Environment.GetEnvironmentVariable("MYSIM_CONTRAST") ?? "1.14", System.Globalization.CultureInfo.InvariantCulture), ColorSat = float.Parse(System.Environment.GetEnvironmentVariable("MYSIM_SAT") ?? "1.1", System.Globalization.CultureInfo.InvariantCulture); Node3D world; CanvasLayer ui; DriveController drive; int lastTrack, lastCar, lastLaps = 3; Button menuStart; bool menuGoWas; float menuAge; bool resultsShown, escWas; float finShown, resultsArmed;
  public override void _Ready() {
+  if(System.Environment.GetEnvironmentVariable("MYSIM_NATIVE_HULL_BAKE") is string hullCars){NativeCarColliders.Bake(this,hullCars);return;}
   if(System.Environment.GetEnvironmentVariable("MYSIM_NATIVE_SUSPENSION_CHECKS")!=null){AddChild(new NativeSuspensionScenario());return;}
   if (System.Environment.GetEnvironmentVariable("MYSIM_RUNTIME_CHECKS") != null) { AddChild(new RuntimeChecks()); return; }
   if (System.Environment.GetEnvironmentVariable("MYSIM_FLOWCHECKS") != null) AddChild(new RaceFlowScenario { GetDrive=()=>drive, ResultsVisible=()=>resultsShown, MenuVisible=()=>ui!=null&&drive==null&&!resultsShown, Restart=()=>StartRace(lastTrack,lastCar,lastLaps), Menu=ShowMenu });
