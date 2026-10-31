@@ -16,6 +16,18 @@ def run(label,values,args=None,timeout=300):
   (out/(label+f'-{attempt}-process.json')).write_text(json.dumps({'returncode':code,'timed_out':timed_out,'elapsed_seconds':time.monotonic()-started,'timeout_seconds':timeout,'screenshot_exists':shot.exists() if shot else None,'error_lines':[line for line in text.splitlines() if 'ERROR:' in line]},indent=2))
   if code==0 and 'ERROR:' not in text:return text
  raise RuntimeError(label+' failed; see saved logs')
+if os.environ.get('NATIVE_MOUNTED_LAPS')=='1':
+ for track in range(shard,60,12):
+  for car in (0,16):
+   label=f'mounted-native-lap-track-{track:02}-car-{car:02}';report=out/(label+'.json')
+   values={'MYSIM_TRACK':str(track),'MYSIM_CAR':str(car),'MYSIM_NATIVE_GAMEPLAY':'1','MYSIM_COMPONENT_MOUNTS':'1','MYSIM_REQUIRE_NATIVE_CAR_HULLS':'1','MYSIM_AI':'1','MYSIM_AUTODRIVE':'1','MYSIM_LAPS':'1','MYSIM_SECONDS':'1200','MYSIM_RIVALS':'0','MYSIM_PRECISE_AI':'3','MYSIM_NATIVE_GAMEPLAY_CHECKS':'1','MYSIM_NATIVE_GAMEPLAY_REPORT':str(report),'MYSIM_COMPONENT_MOUNT_REPORT':str(out/(label+'-mounts.json'))}
+   try:
+    text=run(label,values,['--headless'],timeout=1800);result=json.loads(report.read_text());ok=result['ok'] and 'PASS native force-driven valid lap and results UI' in text and 'NATIVE_SOURCE_BODY_COLLIDERS' in text and 'NATIVE_COLLISION_FIXTURE_PROXY' not in text and 'RECONSTRUCTED_COMPONENT_MOUNTS' in text
+    row={'track':track,'car':car,'ok':bool(ok),'result':result}
+   except RuntimeError as e:row={'track':track,'car':car,'ok':False,'error':str(e)}
+   rows.append(row);(out/'mounted-native-layout-results.json').write_text(json.dumps(rows,indent=2))
+ assert len(rows)==10 and all(x['ok'] for x in rows),'See preserved exact layout/car failures; no rescue, legal-lap, UI or hull gates weakened'
+ print('PASS native mounted hull layout shard; full traffic/weather/art/Windows acceptance separate',flush=True);sys.exit(0)
 if os.environ.get('NATIVE_AI_LAP')=='1':
  track=(0,43)[shard];car=(0,16)[shard];label=f'native-ai-lap-track-{track:02}-car-{car:02}';report=out/(label+'.json')
  values={'MYSIM_TRACK':str(track),'MYSIM_CAR':str(car),'MYSIM_NATIVE_GAMEPLAY':'1','MYSIM_AI':'1','MYSIM_AUTODRIVE':'1','MYSIM_LAPS':'1','MYSIM_SECONDS':'480','MYSIM_RIVALS':'0','MYSIM_PRECISE_AI':'3','MYSIM_NATIVE_GAMEPLAY_REPORT':str(report)}

@@ -4,6 +4,7 @@ root=pathlib.Path.cwd();depth=os.environ.get('IMPORT_REVIEW_DEPTH','');out=root/
 scopes={'rain_focus':([6,16],[0]),'rear_panel_uv':([6],[]),'livery_uv':([0,6,12,18],[]),'gui_review':([],[]),'wheel_compounds':([1,6,16],[]),'car_panel_uv':([6],[]),'car_uv_roles':([1,6,16],[]),'car_uv':([1,6,16],[]),'precise_ai':([16],[43,15]),'contact_trace':([16],[43,15]),'geometry':(list(range(24)),[])}
 if depth=='native_hull_recovery':scopes[depth]=(sorted(set(x['car'] for x in json.loads((root/'data/native_hull_recovery.json').read_text())['cases'])),[])
 if depth=='native_traffic_lap':scopes[depth]=([[0,1],[16,17]][int(os.environ.get('SHARD','0'))],[[0,43][int(os.environ.get('SHARD','0'))]])
+if depth=='native_mounted_laps':scopes[depth]=([0,16],list(range(int(os.environ.get('SHARD','0')),60,12)))
 if depth=='native_hull_matrix':scopes[depth]=(list(range(int(os.environ.get('SHARD','0'))*2,int(os.environ.get('SHARD','0'))*2+2)),[])
 if depth in ('rebuilt_rim_review','car_assembly_audit','rebuilt_wheel_review','car_shape_review','rebuilt_body_review'):scopes[depth]=([[1,6,16][int(os.environ.get('SHARD','0'))]],[])
 if depth in ('native_suspension_track','native_suspension_steer','native_suspension_capture_recovery','native_suspension_contact_recovery','native_gameplay','native_hull_gameplay','native_hull_contact','native_ai_lap','native_hull_ai_lap','native_mounted_gameplay'):scopes[depth]=([[0,16][int(os.environ.get('SHARD','0'))]],[[0,43][int(os.environ.get('SHARD','0'))]])

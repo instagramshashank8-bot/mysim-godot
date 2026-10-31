@@ -1,11 +1,11 @@
 """Bake selected recovered collision resources on the runner and enforce all existing error/containment gates."""
 import os,pathlib,json,subprocess
 out=pathlib.Path('outputs/cloud-game');out.mkdir(parents=True,exist_ok=True)
-shard=int(os.environ['HULL_REVIEW_SHARD']);depth=os.environ['HULL_REVIEW_DEPTH'];cars=[shard*2,shard*2+1] if depth=='native_hull_matrix' else [[0,16][shard]]
+shard=int(os.environ['HULL_REVIEW_SHARD']);depth=os.environ['HULL_REVIEW_DEPTH'];cars=[0,16] if depth=='native_mounted_laps' else [shard*2,shard*2+1] if depth=='native_hull_matrix' else [[0,16][shard]]
 if depth=='native_hull_recovery':cars=sorted(set(x['car'] for x in json.loads(pathlib.Path('data/native_hull_recovery.json').read_text())['cases']))
 if depth=='native_traffic_lap':cars=[[0,1],[16,17]][shard]
 env=dict(os.environ);env['MYSIM_NATIVE_HULL_BAKE']=','.join(map(str,cars));log=out/'hull-bake.log'
-if depth=='native_mounted_gameplay':env.update(MYSIM_COMPONENT_MOUNTS='1')
+if depth in ('native_mounted_gameplay','native_mounted_laps'):env.update(MYSIM_COMPONENT_MOUNTS='1')
 with log.open('w') as stream:result=subprocess.run([os.environ['GODOT_BIN'],'--headless','--path','.'],env=env,stdout=stream,stderr=subprocess.STDOUT,timeout=1200)
 text=log.read_text(errors='replace')
 if result.returncode or 'ERROR:' in text:
