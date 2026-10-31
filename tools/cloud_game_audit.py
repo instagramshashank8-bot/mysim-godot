@@ -1,7 +1,7 @@
 import os,pathlib,subprocess,json,sys,time
 r=pathlib.Path.cwd();out=r/'outputs/cloud-game';out.mkdir(parents=True,exist_ok=True);g=os.environ['GODOT_BIN'];shard=int(os.environ.get('SHARD','0'));rows=[]
 def run(label,values,args=None,timeout=300):
- env={k:v for k,v in os.environ.items() if not k.startswith('MYSIM_')};env.update(values);env['MYSIM_BINDING_AUDIT']=str(out/label);log=out/(label+'.log')
+ env={k:v for k,v in os.environ.items() if not k.startswith('MYSIM_')};env.update(values);env.setdefault('MYSIM_NATIVE_PHYSICS_HZ',os.environ.get('NATIVE_PHYSICS_HZ','120'));env['MYSIM_BINDING_AUDIT']=str(out/label);log=out/(label+'.log')
  for attempt in (1,2):
   env['MYSIM_PROBE_ATTEMPT']=str(attempt)
   shot=pathlib.Path(values['MYSIM_SHOT']).resolve() if values.get('MYSIM_SHOT') else None
