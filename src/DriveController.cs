@@ -165,7 +165,7 @@ AudioStreamPlayer engineSnd, whineSnd; AudioStreamPlayer[] sfxPool; int sfxNext;
   if (WheelPivots != null) foreach (var wp in WheelPivots) wp.Visible = CamMode != 2;
   if(System.Environment.GetEnvironmentVariable("MYSIM_CAMERA_CYCLE_CHECK")=="1"&&cameraCycleChecks<5&&t>(cameraCycleChecks+1)*.5f){
    if(CamMode!=cameraCycleChecks%4||WheelPivots==null||WheelPivots.Length!=4)throw new System.Exception("Camera cycle fixture lost mode or wheel assembly");
-   foreach(var pivot in WheelPivots)if(pivot.Visible!=(cameraCycleChecks%4!=2))throw new System.Exception("Camera cycle left a wheel hidden/visible in the wrong view");
+   foreach(var pivot in WheelPivots)if(pivot.Visible!=CarViewVisibility.WheelsVisible(CarIndex,cameraCycleChecks%4==2))throw new System.Exception("Camera cycle left a wheel hidden/visible in the wrong view");
    cameraCycleChecks++;if(cameraCycleChecks<5)CycleCamera();else GD.Print("PASS full camera cycle restores all four wheels");
   }
   if (System.Environment.GetEnvironmentVariable("MYSIM_CLOSE") != null) { var sideDir = new Vector3(fwd.Z, 0, -fwd.X); Cam.Position = Car.Position + sideDir * 4.2f + Vector3.Up * 0.45f - fwd * 0.8f; Cam.LookAt(Car.Position + Vector3.Up * 0.35f); Cam.Fov = 45f; if (AutoDrive && t >= AutoSeconds) { CaptureShot("close.png"); CleanExit.Request(this); } return; }
@@ -177,7 +177,7 @@ AudioStreamPlayer engineSnd, whineSnd; AudioStreamPlayer[] sfxPool; int sfxNext;
    if (!camInit) { chaseOffset = target-Car.Position; camInit = true; }
    chaseOffset = chaseOffset.Lerp(target-Car.Position, 1f-Mathf.Exp(-6f*(float)delta));
    Cam.Position = ObstructCam(Car.Position + Vector3.Up * (hgt * 0.8f), Car.Position+chaseOffset); Cam.LookAt(Car.Position + fwd * look + Vector3.Up * 1.0f); Cam.Fov = Mathf.Lerp(Cam.Fov, 46f + Mathf.Clamp(speed / 80f, 0, 1) * 6f, 1f - Mathf.Exp(-3f * (float)delta));
-  } else if (CamMode == 2) { Cam.Position = Car.GlobalTransform * new Vector3(-0.35f, 0.88f, 0.05f); Cam.GlobalTransform = new Transform3D(Car.GlobalTransform.Basis.Rotated(Car.GlobalTransform.Basis.Y.Normalized(), Mathf.Pi), Cam.Position); Cam.Fov = 75f; camInit = false; }
+  } else if (CamMode == 2) { Cam.Position = Car.GlobalTransform * new Vector3(CarCatalog.RaceClass(CarIndex)==1?0:-0.35f, 0.88f, 0.05f); Cam.GlobalTransform = new Transform3D(Car.GlobalTransform.Basis.Rotated(Car.GlobalTransform.Basis.Y.Normalized(), Mathf.Pi), Cam.Position); Cam.Fov = 75f; camInit = false; }
   else { Cam.Position = Car.GlobalTransform * new Vector3(0, 0.62f, 1.9f); Cam.GlobalTransform = new Transform3D(Car.GlobalTransform.Basis.Rotated(Car.GlobalTransform.Basis.Y.Normalized(), Mathf.Pi), Cam.Position); Cam.Fov = 70f; camInit = false; }
   if(AutoDrive&&AiTest&&AutoSeconds>250&&t>=AutoSeconds&&!Player.finished){GD.PrintErr("FAIL full-race simulation deadline track=",TrackIndex," progress=",Player.progress," lap=",Player.completedLaps," wallHits=",WallHits," damage=",Player.damage);CleanExit.Request(this,1);return;}
   if (AiTest && Player.finished) { finT += (float)delta; if (finT > (rivals.Count > 0 ? 14f : 1.5f)) { GD.Print("FINISHED t=", t.ToString("0.0"), " laps=", Player.completedLaps, " time=", Player.finishTime.ToString("0.00"), " best=", Player.bestLap.ToString("0.00"), " wallHits=", WallHits, " damage=", Player.damage.ToString("0.000000000",System.Globalization.CultureInfo.InvariantCulture)); CaptureShot("finish.png"); CleanExit.Request(this); } }
