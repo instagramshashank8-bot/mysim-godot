@@ -1,15 +1,16 @@
 name: game-art-and-runtime-review
-run-name: '${{ inputs.depth }} cars ${{ inputs.cars || ''16'' }}'
+run-name: '${{ inputs.depth }} cars ${{ inputs.cars || ''16'' }} backend ${{ inputs.physics_backend || ''source'' }}'
 on:
   workflow_dispatch:
     inputs:
       depth: {description: 'Preview coverage or full races with live mesh collision', type: choice, options: [preview, full_races, geometry, surfaces, collision_probe, car_materials, input_physics, car_uv, native_races, wheel_orientation, contact_trace, car_uv_roles, precise_ai, native_focus, car_panel_uv, wheel_compounds, assembly_review, weather_review, gui_review, livery_uv, rear_panel_uv, rain_focus, route_parity, ground_review, controls_gameplay, track_scene_audit, alpha_policy_review, rebuilt_rim_review, car_assembly_audit, rebuilt_wheel_review, car_shape_review, rebuilt_body_review, native_suspension_track, native_suspension_steer, native_suspension_capture_recovery, native_suspension_contact_recovery, native_gameplay, native_hull_gameplay, native_hull_contact], default: preview}
+      physics_backend: {description: 'Explicit CI-only native solver experiment', type: choice, options: [source, jolt], default: source}
       native_ai: {description: 'Apply explicit experimental AI mode during native regression only', type: boolean, default: false}
       case_set: {description: 'Exact native regression cases; completed cases are not repeated', type: choice, options: [shutdown, bridge, monaco_ai3, ai4_regression, braking_monaco], default: shutdown}
       ai_mode: {description: 'Opt-in curvature AI experiment; default game AI is unchanged', type: choice, options: ['1', '2', '3', '4', '5'], default: '1'}
       cars: {description: 'Comma-separated car IDs for native scene laps', type: string, default: '16'}
 permissions: {contents: write}
-concurrency: {group: 'game-art-review-${{ inputs.depth }}-${{ inputs.cars || ''16'' }}-${{ inputs.case_set || ''default'' }}-${{ inputs.native_ai && inputs.ai_mode || ''default'' }}', cancel-in-progress: false}
+concurrency: {group: 'game-art-review-${{ inputs.physics_backend || ''source'' }}-${{ inputs.depth }}-${{ inputs.cars || ''16'' }}-${{ inputs.case_set || ''default'' }}-${{ inputs.native_ai && inputs.ai_mode || ''default'' }}', cancel-in-progress: false}
 jobs:
   render:
     runs-on: ubuntu-latest
@@ -23,6 +24,10 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
         with: {dotnet-version: '8.0.x'}
+      - name: Select explicit cloud-only native physics backend
+        env:
+          NATIVE_PHYSICS_BACKEND: ${{ inputs.physics_backend || 'source' }}
+        run: python tools/cloud_native_backend.py
       - name: Early C# compilation before asset downloads
         run: dotnet build -v quiet
       - uses: actions/setup-python@v5
