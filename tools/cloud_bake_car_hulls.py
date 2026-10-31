@@ -5,6 +5,7 @@ shard=int(os.environ['HULL_REVIEW_SHARD']);depth=os.environ['HULL_REVIEW_DEPTH']
 if depth=='native_hull_recovery':cars=sorted(set(x['car'] for x in json.loads(pathlib.Path('data/native_hull_recovery.json').read_text())['cases']))
 if depth=='native_traffic_lap':cars=[[0,1],[16,17]][shard]
 env=dict(os.environ);env['MYSIM_NATIVE_HULL_BAKE']=','.join(map(str,cars));log=out/'hull-bake.log'
+if depth=='native_mounted_gameplay':env.update(MYSIM_COMPONENT_MOUNTS='1')
 with log.open('w') as stream:result=subprocess.run([os.environ['GODOT_BIN'],'--headless','--path','.'],env=env,stdout=stream,stderr=subprocess.STDOUT,timeout=1200)
 text=log.read_text(errors='replace')
 if result.returncode or 'ERROR:' in text:

@@ -1,0 +1,6 @@
+{
+  "scope": "Authored experimental assembly mounts. Measured recovered wheel hubs and tyre dimensions anchor wheel components; cockpit anchors require visual review. Original geometry/UVs remain unchanged. Not source-exact pose certification.",
+  "caliper": { "inboardTyreWidth": 0.4, "rearwardRadius": 0.6 },
+  "wheelguard": { "inboardTyreWidth": 0.8, "aboveHubRadius": 0.2 },
+  "steeringWheel": { "closedCar": [-0.35, 0.66, 0.5], "openWheel": [0.0, 0.66, 0.5] }
+}
