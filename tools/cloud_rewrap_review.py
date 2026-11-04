@@ -3,6 +3,10 @@ import os,pathlib,json,subprocess,hashlib,tempfile,re
 from cryptography.hazmat.primitives.ciphers import Cipher,algorithms,modes
 names=os.environ['REVIEW_ASSETS'].split(',')
 source_release=os.environ.get('REVIEW_SOURCE_RELEASE','repair-review-20261029')
+if source_release.startswith('windows-candidate-'):
+ import runpy
+ runpy.run_path(str(pathlib.Path(__file__).with_name('cloud_rewrap_windows.py')),run_name='__main__')
+ raise SystemExit(0)
 if not re.fullmatch(r'repair-review-[0-9]+(?:-[0-9]+)?',source_release):raise ValueError('Invalid bounded source review release')
 if not 1<=len(names)<=8 or len(set(names))!=len(names):raise ValueError('Select1to8distinct review assets')
 if any(not re.fullmatch(r'(game-review-[0-9-]+|sheets-[a-zA-Z0-9_-]+)\.enc',n) for n in names):raise ValueError('Only named encrypted review evidence is allowed')
