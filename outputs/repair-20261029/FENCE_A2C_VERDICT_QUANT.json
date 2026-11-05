@@ -1,0 +1,94 @@
+{
+ "changed_grid": [
+  "000000000000",
+  "000000000000",
+  "000000000000",
+  "000000000899",
+  "000000339998",
+  "973141000000",
+  "100000000000"
+ ],
+ "cells": [
+  {
+   "cell": [
+    3,
+    9
+   ],
+   "changed_pct": 8.4,
+   "base_edge": 21,
+   "a2c_edge": 25
+  },
+  {
+   "cell": [
+    3,
+    10
+   ],
+   "changed_pct": 18.1,
+   "base_edge": 44,
+   "a2c_edge": 44
+  },
+  {
+   "cell": [
+    3,
+    11
+   ],
+   "changed_pct": 26.2,
+   "base_edge": 53,
+   "a2c_edge": 52
+  },
+  {
+   "cell": [
+    4,
+    8
+   ],
+   "changed_pct": 10.1,
+   "base_edge": 46,
+   "a2c_edge": 47
+  },
+  {
+   "cell": [
+    4,
+    9
+   ],
+   "changed_pct": 21.0,
+   "base_edge": 46,
+   "a2c_edge": 45
+  },
+  {
+   "cell": [
+    4,
+    10
+   ],
+   "changed_pct": 16.5,
+   "base_edge": 36,
+   "a2c_edge": 36
+  },
+  {
+   "cell": [
+    4,
+    11
+   ],
+   "changed_pct": 8.1,
+   "base_edge": 30,
+   "a2c_edge": 33
+  },
+  {
+   "cell": [
+    5,
+    0
+   ],
+   "changed_pct": 10.7,
+   "base_edge": 49,
+   "a2c_edge": 50
+  },
+  {
+   "cell": [
+    5,
+    1
+   ],
+   "changed_pct": 7.7,
+   "base_edge": 46,
+   "a2c_edge": 47
+  }
+ ]
+}

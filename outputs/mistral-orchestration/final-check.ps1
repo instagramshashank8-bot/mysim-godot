@@ -1,0 +1,1 @@
+Select-String -Path C:/Users/shash/Documents/MySimGodot/.github/workflows/game-review.yml -Pattern 'settings_persist_review,''reference_evidence' | ForEach-Object { Write-Output ("" + $_.LineNumber + ": " + $_.Line.Trim().Substring(0,[Math]::Min(90,$_.Line.Trim().Length))) }

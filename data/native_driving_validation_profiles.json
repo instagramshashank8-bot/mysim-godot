@@ -1,0 +1,213 @@
+{
+  "scope": "Controlled continuous-driving validation profiles for the native force-driven vehicle. Each profile is a scripted input sequence executed on the track0 reference start straight, one profile at a time, with the car mechanically reset to the same spawn between profiles (rig reset between scenarios, never during measured phases). Assertions are deliberately wide breakage guards (NaN, teleport, inversion, loss of control), not real-world calibration; the recorded metric values are the evidence. Numeric anchors come only from this project's recovered vehicle profiles and live recorded state; no purchased-reference physics constants are known or used. Calibration status: first clean continuous lap (run 41799538756, jolt/240Hz/CCD/rotational, bestLap 87.52s) confirms the 0-60 band, full-tyre-contact behaviour (~99.4% of a lap), and that chassis hulls legitimately rest on the drive surface with near-zero DeltaV - so body-contact evidence is recorded (chassisContactSamples) while assertions use nonSurfaceContactSamples (contacts on anything that is not the drive surface), which the clean lap satisfies at zero.",
+  "references": {
+    "brakeStop60Metres": "RecoveredVehicleProfiles.Brakes[car]*0.3048 (recovered stopping-distance spec from 60 mph)",
+    "accel0To60Seconds": "RecoveredVehicleProfiles.Acceleration[car] (recovered 0-60 mph spec)",
+    "steerActuatorRate": "3.2 rad/s wheel-angle rate limit in NativeSuspensionVehicle"
+  },
+  "profiles": [
+    {
+      "id": "input_direction",
+      "title": "Input direction and basic response at the native layer",
+      "purpose": "Verify model-coordinate steering produces consistent signed yaw for both signs, throttle accelerates, brake stops, and no control is inverted or dead. Screen-side mapping is covered separately by Logic/CoreChecks.",
+      "requires": { "rotationalTyres": false, "damageEnabled": false },
+      "abort": { "maxDurationSeconds": 30, "lateralAbsBeyond": 25, "positionJumpBeyond": 2.5 },
+      "phases": [
+        { "id": "hold", "forSeconds": 1.2, "throttle": 0, "brake": 1, "steer": 0 },
+        { "id": "launch", "throttle": 1, "brake": 0, "steer": 0, "until": { "speedAtLeast": 15 }, "minSeconds": 0.2 },
+        { "id": "settle", "forSeconds": 1.0, "throttle": 0.3, "brake": 0, "steer": 0 },
+        { "id": "steer_positive", "forSeconds": 1.2, "throttle": 0.3, "brake": 0, "steer": 1 },
+        { "id": "centre", "forSeconds": 0.8, "throttle": 0.3, "brake": 0, "steer": 0 },
+        { "id": "steer_negative", "forSeconds": 1.2, "throttle": 0.3, "brake": 0, "steer": -1 },
+        { "id": "centre2", "forSeconds": 0.8, "throttle": 0.3, "brake": 0, "steer": 0 },
+        { "id": "brake_stop", "throttle": 0, "brake": 1, "steer": 0, "until": { "speedBelow": 0.1 }, "minSeconds": 0.2 }
+      ],
+      "assertions": [
+        { "id": "yaw_positive", "metric": "meanYawRate:steer_positive", "op": "gte", "value": 0.05 },
+        { "id": "yaw_negative", "metric": "meanYawRate:steer_negative", "op": "lte", "value": -0.05 },
+        { "id": "yaw_real_both_sides", "metric": "meanYawRateAbsMin:all", "op": "gte", "value": 0.05 },
+        { "id": "launch_reached_speed", "metric": "endSpeed:launch", "op": "between", "min": 14.5, "max": 16.5 },
+        { "id": "brake_stopped", "metric": "endSpeed:brake_stop", "op": "lt", "value": 0.2 },
+        { "id": "no_foreign_surface_contact", "metric": "nonSurfaceContactSamples:all", "op": "lt", "value": 1 },
+        { "id": "stayed_upright", "metric": "uprightMinCosine:all", "op": "gte", "value": 0.9 },
+        { "id": "no_teleport", "metric": "positionJumpMax:all", "op": "lt", "value": 1.0 }
+      ]
+    },
+    {
+      "id": "acceleration_0_60",
+      "title": "Full-throttle 0-60 mph acceleration, dry",
+      "purpose": "Record the v(t) curve and compare 0-26.82 m/s time against the recovered acceleration spec of the car under test. Clean-lap calibration: full-throttle 0-26.82 measured 2.40s (1.17x the car16 spec) in run 41799538756, inside the band below.",
+      "requires": { "rotationalTyres": false, "damageEnabled": false },
+      "abort": { "maxDurationSeconds": 30, "lateralAbsBeyond": 25, "positionJumpBeyond": 2.5 },
+      "phases": [
+        { "id": "hold", "forSeconds": 1.2, "throttle": 0, "brake": 1, "steer": 0 },
+        { "id": "launch", "throttle": 1, "brake": 0, "steer": 0, "until": { "speedAtLeast": 26.82 }, "minSeconds": 0.2 },
+        { "id": "cool", "throttle": 0, "brake": 0.3, "steer": 0, "until": { "speedBelow": 22 } },
+        { "id": "brake_stop", "throttle": 0, "brake": 1, "steer": 0, "until": { "speedBelow": 0.1 }, "minSeconds": 0.2 }
+      ],
+      "assertions": [
+        { "id": "accel_time_band", "metric": "duration:launch", "op": "betweenReference", "reference": "accel0To60Seconds", "factorMin": 0.55, "factorMax": 1.9 },
+        { "id": "reached_60mph", "metric": "endSpeed:launch", "op": "gte", "value": 26.5 },
+        { "id": "stayed_straight", "metric": "trackLateralAbsMax:all", "op": "lt", "value": 3 },
+        { "id": "wheels_down", "metric": "groundedFraction:all", "op": "gte", "value": 0.9 },
+        { "id": "no_foreign_surface_contact", "metric": "nonSurfaceContactSamples:all", "op": "lt", "value": 1 },
+        { "id": "stayed_upright", "metric": "uprightMinCosine:all", "op": "gte", "value": 0.9 },
+        { "id": "no_teleport", "metric": "positionJumpMax:all", "op": "lt", "value": 1.0 }
+      ]
+    },
+    {
+      "id": "braking_60_0",
+      "title": "Full-service brake stop from 60 mph, dry, assists off",
+      "purpose": "Measure stop distance and decel from 60 mph against the recovered braking spec; record lockup/slip evidence when rotational tyres are enabled. NOT yet calibrated against a real full-force stop: the clean-lap AI braked only up to ~0.19 input, so the band rests on the model's own brake force definition and stays as first authored.",
+      "requires": { "rotationalTyres": false, "damageEnabled": false },
+      "abort": { "maxDurationSeconds": 25, "lateralAbsBeyond": 25, "positionJumpBeyond": 2.5 },
+      "phases": [
+        { "id": "hold", "forSeconds": 1.2, "throttle": 0, "brake": 1, "steer": 0 },
+        { "id": "launch", "throttle": 1, "brake": 0, "steer": 0, "until": { "speedAtLeast": 27.5 }, "minSeconds": 0.2 },
+        { "id": "settle", "forSeconds": 0.7, "throttle": 0, "brake": 0, "steer": 0 },
+        { "id": "brake", "throttle": 0, "brake": 1, "steer": 0, "until": { "speedBelow": 0.1 }, "minSeconds": 0.2 },
+        { "id": "hold_end", "forSeconds": 1.0, "throttle": 0, "brake": 1, "steer": 0 }
+      ],
+      "assertions": [
+        { "id": "stop_started_near_60mph", "metric": "startSpeed:brake", "op": "gte", "value": 26.0 },
+        { "id": "stop_distance_band", "metric": "pathLength:brake", "op": "betweenReference", "reference": "brakeStop60Metres", "factorMin": 0.7, "factorMax": 1.45 },
+        { "id": "decel_band", "metric": "longitudinalAccelMin:brake", "op": "between", "min": -28, "max": -12 },
+        { "id": "stopped", "metric": "endSpeed:brake", "op": "lt", "value": 0.5 },
+        { "id": "stayed_straight", "metric": "trackLateralAbsMax:brake", "op": "lt", "value": 4 },
+        { "id": "wheels_down", "metric": "groundedFraction:brake", "op": "gte", "value": 0.95 },
+        { "id": "no_teleport", "metric": "positionJumpMax:all", "op": "lt", "value": 1.0 }
+      ]
+    },
+    {
+      "id": "braking_60_wet",
+      "title": "Full-service brake stop from 60 mph on a wet surface",
+      "purpose": "Same measurement as braking_60_0 under the case's weather/compound; the wider distance band reflects grip-limited braking on surface water. The recorded ratio against the dry reference is the evidence.",
+      "requires": { "rotationalTyres": false, "damageEnabled": false },
+      "abort": { "maxDurationSeconds": 30, "lateralAbsBeyond": 25, "positionJumpBeyond": 2.5 },
+      "phases": [
+        { "id": "hold", "forSeconds": 1.2, "throttle": 0, "brake": 1, "steer": 0 },
+        { "id": "launch", "throttle": 1, "brake": 0, "steer": 0, "until": { "speedAtLeast": 27.5 }, "minSeconds": 0.2 },
+        { "id": "settle", "forSeconds": 0.7, "throttle": 0, "brake": 0, "steer": 0 },
+        { "id": "brake", "throttle": 0, "brake": 1, "steer": 0, "until": { "speedBelow": 0.1 }, "minSeconds": 0.2 },
+        { "id": "hold_end", "forSeconds": 1.0, "throttle": 0, "brake": 1, "steer": 0 }
+      ],
+      "assertions": [
+        { "id": "stop_started_near_60mph", "metric": "startSpeed:brake", "op": "gte", "value": 26.0 },
+        { "id": "stop_distance_band", "metric": "pathLength:brake", "op": "betweenReference", "reference": "brakeStop60Metres", "factorMin": 0.7, "factorMax": 2.6 },
+        { "id": "decel_band", "metric": "longitudinalAccelMin:brake", "op": "between", "min": -25, "max": -5 },
+        { "id": "stopped", "metric": "endSpeed:brake", "op": "lt", "value": 0.5 },
+        { "id": "stayed_straight", "metric": "trackLateralAbsMax:brake", "op": "lt", "value": 6 },
+        { "id": "no_teleport", "metric": "positionJumpMax:all", "op": "lt", "value": 1.0 }
+      ]
+    },
+    {
+      "id": "steering_rate_step",
+      "title": "Full-lock step steer at 15 m/s and 30 m/s, both directions",
+      "purpose": "Measure wheel-angle actuator response against the 3.2 rad/s rate limit and the speed-dependent SteeringLock curve (responsive at low speed, reduced lock at high speed), plus yaw response and recovery after centring. Requires rotational tyres so the slip channels requested by the slip-visibility handling target exist.",
+      "requires": { "rotationalTyres": true, "damageEnabled": false },
+      "abort": { "maxDurationSeconds": 45, "lateralAbsBeyond": 25, "positionJumpBeyond": 2.5 },
+      "phases": [
+        { "id": "hold", "forSeconds": 1.2, "throttle": 0, "brake": 1, "steer": 0 },
+        { "id": "launch", "throttle": 1, "brake": 0, "steer": 0, "until": { "speedAtLeast": 15.5 }, "minSeconds": 0.2 },
+        { "id": "settle", "forSeconds": 1.2, "throttle": 0.3, "brake": 0, "steer": 0 },
+        { "id": "step_right_low", "forSeconds": 2, "throttle": 0.3, "brake": 0, "steer": 1 },
+        { "id": "centre_low_r", "forSeconds": 1.5, "throttle": 0.3, "brake": 0, "steer": 0 },
+        { "id": "step_left_low", "forSeconds": 2, "throttle": 0.3, "brake": 0, "steer": -1 },
+        { "id": "centre_low_l", "forSeconds": 1.5, "throttle": 0.3, "brake": 0, "steer": 0 },
+        { "id": "launch_high", "throttle": 1, "brake": 0, "steer": 0, "until": { "speedAtLeast": 30.5 }, "minSeconds": 0.2 },
+        { "id": "settle_high", "forSeconds": 1.2, "throttle": 0.3, "brake": 0, "steer": 0 },
+        { "id": "step_right_high", "forSeconds": 2, "throttle": 0.3, "brake": 0, "steer": 1 },
+        { "id": "centre_high", "forSeconds": 1.5, "throttle": 0.3, "brake": 0, "steer": 0 },
+        { "id": "brake_stop", "throttle": 0, "brake": 1, "steer": 0, "until": { "speedBelow": 0.1 }, "minSeconds": 0.2 }
+      ],
+      "assertions": [
+        { "id": "responds_right_low", "metric": "steerResponseTime:step_right_low", "op": "lt", "value": 0.2 },
+        { "id": "responds_left_low", "metric": "steerResponseTime:step_left_low", "op": "lt", "value": 0.2 },
+        { "id": "responds_right_high", "metric": "steerResponseTime:step_right_high", "op": "lt", "value": 0.2 },
+        { "id": "settle_rate_limited_low", "metric": "steerSettleRatio:step_right_low", "op": "between", "min": 0.5, "max": 1.4 },
+        { "id": "settle_rate_limited_left", "metric": "steerSettleRatio:step_left_low", "op": "between", "min": 0.5, "max": 1.4 },
+        { "id": "settle_rate_limited_high", "metric": "steerSettleRatio:step_right_high", "op": "between", "min": 0.5, "max": 1.4 },
+        { "id": "tracks_lock_low", "metric": "steerTrackingRatio:step_right_low", "op": "between", "min": 0.9, "max": 1.1 },
+        { "id": "tracks_lock_high", "metric": "steerTrackingRatio:step_right_high", "op": "between", "min": 0.9, "max": 1.1 },
+        { "id": "yaw_right_low", "metric": "meanYawRate:step_right_low", "op": "gte", "value": 0.08 },
+        { "id": "yaw_left_low", "metric": "meanYawRate:step_left_low", "op": "lte", "value": -0.08 },
+        { "id": "yaw_right_high", "metric": "meanYawRate:step_right_high", "op": "gte", "value": 0.02 },
+        { "id": "no_spin_low", "metric": "yawRatePeakAbs:step_right_low", "op": "lt", "value": 4 },
+        { "id": "no_spin_high", "metric": "yawRatePeakAbs:step_right_high", "op": "lt", "value": 4 },
+        { "id": "recovers_after_centre_low", "metric": "yawRateEndAbs:centre_low_r", "op": "lt", "value": 0.35 },
+        { "id": "recovers_after_centre_high", "metric": "yawRateEndAbs:centre_high", "op": "lt", "value": 0.35 },
+        { "id": "wheels_down", "metric": "groundedFraction:all", "op": "gte", "value": 0.9 },
+        { "id": "no_foreign_surface_contact", "metric": "nonSurfaceContactSamples:all", "op": "lt", "value": 1 },
+        { "id": "no_teleport", "metric": "positionJumpMax:all", "op": "lt", "value": 1.0 }
+      ]
+    },
+    {
+      "id": "straight_stability",
+      "title": "Hands-off straight-running stability at 30 m/s",
+      "purpose": "Record natural heading/lateral drift with no driver input at speed; the reference shows a car holding a straight line without visible pilot correction. Slope on the real straight is recorded, so speed loss is a recorded metric, not an assertion.",
+      "requires": { "rotationalTyres": false, "damageEnabled": false },
+      "abort": { "maxDurationSeconds": 30, "lateralAbsBeyond": 25, "positionJumpBeyond": 2.5 },
+      "phases": [
+        { "id": "hold", "forSeconds": 1.2, "throttle": 0, "brake": 1, "steer": 0 },
+        { "id": "launch", "throttle": 1, "brake": 0, "steer": 0, "until": { "speedAtLeast": 30.5 }, "minSeconds": 0.2 },
+        { "id": "settle", "forSeconds": 1.0, "throttle": 0.3, "brake": 0, "steer": 0 },
+        { "id": "coast", "forSeconds": 4, "throttle": 0, "brake": 0, "steer": 0 },
+        { "id": "brake_stop", "throttle": 0, "brake": 1, "steer": 0, "until": { "speedBelow": 0.1 }, "minSeconds": 0.2 }
+      ],
+      "assertions": [
+        { "id": "heading_stable", "metric": "headingDriftAbs:coast", "op": "lt", "value": 0.25 },
+        { "id": "lateral_stable", "metric": "lateralDriftAbs:coast", "op": "lt", "value": 3 },
+        { "id": "yaw_settled", "metric": "yawRateEndAbs:coast", "op": "lt", "value": 0.15 },
+        { "id": "stayed_on_surface", "metric": "offTrackFraction:coast", "op": "lt", "value": 0.05 },
+        { "id": "wheels_down", "metric": "groundedFraction:coast", "op": "gte", "value": 0.95 },
+        { "id": "no_teleport", "metric": "positionJumpMax:all", "op": "lt", "value": 1.0 }
+      ]
+    },
+    {
+      "id": "edge_excursion",
+      "title": "Controlled edge excursion onto run-off and recovery",
+      "purpose": "Record what actually happens when two wheels leave the racing surface at speed: surface grip difference, suspension response, controllability and return. The native model currently applies no off-surface grip reduction (the legacy model applies 0.62) while off track; this measurement is expected to expose that difference. Off-surface contact naming is not yet observed (the clean lap never left the road), so non-surface contacts here are recorded evidence, not assertions. Requires track-metadata coordination for deliberate kerb-targeting, so this profile measures the general edge case.",
+      "requires": { "rotationalTyres": true, "damageEnabled": false },
+      "abort": { "maxDurationSeconds": 30, "lateralAbsBeyond": 25, "positionJumpBeyond": 2.5 },
+      "phases": [
+        { "id": "hold", "forSeconds": 1.2, "throttle": 0, "brake": 1, "steer": 0 },
+        { "id": "launch", "throttle": 1, "brake": 0, "steer": 0, "until": { "speedAtLeast": 18.5 }, "minSeconds": 0.2 },
+        { "id": "settle", "forSeconds": 1.0, "throttle": 0.3, "brake": 0, "steer": 0 },
+        { "id": "drift_out", "forSeconds": 1.6, "throttle": 0.5, "brake": 0, "steer": 0.35 },
+        { "id": "recover", "forSeconds": 2, "throttle": 0.6, "brake": 0, "steer": 0 },
+        { "id": "brake_stop", "throttle": 0, "brake": 1, "steer": 0, "until": { "speedBelow": 0.1 }, "minSeconds": 0.2 }
+      ],
+      "assertions": [
+        { "id": "stayed_controllable", "metric": "yawRateEndAbs:recover", "op": "lt", "value": 0.5 },
+        { "id": "no_spin", "metric": "yawRatePeakAbs:all", "op": "lt", "value": 2.5 },
+        { "id": "stayed_upright", "metric": "uprightMinCosine:all", "op": "gte", "value": 0.9 },
+        { "id": "still_drives_after", "metric": "endLongitudinalSpeed:recover", "op": "gt", "value": 5 },
+        { "id": "no_teleport", "metric": "positionJumpMax:all", "op": "lt", "value": 1.5 }
+      ]
+    },
+    {
+      "id": "impact_wall_recovery",
+      "title": "Controlled barrier contact, damage recording and drive-away recovery",
+      "purpose": "Record a real low-speed barrier contact end to end: impact event and DeltaV from NativeImpactDamage, damage state, absence of teleport/rescue, and recovery under the car's own drive. The aiming loop waits for the damage system's first impact event (DeltaV >= the profile's 2 m/s gate), so a glancing scrape that stays under the gate times the phase out and fails honestly for the next iteration to aim better. Requires the native damage system enabled for the run.",
+      "requires": { "rotationalTyres": true, "damageEnabled": true },
+      "abort": { "maxDurationSeconds": 45, "lateralAbsBeyond": 40, "positionJumpBeyond": 2.5 },
+      "phases": [
+        { "id": "hold", "forSeconds": 1.2, "throttle": 0, "brake": 1, "steer": 0 },
+        { "id": "approach", "throttle": 1, "brake": 0, "steer": 0, "until": { "speedAtLeast": 12 }, "minSeconds": 0.2 },
+        { "id": "aim", "throttle": 0.4, "brake": 0, "steer": -1, "until": { "impactEventsAtLeast": 1 }, "maxSeconds": 8, "minSeconds": 0.3 },
+        { "id": "contact_hold", "forSeconds": 0.5, "throttle": 0, "brake": 1, "steer": 0 },
+        { "id": "reverse_out", "forSeconds": 2, "throttle": 1, "brake": 0, "steer": 0, "reverse": true },
+        { "id": "recover_fwd", "forSeconds": 3, "throttle": 1, "brake": 0, "steer": 0 },
+        { "id": "stop", "throttle": 0, "brake": 1, "steer": 0, "until": { "speedBelow": 0.1 }, "minSeconds": 0.2 }
+      ],
+      "assertions": [
+        { "id": "impact_recorded", "metric": "impactEventsDelta:aim", "op": "gte", "value": 1 },
+        { "id": "impact_measured", "metric": "maxDeltaVRise:aim", "op": "gte", "value": 0.5 },
+        { "id": "impact_not_catastrophic", "metric": "maxDeltaVRise:aim", "op": "lte", "value": 30 },
+        { "id": "no_teleport", "metric": "positionJumpMax:all", "op": "lt", "value": 2 },
+        { "id": "drives_after_impact", "metric": "endLongitudinalSpeed:recover_fwd", "op": "gt", "value": 0.5 },
+        { "id": "stayed_upright", "metric": "uprightMinCosine:recover_fwd", "op": "gte", "value": 0.7 }
+      ]
+    }
+  ]
+}

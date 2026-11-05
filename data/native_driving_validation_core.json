@@ -1,0 +1,19 @@
+{
+  "cases": [
+    {
+      "car": 16,
+      "track": 0,
+      "weather": 0,
+      "compound": 1,
+      "drivingValidation": ["input_direction", "acceleration_0_60", "braking_60_0", "steering_rate_step", "straight_stability", "edge_excursion"]
+    },
+    {
+      "car": 0,
+      "track": 0,
+      "weather": 0,
+      "compound": 1,
+      "drivingValidation": ["input_direction", "acceleration_0_60", "braking_60_0", "steering_rate_step", "straight_stability"]
+    }
+  ],
+  "scope": "Dry controlled continuous-driving validation on the track0 reference: each case runs its listed profiles in one session, car reset to the same spawn between profiles. Dispatch with assists off and rotational tyres on (slip evidence). Requires the dedicated driving_validation runner depth proposed in the agent report; not runnable under native_geometry_recovery lap gates because these are scripted scenarios, not laps. Formula16 (16) covers the open-wheel reference, car 0 covers the road-car class."
+}

@@ -1,0 +1,1393 @@
+{
+ "scope": "read-only texture inventory (no mutation, no rendering)",
+ "target": "car 2018_lamborghini_huracan_gt3 (index 6)",
+ "assemblySource": null,
+ "rows": [
+  {
+   "file": "RealRacing/Source/2018_lamborghini_huracan_gt3/2018_lamborghini_huracan_gt3_badges.png",
+   "pixels": "512x512",
+   "width": 512,
+   "height": 512,
+   "bitDepth": 8,
+   "colourType": 6,
+   "hasAlpha": true,
+   "iccOrGamma": [],
+   "unknownChunks": [],
+   "bytes": 134139,
+   "import": {
+    "present": true,
+    "importer": "texture",
+    "compressMode": 0,
+    "mipmaps": "true",
+    "sizeLimit": 0,
+    "detect3dTo": 1,
+    "vramTexture": "false",
+    "premultAlpha": "false",
+    "fixAlphaBorder": "true"
+   },
+   "boundTo": [
+    {
+     "car": 6,
+     "renderer": "LOD_A_HOOD_mm_badges",
+     "guid": "65f131929dd52e7f3b1acf96c8704c97",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_FRONTBUMPER_mm_badges",
+     "guid": "65f131929dd52e7f3b1acf96c8704c97",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_DOOR_LEFT_mm_badges",
+     "guid": "65f131929dd52e7f3b1acf96c8704c97",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_DOOR_RIGHT_mm_badges",
+     "guid": "65f131929dd52e7f3b1acf96c8704c97",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_BODY_mm_badges",
+     "guid": "65f131929dd52e7f3b1acf96c8704c97",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_REARBUMPER_mm_badges",
+     "guid": "65f131929dd52e7f3b1acf96c8704c97",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_BOOT_mm_badges",
+     "guid": "65f131929dd52e7f3b1acf96c8704c97",
+     "slot": "_BaseMap"
+    }
+   ],
+   "repairs": [],
+   "assembly": [],
+   "density": []
+  },
+  {
+   "file": "RealRacing/Source/2018_lamborghini_huracan_gt3/2018_lamborghini_huracan_gt3_badges_02.png",
+   "pixels": "512x512",
+   "width": 512,
+   "height": 512,
+   "bitDepth": 8,
+   "colourType": 6,
+   "hasAlpha": true,
+   "iccOrGamma": [],
+   "unknownChunks": [],
+   "bytes": 135834,
+   "import": {
+    "present": true,
+    "importer": "texture",
+    "compressMode": 0,
+    "mipmaps": "true",
+    "sizeLimit": 0,
+    "detect3dTo": 1,
+    "vramTexture": "false",
+    "premultAlpha": "false",
+    "fixAlphaBorder": "true"
+   },
+   "boundTo": [],
+   "repairs": [],
+   "assembly": [],
+   "density": []
+  },
+  {
+   "file": "RealRacing/Source/2018_lamborghini_huracan_gt3/2018_lamborghini_huracan_gt3_cab.png",
+   "pixels": "512x512",
+   "width": 512,
+   "height": 512,
+   "bitDepth": 8,
+   "colourType": 6,
+   "hasAlpha": true,
+   "iccOrGamma": [],
+   "unknownChunks": [],
+   "bytes": 184722,
+   "import": {
+    "present": true,
+    "importer": "texture",
+    "compressMode": 0,
+    "mipmaps": "true",
+    "sizeLimit": 0,
+    "detect3dTo": 1,
+    "vramTexture": "false",
+    "premultAlpha": "false",
+    "fixAlphaBorder": "true"
+   },
+   "boundTo": [
+    {
+     "car": 6,
+     "renderer": "LOD_A_DOOR_LEFT_mm_cab",
+     "guid": "da027e0b54adc10c6a3de5910abcb7fe",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_DOOR_RIGHT_mm_cab",
+     "guid": "da027e0b54adc10c6a3de5910abcb7fe",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INTERIOR_mm_cab",
+     "guid": "da027e0b54adc10c6a3de5910abcb7fe",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_STEERING_WHEEL_mm_cab",
+     "guid": "da027e0b54adc10c6a3de5910abcb7fe",
+     "slot": "_BaseMap"
+    }
+   ],
+   "repairs": [],
+   "assembly": [],
+   "density": []
+  },
+  {
+   "file": "RealRacing/Source/2018_lamborghini_huracan_gt3/2018_lamborghini_huracan_gt3_int.png",
+   "pixels": "1024x1024",
+   "width": 1024,
+   "height": 1024,
+   "bitDepth": 8,
+   "colourType": 6,
+   "hasAlpha": true,
+   "iccOrGamma": [],
+   "unknownChunks": [],
+   "bytes": 863347,
+   "import": {
+    "present": true,
+    "importer": "texture",
+    "compressMode": 0,
+    "mipmaps": "true",
+    "sizeLimit": 0,
+    "detect3dTo": 1,
+    "vramTexture": "false",
+    "premultAlpha": "false",
+    "fixAlphaBorder": "true"
+   },
+   "boundTo": [
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_SHIFT_LIT_01_mm_int",
+     "guid": "7ea24c9c4a05b8f1d80cb9fcf309b77f",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_MIRROR_GLASS_LEFT_mm_int",
+     "guid": "7ea24c9c4a05b8f1d80cb9fcf309b77f",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_DOOR_RIGHT_mm_int",
+     "guid": "7ea24c9c4a05b8f1d80cb9fcf309b77f",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_SHIFT_LIT_12_mm_int",
+     "guid": "7ea24c9c4a05b8f1d80cb9fcf309b77f",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_SHIFT_LIT_10_mm_int",
+     "guid": "7ea24c9c4a05b8f1d80cb9fcf309b77f",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_SHIFT_LIT_09_mm_int",
+     "guid": "7ea24c9c4a05b8f1d80cb9fcf309b77f",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_GLASS_FRONT_mm_int",
+     "guid": "7ea24c9c4a05b8f1d80cb9fcf309b77f",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_SHIFT_LIT_05_mm_int",
+     "guid": "7ea24c9c4a05b8f1d80cb9fcf309b77f",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_LED_mm_int",
+     "guid": "7ea24c9c4a05b8f1d80cb9fcf309b77f",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_INTERIOR_mm_int",
+     "guid": "7ea24c9c4a05b8f1d80cb9fcf309b77f",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_DOOR_LEFT_mm_int",
+     "guid": "7ea24c9c4a05b8f1d80cb9fcf309b77f",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_LED_EMISSIVE_mm_int",
+     "guid": "7ea24c9c4a05b8f1d80cb9fcf309b77f",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_BODY_mm_int",
+     "guid": "7ea24c9c4a05b8f1d80cb9fcf309b77f",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_SHIFT_LIT_13_mm_int",
+     "guid": "7ea24c9c4a05b8f1d80cb9fcf309b77f",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_SHIFT_LIT_04_mm_int",
+     "guid": "7ea24c9c4a05b8f1d80cb9fcf309b77f",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_SHIFT_LIT_07_mm_int",
+     "guid": "7ea24c9c4a05b8f1d80cb9fcf309b77f",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_SHIFT_LIT_02_mm_int",
+     "guid": "7ea24c9c4a05b8f1d80cb9fcf309b77f",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_SHIFT_LIT_03_mm_int",
+     "guid": "7ea24c9c4a05b8f1d80cb9fcf309b77f",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_SHIFT_LIT_08_mm_int",
+     "guid": "7ea24c9c4a05b8f1d80cb9fcf309b77f",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_SHIFT_LIT_11_mm_int",
+     "guid": "7ea24c9c4a05b8f1d80cb9fcf309b77f",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_SHIFT_LIT_06_mm_int",
+     "guid": "7ea24c9c4a05b8f1d80cb9fcf309b77f",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_MIRROR_GLASS_RIGHT_mm_int",
+     "guid": "7ea24c9c4a05b8f1d80cb9fcf309b77f",
+     "slot": "_BaseMap"
+    }
+   ],
+   "repairs": [],
+   "assembly": [],
+   "density": []
+  },
+  {
+   "file": "RealRacing/Source/2018_lamborghini_huracan_gt3/2018_lamborghini_huracan_gt3_lights.png",
+   "pixels": "512x512",
+   "width": 512,
+   "height": 512,
+   "bitDepth": 8,
+   "colourType": 6,
+   "hasAlpha": true,
+   "iccOrGamma": [],
+   "unknownChunks": [],
+   "bytes": 84532,
+   "import": {
+    "present": true,
+    "importer": "texture",
+    "compressMode": 0,
+    "mipmaps": "true",
+    "sizeLimit": 0,
+    "detect3dTo": 1,
+    "vramTexture": "false",
+    "premultAlpha": "false",
+    "fixAlphaBorder": "true"
+   },
+   "boundTo": [
+    {
+     "car": 6,
+     "renderer": "LOD_A_BRAKES_LEFT_mm_lights",
+     "guid": "1921a1e0f051a2d8ab7780048d30f2e9",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_TAILLIGHT_LENS_LEFT_mm_lights",
+     "guid": "1921a1e0f051a2d8ab7780048d30f2e9",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_HEADLIGHT_LENS_LEFT_mm_lights",
+     "guid": "1921a1e0f051a2d8ab7780048d30f2e9",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_HEADLIGHT_LENS_RIGHT_mm_lights",
+     "guid": "1921a1e0f051a2d8ab7780048d30f2e9",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_BRAKES_RIGHT_mm_lights",
+     "guid": "1921a1e0f051a2d8ab7780048d30f2e9",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_TAILLIGHT_LENS_RIGHT_mm_lights",
+     "guid": "1921a1e0f051a2d8ab7780048d30f2e9",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_CHASSIS_mm_lights",
+     "guid": "1921a1e0f051a2d8ab7780048d30f2e9",
+     "slot": "_BaseMap"
+    }
+   ],
+   "repairs": [],
+   "assembly": [],
+   "density": []
+  },
+  {
+   "file": "RealRacing/Source/2018_lamborghini_huracan_gt3/2018_lamborghini_huracan_gt3_mask.png",
+   "pixels": "1024x1024",
+   "width": 1024,
+   "height": 1024,
+   "bitDepth": 8,
+   "colourType": 6,
+   "hasAlpha": true,
+   "iccOrGamma": [],
+   "unknownChunks": [],
+   "bytes": 62343,
+   "import": {
+    "present": true,
+    "importer": "texture",
+    "compressMode": 0,
+    "mipmaps": "true",
+    "sizeLimit": 0,
+    "detect3dTo": 1,
+    "vramTexture": "false",
+    "premultAlpha": "false",
+    "fixAlphaBorder": "true"
+   },
+   "boundTo": [
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_SHIFT_LIT_01_mm_int",
+     "guid": "7ea24c9c4a05b8f1d80cb9fcf309b77f",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_HAND_GEAR",
+     "guid": "73c5434059a2bbe3b97e4f9115bfeba3",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_MIRROR_GLASS_RIGHT_mm_misc",
+     "guid": "73c5434059a2bbe3b97e4f9115bfeba3",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_BRAKES_LEFT_mm_lights",
+     "guid": "1921a1e0f051a2d8ab7780048d30f2e9",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_MIRROR_GLASS_LEFT_mm_int",
+     "guid": "7ea24c9c4a05b8f1d80cb9fcf309b77f",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_DOOR_LEFT_mm_misc",
+     "guid": "73c5434059a2bbe3b97e4f9115bfeba3",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_DOOR_RIGHT_mm_int",
+     "guid": "7ea24c9c4a05b8f1d80cb9fcf309b77f",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_SHIFT_LIT_12_mm_int",
+     "guid": "7ea24c9c4a05b8f1d80cb9fcf309b77f",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_CHASSIS_mm_chassis",
+     "guid": "bfd76531cf0e89bc38265fbdf16a5bce",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_TAILLIGHT_LENS_LEFT_mm_lights",
+     "guid": "1921a1e0f051a2d8ab7780048d30f2e9",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_HOOD_mm_badges",
+     "guid": "65f131929dd52e7f3b1acf96c8704c97",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_SHIFT_LIT_10_mm_int",
+     "guid": "7ea24c9c4a05b8f1d80cb9fcf309b77f",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_FRONTBUMPER_mm_badges",
+     "guid": "65f131929dd52e7f3b1acf96c8704c97",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_DOOR_LEFT_mm_cab",
+     "guid": "da027e0b54adc10c6a3de5910abcb7fe",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_HOOD_mm_misc",
+     "guid": "73c5434059a2bbe3b97e4f9115bfeba3",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_DOOR_RIGHT_mm_cab",
+     "guid": "da027e0b54adc10c6a3de5910abcb7fe",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INTERIOR_mm_cab",
+     "guid": "da027e0b54adc10c6a3de5910abcb7fe",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_BODY_mm_misc",
+     "guid": "73c5434059a2bbe3b97e4f9115bfeba3",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_STEERING_WHEEL_LED_EMISSIVE_mm_sw",
+     "guid": "f64e38ed57052850f83b48247791e8a8",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_SHIFT_LIT_09_mm_int",
+     "guid": "7ea24c9c4a05b8f1d80cb9fcf309b77f",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_BODY_mm_ext",
+     "guid": "cc4e44d77c28d32a397c5b2913fe4169",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_HOOD_mm_chassis",
+     "guid": "bfd76531cf0e89bc38265fbdf16a5bce",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_STEERING_WHEEL_mm_cab",
+     "guid": "da027e0b54adc10c6a3de5910abcb7fe",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_GLASS_FRONT_mm_int",
+     "guid": "7ea24c9c4a05b8f1d80cb9fcf309b77f",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_DOOR_RIGHT_mm_ext",
+     "guid": "cc4e44d77c28d32a397c5b2913fe4169",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_REARBUMPER_mm_misc",
+     "guid": "73c5434059a2bbe3b97e4f9115bfeba3",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_SHIFT_LIT_05_mm_int",
+     "guid": "7ea24c9c4a05b8f1d80cb9fcf309b77f",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_LED_mm_int",
+     "guid": "7ea24c9c4a05b8f1d80cb9fcf309b77f",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_HEADLIGHT_LENS_LEFT_mm_lights",
+     "guid": "1921a1e0f051a2d8ab7780048d30f2e9",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_DOOR_LEFT_mm_badges",
+     "guid": "65f131929dd52e7f3b1acf96c8704c97",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_INTERIOR_mm_int",
+     "guid": "7ea24c9c4a05b8f1d80cb9fcf309b77f",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_DOOR_LEFT_mm_int",
+     "guid": "7ea24c9c4a05b8f1d80cb9fcf309b77f",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_LED_EMISSIVE_mm_int",
+     "guid": "7ea24c9c4a05b8f1d80cb9fcf309b77f",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_MIRROR_RIGHT_mm_ext",
+     "guid": "cc4e44d77c28d32a397c5b2913fe4169",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_BOOT_mm_misc",
+     "guid": "73c5434059a2bbe3b97e4f9115bfeba3",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_HEADLIGHT_LENS_RIGHT_mm_lights",
+     "guid": "1921a1e0f051a2d8ab7780048d30f2e9",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_BODY_mm_int",
+     "guid": "7ea24c9c4a05b8f1d80cb9fcf309b77f",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_SHIFT_LIT_13_mm_int",
+     "guid": "7ea24c9c4a05b8f1d80cb9fcf309b77f",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_MIRROR_LEFT_mm_ext",
+     "guid": "cc4e44d77c28d32a397c5b2913fe4169",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_WHEEL_mm_wheel",
+     "guid": "d2a7dafb5bf94a238a6d9b8d6fdda018",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_MIRROR_RIGHT_mm_misc",
+     "guid": "73c5434059a2bbe3b97e4f9115bfeba3",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_BRAKES_RIGHT_mm_lights",
+     "guid": "1921a1e0f051a2d8ab7780048d30f2e9",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_SHIFT_LIT_04_mm_int",
+     "guid": "7ea24c9c4a05b8f1d80cb9fcf309b77f",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_MIRROR_GLASS_LEFT_mm_misc",
+     "guid": "73c5434059a2bbe3b97e4f9115bfeba3",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_DOOR_RIGHT_mm_badges",
+     "guid": "65f131929dd52e7f3b1acf96c8704c97",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_MIRROR_LEFT_mm_misc",
+     "guid": "73c5434059a2bbe3b97e4f9115bfeba3",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_HAND_STEER",
+     "guid": "73c5434059a2bbe3b97e4f9115bfeba3",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_MIRROR_RIGHT_mm_ext",
+     "guid": "cc4e44d77c28d32a397c5b2913fe4169",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_SHIFT_LIT_07_mm_int",
+     "guid": "7ea24c9c4a05b8f1d80cb9fcf309b77f",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_DOOR_LEFT_mm_ext",
+     "guid": "cc4e44d77c28d32a397c5b2913fe4169",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_SHIFT_LIT_02_mm_int",
+     "guid": "7ea24c9c4a05b8f1d80cb9fcf309b77f",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_TAILLIGHT_LENS_RIGHT_mm_lights",
+     "guid": "1921a1e0f051a2d8ab7780048d30f2e9",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_BODY_mm_ext",
+     "guid": "cc4e44d77c28d32a397c5b2913fe4169",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_DOOR_RIGHT_mm_misc",
+     "guid": "73c5434059a2bbe3b97e4f9115bfeba3",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_SHIFT_LIT_03_mm_int",
+     "guid": "7ea24c9c4a05b8f1d80cb9fcf309b77f",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_CHASSIS_mm_misc",
+     "guid": "73c5434059a2bbe3b97e4f9115bfeba3",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_DOOR_LEFT_mm_ext",
+     "guid": "cc4e44d77c28d32a397c5b2913fe4169",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_SHIFT_LIT_08_mm_int",
+     "guid": "7ea24c9c4a05b8f1d80cb9fcf309b77f",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_DOOR_RIGHT_mm_ext",
+     "guid": "cc4e44d77c28d32a397c5b2913fe4169",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_FRONTBUMPER_mm_ext",
+     "guid": "cc4e44d77c28d32a397c5b2913fe4169",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_STEERING_WHEEL_mm_sw",
+     "guid": "f64e38ed57052850f83b48247791e8a8",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_EXHAUST_mm_misc",
+     "guid": "73c5434059a2bbe3b97e4f9115bfeba3",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_HOOD_mm_ext",
+     "guid": "cc4e44d77c28d32a397c5b2913fe4169",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_SHIFT_LIT_11_mm_int",
+     "guid": "7ea24c9c4a05b8f1d80cb9fcf309b77f",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_REARBUMPER_mm_ext",
+     "guid": "cc4e44d77c28d32a397c5b2913fe4169",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_BODY_mm_badges",
+     "guid": "65f131929dd52e7f3b1acf96c8704c97",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_HOOD_mm_ext",
+     "guid": "cc4e44d77c28d32a397c5b2913fe4169",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_SHIFT_LIT_06_mm_int",
+     "guid": "7ea24c9c4a05b8f1d80cb9fcf309b77f",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_BOOT_mm_ext",
+     "guid": "cc4e44d77c28d32a397c5b2913fe4169",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_CHASSIS_mm_lights",
+     "guid": "1921a1e0f051a2d8ab7780048d30f2e9",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_REARBUMPER_mm_badges",
+     "guid": "65f131929dd52e7f3b1acf96c8704c97",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_MIRROR_GLASS_RIGHT_mm_int",
+     "guid": "7ea24c9c4a05b8f1d80cb9fcf309b77f",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_BOOT_mm_badges",
+     "guid": "65f131929dd52e7f3b1acf96c8704c97",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_FRONTBUMPER_mm_misc",
+     "guid": "73c5434059a2bbe3b97e4f9115bfeba3",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_MIRROR_LEFT_mm_ext",
+     "guid": "cc4e44d77c28d32a397c5b2913fe4169",
+     "slot": "_MaskMap"
+    }
+   ],
+   "repairs": [
+    {
+     "key": "6/LOD_A_HOOD_mm_misc",
+     "scale": [
+      1,
+      -1
+     ],
+     "offset": [
+      0,
+      1
+     ],
+     "pending": false
+    }
+   ],
+   "assembly": [],
+   "density": []
+  },
+  {
+   "file": "RealRacing/Source/2018_lamborghini_huracan_gt3/2018_lamborghini_huracan_gt3_misc.png",
+   "pixels": "512x512",
+   "width": 512,
+   "height": 512,
+   "bitDepth": 8,
+   "colourType": 6,
+   "hasAlpha": true,
+   "iccOrGamma": [],
+   "unknownChunks": [],
+   "bytes": 104720,
+   "import": {
+    "present": true,
+    "importer": "texture",
+    "compressMode": 0,
+    "mipmaps": "true",
+    "sizeLimit": 0,
+    "detect3dTo": 1,
+    "vramTexture": "false",
+    "premultAlpha": "false",
+    "fixAlphaBorder": "true"
+   },
+   "boundTo": [
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_HAND_GEAR",
+     "guid": "73c5434059a2bbe3b97e4f9115bfeba3",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_MIRROR_GLASS_RIGHT_mm_misc",
+     "guid": "73c5434059a2bbe3b97e4f9115bfeba3",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_DOOR_LEFT_mm_misc",
+     "guid": "73c5434059a2bbe3b97e4f9115bfeba3",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_HOOD_mm_misc",
+     "guid": "73c5434059a2bbe3b97e4f9115bfeba3",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_BODY_mm_misc",
+     "guid": "73c5434059a2bbe3b97e4f9115bfeba3",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_REARBUMPER_mm_misc",
+     "guid": "73c5434059a2bbe3b97e4f9115bfeba3",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_BOOT_mm_misc",
+     "guid": "73c5434059a2bbe3b97e4f9115bfeba3",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_MIRROR_RIGHT_mm_misc",
+     "guid": "73c5434059a2bbe3b97e4f9115bfeba3",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_MIRROR_GLASS_LEFT_mm_misc",
+     "guid": "73c5434059a2bbe3b97e4f9115bfeba3",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_MIRROR_LEFT_mm_misc",
+     "guid": "73c5434059a2bbe3b97e4f9115bfeba3",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_HAND_STEER",
+     "guid": "73c5434059a2bbe3b97e4f9115bfeba3",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_DOOR_RIGHT_mm_misc",
+     "guid": "73c5434059a2bbe3b97e4f9115bfeba3",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_CHASSIS_mm_misc",
+     "guid": "73c5434059a2bbe3b97e4f9115bfeba3",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_EXHAUST_mm_misc",
+     "guid": "73c5434059a2bbe3b97e4f9115bfeba3",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_FRONTBUMPER_mm_misc",
+     "guid": "73c5434059a2bbe3b97e4f9115bfeba3",
+     "slot": "_BaseMap"
+    }
+   ],
+   "repairs": [
+    {
+     "key": "6/LOD_A_HOOD_mm_misc",
+     "scale": [
+      1,
+      -1
+     ],
+     "offset": [
+      0,
+      1
+     ],
+     "pending": false
+    }
+   ],
+   "assembly": [],
+   "density": []
+  },
+  {
+   "file": "RealRacing/Source/2018_lamborghini_huracan_gt3/2018_lamborghini_huracan_gt3_sha.png",
+   "pixels": "256x256",
+   "width": 256,
+   "height": 256,
+   "bitDepth": 8,
+   "colourType": 6,
+   "hasAlpha": true,
+   "iccOrGamma": [],
+   "unknownChunks": [],
+   "bytes": 14931,
+   "import": {
+    "present": true,
+    "importer": "texture",
+    "compressMode": 0,
+    "mipmaps": "true",
+    "sizeLimit": 0,
+    "detect3dTo": 1,
+    "vramTexture": "false",
+    "premultAlpha": "false",
+    "fixAlphaBorder": "true"
+   },
+   "boundTo": [],
+   "repairs": [],
+   "assembly": [],
+   "density": []
+  },
+  {
+   "file": "RealRacing/Source/2018_lamborghini_huracan_gt3/2018_lamborghini_huracan_gt3_sw.png",
+   "pixels": "512x512",
+   "width": 512,
+   "height": 512,
+   "bitDepth": 8,
+   "colourType": 6,
+   "hasAlpha": true,
+   "iccOrGamma": [],
+   "unknownChunks": [],
+   "bytes": 158375,
+   "import": {
+    "present": true,
+    "importer": "texture",
+    "compressMode": 0,
+    "mipmaps": "true",
+    "sizeLimit": 0,
+    "detect3dTo": 1,
+    "vramTexture": "false",
+    "premultAlpha": "false",
+    "fixAlphaBorder": "true"
+   },
+   "boundTo": [
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_STEERING_WHEEL_LED_EMISSIVE_mm_sw",
+     "guid": "f64e38ed57052850f83b48247791e8a8",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_STEERING_WHEEL_mm_sw",
+     "guid": "f64e38ed57052850f83b48247791e8a8",
+     "slot": "_BaseMap"
+    }
+   ],
+   "repairs": [],
+   "assembly": [],
+   "density": []
+  },
+  {
+   "file": "RealRacing/Source/2018_lamborghini_huracan_gt3/2018_lamborghini_huracan_gt3_wheel.png",
+   "pixels": "512x512",
+   "width": 512,
+   "height": 512,
+   "bitDepth": 8,
+   "colourType": 6,
+   "hasAlpha": true,
+   "iccOrGamma": [],
+   "unknownChunks": [],
+   "bytes": 29207,
+   "import": {
+    "present": true,
+    "importer": "texture",
+    "compressMode": 0,
+    "mipmaps": "true",
+    "sizeLimit": 0,
+    "detect3dTo": 1,
+    "vramTexture": "false",
+    "premultAlpha": "false",
+    "fixAlphaBorder": "true"
+   },
+   "boundTo": [
+    {
+     "car": 6,
+     "renderer": "LOD_A_WHEEL_mm_wheel",
+     "guid": "d2a7dafb5bf94a238a6d9b8d6fdda018",
+     "slot": "_BaseMap"
+    }
+   ],
+   "repairs": [],
+   "assembly": [],
+   "density": []
+  },
+  {
+   "file": "RealRacing/Source/2018_lamborghini_huracan_gt3/2018_lamborghini_huracan_gt3_wheel_blur.png",
+   "pixels": "512x512",
+   "width": 512,
+   "height": 512,
+   "bitDepth": 8,
+   "colourType": 6,
+   "hasAlpha": true,
+   "iccOrGamma": [],
+   "unknownChunks": [],
+   "bytes": 41817,
+   "import": {
+    "present": true,
+    "importer": "texture",
+    "compressMode": 0,
+    "mipmaps": "true",
+    "sizeLimit": 0,
+    "detect3dTo": 1,
+    "vramTexture": "false",
+    "premultAlpha": "false",
+    "fixAlphaBorder": "true"
+   },
+   "boundTo": [],
+   "repairs": [],
+   "assembly": [],
+   "density": []
+  },
+  {
+   "file": "RealRacing/Source/2018_lamborghini_huracan_gt3/livery/2018_lamborghini_huracan_gt3_ext_fictional_08.png",
+   "pixels": "1024x1024",
+   "width": 1024,
+   "height": 1024,
+   "bitDepth": 8,
+   "colourType": 6,
+   "hasAlpha": true,
+   "iccOrGamma": [],
+   "unknownChunks": [],
+   "bytes": 437083,
+   "import": {
+    "present": true,
+    "importer": "texture",
+    "compressMode": 0,
+    "mipmaps": "true",
+    "sizeLimit": 0,
+    "detect3dTo": 1,
+    "vramTexture": "false",
+    "premultAlpha": "false",
+    "fixAlphaBorder": "true"
+   },
+   "boundTo": [
+    {
+     "car": 6,
+     "renderer": "LOD_A_BODY_mm_ext",
+     "guid": "cc4e44d77c28d32a397c5b2913fe4169",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_DOOR_RIGHT_mm_ext",
+     "guid": "cc4e44d77c28d32a397c5b2913fe4169",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_MIRROR_RIGHT_mm_ext",
+     "guid": "cc4e44d77c28d32a397c5b2913fe4169",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_MIRROR_LEFT_mm_ext",
+     "guid": "cc4e44d77c28d32a397c5b2913fe4169",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_MIRROR_RIGHT_mm_ext",
+     "guid": "cc4e44d77c28d32a397c5b2913fe4169",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_DOOR_LEFT_mm_ext",
+     "guid": "cc4e44d77c28d32a397c5b2913fe4169",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_BODY_mm_ext",
+     "guid": "cc4e44d77c28d32a397c5b2913fe4169",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_DOOR_LEFT_mm_ext",
+     "guid": "cc4e44d77c28d32a397c5b2913fe4169",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_DOOR_RIGHT_mm_ext",
+     "guid": "cc4e44d77c28d32a397c5b2913fe4169",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_FRONTBUMPER_mm_ext",
+     "guid": "cc4e44d77c28d32a397c5b2913fe4169",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_HOOD_mm_ext",
+     "guid": "cc4e44d77c28d32a397c5b2913fe4169",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_REARBUMPER_mm_ext",
+     "guid": "cc4e44d77c28d32a397c5b2913fe4169",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_HOOD_mm_ext",
+     "guid": "cc4e44d77c28d32a397c5b2913fe4169",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_BOOT_mm_ext",
+     "guid": "cc4e44d77c28d32a397c5b2913fe4169",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 6,
+     "renderer": "LOD_A_INT_MIRROR_LEFT_mm_ext",
+     "guid": "cc4e44d77c28d32a397c5b2913fe4169",
+     "slot": "_BaseMap"
+    }
+   ],
+   "repairs": [],
+   "assembly": [],
+   "density": []
+  },
+  {
+   "file": "RealRacing/Source/2018_lamborghini_huracan_gt3/livery/2018_lamborghini_huracan_gt3_ext_fictional_09.png",
+   "pixels": "1024x1024",
+   "width": 1024,
+   "height": 1024,
+   "bitDepth": 8,
+   "colourType": 6,
+   "hasAlpha": true,
+   "iccOrGamma": [],
+   "unknownChunks": [],
+   "bytes": 352526,
+   "import": {
+    "present": true,
+    "importer": "texture",
+    "compressMode": 0,
+    "mipmaps": "true",
+    "sizeLimit": 0,
+    "detect3dTo": 1,
+    "vramTexture": "false",
+    "premultAlpha": "false",
+    "fixAlphaBorder": "true"
+   },
+   "boundTo": [],
+   "repairs": [],
+   "assembly": [],
+   "density": []
+  },
+  {
+   "file": "RealRacing/Source/2018_lamborghini_huracan_gt3/livery/2018_lamborghini_huracan_gt3_ext_fictional_17.png",
+   "pixels": "1024x1024",
+   "width": 1024,
+   "height": 1024,
+   "bitDepth": 8,
+   "colourType": 6,
+   "hasAlpha": true,
+   "iccOrGamma": [],
+   "unknownChunks": [],
+   "bytes": 393781,
+   "import": {
+    "present": true,
+    "importer": "texture",
+    "compressMode": 0,
+    "mipmaps": "true",
+    "sizeLimit": 0,
+    "detect3dTo": 1,
+    "vramTexture": "false",
+    "premultAlpha": "false",
+    "fixAlphaBorder": "true"
+   },
+   "boundTo": [],
+   "repairs": [],
+   "assembly": [],
+   "density": []
+  },
+  {
+   "file": "RealRacing/Source/2018_lamborghini_huracan_gt3/livery/2018_lamborghini_huracan_gt3_ext_fictional_18.png",
+   "pixels": "1024x1024",
+   "width": 1024,
+   "height": 1024,
+   "bitDepth": 8,
+   "colourType": 6,
+   "hasAlpha": true,
+   "iccOrGamma": [],
+   "unknownChunks": [],
+   "bytes": 397143,
+   "import": {
+    "present": true,
+    "importer": "texture",
+    "compressMode": 0,
+    "mipmaps": "true",
+    "sizeLimit": 0,
+    "detect3dTo": 1,
+    "vramTexture": "false",
+    "premultAlpha": "false",
+    "fixAlphaBorder": "true"
+   },
+   "boundTo": [],
+   "repairs": [],
+   "assembly": [],
+   "density": []
+  },
+  {
+   "file": "RealRacing/Source/2018_lamborghini_huracan_gt3/livery/2018_lamborghini_huracan_gt3_ext_grt_11.png",
+   "pixels": "1024x1024",
+   "width": 1024,
+   "height": 1024,
+   "bitDepth": 8,
+   "colourType": 6,
+   "hasAlpha": true,
+   "iccOrGamma": [],
+   "unknownChunks": [],
+   "bytes": 474571,
+   "import": {
+    "present": true,
+    "importer": "texture",
+    "compressMode": 0,
+    "mipmaps": "true",
+    "sizeLimit": 0,
+    "detect3dTo": 1,
+    "vramTexture": "false",
+    "premultAlpha": "false",
+    "fixAlphaBorder": "true"
+   },
+   "boundTo": [],
+   "repairs": [],
+   "assembly": [],
+   "density": []
+  },
+  {
+   "file": "RealRacing/Source/2018_lamborghini_huracan_gt3/livery/2018_lamborghini_huracan_gt3_ext_grt_19.png",
+   "pixels": "1024x1024",
+   "width": 1024,
+   "height": 1024,
+   "bitDepth": 8,
+   "colourType": 6,
+   "hasAlpha": true,
+   "iccOrGamma": [],
+   "unknownChunks": [],
+   "bytes": 475352,
+   "import": {
+    "present": true,
+    "importer": "texture",
+    "compressMode": 0,
+    "mipmaps": "true",
+    "sizeLimit": 0,
+    "detect3dTo": 1,
+    "vramTexture": "false",
+    "premultAlpha": "false",
+    "fixAlphaBorder": "true"
+   },
+   "boundTo": [],
+   "repairs": [],
+   "assembly": [],
+   "density": []
+  }
+ ],
+ "notes": [
+  "orientation classes and defect columns live in the turn report; this tool emits measured facts only",
+  "density pxPerMetre = textureWidth / metresPerUv0, valid only when --assembly supplies metresPerUv0"
+ ]
+}

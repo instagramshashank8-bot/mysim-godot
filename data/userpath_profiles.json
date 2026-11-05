@@ -1,0 +1,209 @@
+{
+  "scope": "User-path device-level input profiles for the packaged player (spec: agents/verification-turn8.md; harness: src/UserPathScenario.cs + tools/cloud_windows_userpath.py). KEYBOARD-ONLY by design: the game reads the gamepad through raw Input.GetJoyAxis polls gated on Input.GetConnectedJoypads(), and no script-level API can register a virtual joypad (device connection is OS-driven only, verified against godot 4.7.2-stable core/input/input.cpp) - so analog shapes are delivered as keyboard duty-modulated pulse-trains through the game's own steering/throttle filters, which IS the real keyboard user path. Times are seconds in the harness clock (starts when the player exists, or when Race.started flips if startOnRaceStart; the ~5s grid countdown is thereby excluded). Thresholds are deliberately conservative: they must pass on a working game and fail on a broken one.",
+  "profiles": [
+    {
+      "id": "probe_key_echo",
+      "title": "Probe: synthetic W press reaches ControlBindings.Held within a frame",
+      "durationSeconds": 2.5,
+      "startOnRaceStart": false,
+      "events": [
+        { "t": 0.5, "device": "key", "key": "W", "action": "press" },
+        { "t": 1.5, "device": "key", "key": "W", "action": "release" }
+      ],
+      "asserts": [
+        { "id": "probe_w_down_echo", "kind": "heldEchoAtLeast", "action": "Throttle", "from": 0.6, "to": 1.4, "minFraction": 0.9 },
+        { "id": "probe_w_up_echo", "kind": "heldEchoAtMost", "action": "Throttle", "from": 1.7, "to": 2.3, "maxFraction": 0.1 }
+      ]
+    },
+    {
+      "id": "throttle_step",
+      "title": "Full-throttle step from race start: held echo, acceleration, forward progress, release",
+      "durationSeconds": 16,
+      "startOnRaceStart": true,
+      "events": [
+        { "t": 0.5, "device": "key", "key": "W", "action": "press" },
+        { "t": 6.0, "device": "key", "key": "W", "action": "release" }
+      ],
+      "asserts": [
+        { "id": "throttle_step_echo_held", "kind": "heldEchoAtLeast", "action": "Throttle", "from": 1.0, "to": 5.5, "minFraction": 0.9 },
+        { "id": "throttle_step_speed", "kind": "speedAbove", "t": 5.5, "value": 10 },
+        { "id": "throttle_step_progress", "kind": "forwardProgressAtLeast", "from": 0.5, "to": 6.0, "minMeters": 25 },
+        { "id": "throttle_step_release_echo", "kind": "heldEchoAtMost", "action": "Throttle", "from": 6.5, "to": 8.0, "maxFraction": 0.1 }
+      ]
+    },
+    {
+      "id": "brake_step",
+      "title": "Accelerate then full brake: speed up, brake echo, stop",
+      "durationSeconds": 18,
+      "startOnRaceStart": true,
+      "events": [
+        { "t": 0.3, "device": "key", "key": "W", "action": "press" },
+        { "t": 6.0, "device": "key", "key": "W", "action": "release" },
+        { "t": 6.3, "device": "key", "key": "S", "action": "press" },
+        { "t": 11.0, "device": "key", "key": "S", "action": "release" }
+      ],
+      "asserts": [
+        { "id": "brake_step_approach_speed", "kind": "speedAbove", "t": 5.5, "value": 15 },
+        { "id": "brake_step_echo_held", "kind": "heldEchoAtLeast", "action": "Brake / reverse", "from": 6.8, "to": 9.5, "minFraction": 0.9 },
+        { "id": "brake_step_stopped", "kind": "speedBelow", "t": 10.5, "value": 2.5 }
+      ]
+    },
+    {
+      "id": "throttle_ramp",
+      "title": "Throttle ramp via keyboard duty-modulated pulses (0.2 to 1.0 duty over 5 s) - the real keyboard path through the game's own pedal filter",
+      "durationSeconds": 22,
+      "startOnRaceStart": true,
+      "events": [
+        { "t": 0.5, "device": "key", "key": "W", "action": "press" },
+        { "t": 0.7, "device": "key", "key": "W", "action": "release" },
+        { "t": 1.5, "device": "key", "key": "W", "action": "press" },
+        { "t": 1.9, "device": "key", "key": "W", "action": "release" },
+        { "t": 2.5, "device": "key", "key": "W", "action": "press" },
+        { "t": 3.1, "device": "key", "key": "W", "action": "release" },
+        { "t": 3.5, "device": "key", "key": "W", "action": "press" },
+        { "t": 4.3, "device": "key", "key": "W", "action": "release" },
+        { "t": 4.5, "device": "key", "key": "W", "action": "press" },
+        { "t": 8.0, "device": "key", "key": "W", "action": "release" }
+      ],
+      "asserts": [
+        { "id": "throttle_ramp_early", "kind": "speedAbove", "t": 4.0, "value": 2 },
+        { "id": "throttle_ramp_late", "kind": "speedAbove", "t": 7.5, "value": 8 },
+        { "id": "throttle_ramp_progress", "kind": "forwardProgressAtLeast", "from": 0.5, "to": 12.0, "minMeters": 40 }
+      ]
+    },
+    {
+      "id": "steer_sine",
+      "title": "Steering sine via alternating A/D with 1.5 s half-period under throttle - lateral oscillation through the game's steering filter",
+      "durationSeconds": 26,
+      "startOnRaceStart": true,
+      "events": [
+        { "t": 0.5, "device": "key", "key": "W", "action": "press" },
+        { "t": 2.0, "device": "key", "key": "A", "action": "press" },
+        { "t": 3.5, "device": "key", "key": "A", "action": "release" },
+        { "t": 3.5, "device": "key", "key": "D", "action": "press" },
+        { "t": 5.0, "device": "key", "key": "D", "action": "release" },
+        { "t": 5.0, "device": "key", "key": "A", "action": "press" },
+        { "t": 6.5, "device": "key", "key": "A", "action": "release" },
+        { "t": 6.5, "device": "key", "key": "D", "action": "press" },
+        { "t": 8.0, "device": "key", "key": "D", "action": "release" },
+        { "t": 8.0, "device": "key", "key": "A", "action": "press" },
+        { "t": 9.5, "device": "key", "key": "A", "action": "release" },
+        { "t": 9.5, "device": "key", "key": "D", "action": "press" },
+        { "t": 11.0, "device": "key", "key": "D", "action": "release" },
+        { "t": 20.0, "device": "key", "key": "W", "action": "release" },
+        { "t": 12.5, "device": "key", "key": "S", "action": "press" },
+        { "t": 16.0, "device": "key", "key": "S", "action": "release" }
+      ],
+      "asserts": [
+        { "id": "steer_sine_oscillation", "kind": "lateralOscillationsAtLeast", "from": 2.0, "to": 11.0, "minCount": 4 },
+        { "id": "steer_sine_throttle_echo", "kind": "heldEchoAtLeast", "action": "Throttle", "from": 3.0, "to": 10.0, "minFraction": 0.85 },
+        { "id": "steer_sine_speed", "kind": "speedAbove", "t": 11.5, "value": 8 },
+        { "id": "steer_sine_progress", "kind": "forwardProgressAtLeast", "from": 0.5, "to": 20.0, "minMeters": 50 }
+      ]
+    },
+    {
+      "id": "slalom",
+      "title": "Slalom: 0.7 s alternating steer pulses at speed - yaw-rate oscillation at the driven cadence",
+      "durationSeconds": 26,
+      "startOnRaceStart": true,
+      "events": [
+        { "t": 0.5, "device": "key", "key": "W", "action": "press" },
+        { "t": 3.0, "device": "key", "key": "A", "action": "press" },
+        { "t": 3.7, "device": "key", "key": "A", "action": "release" },
+        { "t": 3.7, "device": "key", "key": "D", "action": "press" },
+        { "t": 4.4, "device": "key", "key": "D", "action": "release" },
+        { "t": 4.4, "device": "key", "key": "A", "action": "press" },
+        { "t": 5.1, "device": "key", "key": "A", "action": "release" },
+        { "t": 5.1, "device": "key", "key": "D", "action": "press" },
+        { "t": 5.8, "device": "key", "key": "D", "action": "release" },
+        { "t": 5.8, "device": "key", "key": "A", "action": "press" },
+        { "t": 6.5, "device": "key", "key": "A", "action": "release" },
+        { "t": 6.5, "device": "key", "key": "D", "action": "press" },
+        { "t": 7.2, "device": "key", "key": "D", "action": "release" },
+        { "t": 7.2, "device": "key", "key": "A", "action": "press" },
+        { "t": 7.9, "device": "key", "key": "A", "action": "release" },
+        { "t": 7.9, "device": "key", "key": "D", "action": "press" },
+        { "t": 8.6, "device": "key", "key": "D", "action": "release" },
+        { "t": 20.0, "device": "key", "key": "W", "action": "release" },
+        { "t": 20.0, "device": "key", "key": "S", "action": "press" },
+        { "t": 24.0, "device": "key", "key": "S", "action": "release" }
+      ],
+      "asserts": [
+        { "id": "slalom_oscillation", "kind": "lateralOscillationsAtLeast", "from": 3.0, "to": 8.6, "minCount": 5 },
+        { "id": "slalom_speed", "kind": "speedAbove", "t": 8.0, "value": 8 },
+        { "id": "slalom_progress", "kind": "forwardProgressAtLeast", "from": 0.5, "to": 20.0, "minMeters": 60 }
+      ]
+    },
+    {
+      "id": "hairpin",
+      "title": "Hairpin: approach at speed, held full lock with throttle modulation, exit; direction-agnostic yaw check (the sign convention is covered by the DV input_direction profile at the sim layer)",
+      "durationSeconds": 30,
+      "startOnRaceStart": true,
+      "events": [
+        { "t": 0.5, "device": "key", "key": "W", "action": "press" },
+        { "t": 6.0, "device": "key", "key": "W", "action": "release" },
+        { "t": 6.5, "device": "key", "key": "A", "action": "press" },
+        { "t": 8.0, "device": "key", "key": "W", "action": "press" },
+        { "t": 8.6, "device": "key", "key": "W", "action": "release" },
+        { "t": 9.2, "device": "key", "key": "W", "action": "press" },
+        { "t": 9.8, "device": "key", "key": "W", "action": "release" },
+        { "t": 11.0, "device": "key", "key": "A", "action": "release" },
+        { "t": 11.5, "device": "key", "key": "D", "action": "press" },
+        { "t": 12.0, "device": "key", "key": "D", "action": "release" },
+        { "t": 12.5, "device": "key", "key": "W", "action": "press" },
+        { "t": 17.0, "device": "key", "key": "W", "action": "release" },
+        { "t": 17.5, "device": "key", "key": "S", "action": "press" },
+        { "t": 21.5, "device": "key", "key": "S", "action": "release" }
+      ],
+      "asserts": [
+        { "id": "hairpin_approach_speed", "kind": "speedAbove", "t": 6.0, "value": 12 },
+        { "id": "hairpin_rotation", "kind": "yawRateMagnitudeAfter", "afterT": 7.5, "to": 2.5, "minMagnitude": 0.25 },
+        { "id": "hairpin_progress", "kind": "forwardProgressAtLeast", "from": 0.5, "to": 16.0, "minMeters": 60 }
+      ]
+    },
+    {
+      "id": "trail_brake",
+      "title": "Trail braking: brake held THROUGH turn-in (simultaneous brake+steer), rotation continues, then throttle while still steering",
+      "durationSeconds": 30,
+      "startOnRaceStart": true,
+      "events": [
+        { "t": 0.5, "device": "key", "key": "W", "action": "press" },
+        { "t": 8.0, "device": "key", "key": "W", "action": "release" },
+        { "t": 8.0, "device": "key", "key": "S", "action": "press" },
+        { "t": 8.0, "device": "key", "key": "A", "action": "press" },
+        { "t": 10.0, "device": "key", "key": "S", "action": "release" },
+        { "t": 10.0, "device": "key", "key": "W", "action": "press" },
+        { "t": 11.0, "device": "key", "key": "A", "action": "release" },
+        { "t": 16.0, "device": "key", "key": "W", "action": "release" },
+        { "t": 17.0, "device": "key", "key": "S", "action": "press" },
+        { "t": 21.0, "device": "key", "key": "S", "action": "release" }
+      ],
+      "asserts": [
+        { "id": "trail_approach_speed", "kind": "speedAbove", "t": 7.5, "value": 18 },
+        { "id": "trail_brake_held", "kind": "heldEchoAtLeast", "action": "Brake / reverse", "from": 8.2, "to": 9.8, "minFraction": 0.9 },
+        { "id": "trail_steer_held", "kind": "heldEchoAtLeast", "action": "Steer left", "from": 8.2, "to": 9.8, "minFraction": 0.9 },
+        { "id": "trail_slowed", "kind": "speedBelow", "t": 9.9, "value": 18 },
+        { "id": "trail_rotation", "kind": "yawRateMagnitudeAfter", "afterT": 8.5, "to": 1.5, "minMagnitude": 0.15 },
+        { "id": "trail_throttle_return", "kind": "heldEchoAtLeast", "action": "Throttle", "from": 10.2, "to": 10.9, "minFraction": 0.8 }
+      ]
+    },
+    {
+      "id": "reverse_hold_forward",
+      "title": "Reverse from standstill (S held), then forward (W) - extends the proven DrivingScenario leg onto the packaged player",
+      "durationSeconds": 16,
+      "startOnRaceStart": true,
+      "events": [
+        { "t": 0.5, "device": "key", "key": "S", "action": "press" },
+        { "t": 3.5, "device": "key", "key": "S", "action": "release" },
+        { "t": 5.5, "device": "key", "key": "W", "action": "press" },
+        { "t": 11.0, "device": "key", "key": "W", "action": "release" }
+      ],
+      "asserts": [
+        { "id": "reverse_hold_reverse_motion", "kind": "reverseReached", "t": 4.2, "limit": -1.0 },
+        { "id": "reverse_hold_echo", "kind": "heldEchoAtLeast", "action": "Brake / reverse", "from": 1.0, "to": 3.0, "minFraction": 0.9 },
+        { "id": "reverse_hold_release_echo", "kind": "heldEchoAtMost", "action": "Brake / reverse", "from": 5.0, "to": 6.0, "maxFraction": 0.15 },
+        { "id": "reverse_hold_forward_speed", "kind": "speedAbove", "t": 9.0, "value": 4 }
+      ]
+    }
+  ]
+}

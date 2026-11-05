@@ -1,0 +1,24 @@
+{
+ "part": 73,
+ "meshes": 318,
+ "sheetsReviewed": 13,
+ "itemsFlagged": 1,
+ "flaggedTileCount": 1,
+ "flagTypes": {
+  "blackcard": 1
+ },
+ "flaggedItems": {
+  "281": {
+   "flags": [
+    "blackcard"
+   ],
+   "object": "gnd_water_01_mm602__program_10",
+   "sha": "208817b8"
+  }
+ },
+ "overviewsAfter": 23962,
+ "accepted": 0,
+ "basis": "quantitative tile metrics from rewrap 41618971031; metadata flat order mapping; overview only, no quality acceptance",
+ "review_class_note": "Quantitative tile metrics only; NO manual image inspection; does not count toward manual review coverage",
+ "review_class": "machine_screened_only"
+}

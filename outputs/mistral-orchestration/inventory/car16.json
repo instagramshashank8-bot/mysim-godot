@@ -1,0 +1,1490 @@
+{
+ "scope": "read-only texture inventory (no mutation, no rendering)",
+ "target": "car 2019_f1_ferrari_sf90 (index 16)",
+ "assemblySource": null,
+ "rows": [
+  {
+   "file": "RealRacing/Source/2019_f1_ferrari_sf90/2019_f1_ferrari_sf90_arms.png",
+   "pixels": "1024x1024",
+   "width": 1024,
+   "height": 1024,
+   "bitDepth": 8,
+   "colourType": 6,
+   "hasAlpha": true,
+   "iccOrGamma": [],
+   "unknownChunks": [],
+   "bytes": 452298,
+   "import": {
+    "present": true,
+    "importer": "texture",
+    "compressMode": 0,
+    "mipmaps": "true",
+    "sizeLimit": 0,
+    "detect3dTo": 1,
+    "vramTexture": "false",
+    "premultAlpha": "false",
+    "fixAlphaBorder": "true"
+   },
+   "boundTo": [],
+   "repairs": [],
+   "assembly": [],
+   "density": []
+  },
+  {
+   "file": "RealRacing/Source/2019_f1_ferrari_sf90/2019_f1_ferrari_sf90_badges.png",
+   "pixels": "256x256",
+   "width": 256,
+   "height": 256,
+   "bitDepth": 8,
+   "colourType": 6,
+   "hasAlpha": true,
+   "iccOrGamma": [],
+   "unknownChunks": [],
+   "bytes": 21653,
+   "import": {
+    "present": true,
+    "importer": "texture",
+    "compressMode": 0,
+    "mipmaps": "true",
+    "sizeLimit": 0,
+    "detect3dTo": 1,
+    "vramTexture": "false",
+    "premultAlpha": "false",
+    "fixAlphaBorder": "true"
+   },
+   "boundTo": [
+    {
+     "car": 16,
+     "renderer": "LOD_A_BODY_mm_badges",
+     "guid": "a903631edbed0e5cf8f2a64dc5a09eb2",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_REARBUMPER_mm_badges",
+     "guid": "a903631edbed0e5cf8f2a64dc5a09eb2",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_FRONTBUMPER_mm_badges",
+     "guid": "a903631edbed0e5cf8f2a64dc5a09eb2",
+     "slot": "_BaseMap"
+    }
+   ],
+   "repairs": [
+    {
+     "key": "16/LOD_A_BODY_mm_badges",
+     "scale": [
+      1,
+      -1
+     ],
+     "offset": [
+      0,
+      1
+     ],
+     "pending": true
+    },
+    {
+     "key": "16/LOD_A_REARBUMPER_mm_badges",
+     "scale": [
+      1,
+      -1
+     ],
+     "offset": [
+      0,
+      1
+     ],
+     "pending": true
+    },
+    {
+     "key": "16/LOD_A_FRONTBUMPER_mm_badges",
+     "scale": [
+      1,
+      -1
+     ],
+     "offset": [
+      0,
+      1
+     ],
+     "pending": true
+    }
+   ],
+   "assembly": [],
+   "density": []
+  },
+  {
+   "file": "RealRacing/Source/2019_f1_ferrari_sf90/2019_f1_ferrari_sf90_cab.png",
+   "pixels": "512x512",
+   "width": 512,
+   "height": 512,
+   "bitDepth": 8,
+   "colourType": 6,
+   "hasAlpha": true,
+   "iccOrGamma": [],
+   "unknownChunks": [],
+   "bytes": 107734,
+   "import": {
+    "present": true,
+    "importer": "texture",
+    "compressMode": 0,
+    "mipmaps": "true",
+    "sizeLimit": 0,
+    "detect3dTo": 1,
+    "vramTexture": "false",
+    "premultAlpha": "false",
+    "fixAlphaBorder": "true"
+   },
+   "boundTo": [
+    {
+     "car": 16,
+     "renderer": "LOD_A_INTERIOR_mm_cab",
+     "guid": "3f4b5473ee123db8a83b388031369843",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_STEERING_WHEEL_mm_cab",
+     "guid": "3f4b5473ee123db8a83b388031369843",
+     "slot": "_BaseMap"
+    }
+   ],
+   "repairs": [],
+   "assembly": [],
+   "density": []
+  },
+  {
+   "file": "RealRacing/Source/2019_f1_ferrari_sf90/2019_f1_ferrari_sf90_driver_16.png",
+   "pixels": "1024x1024",
+   "width": 1024,
+   "height": 1024,
+   "bitDepth": 8,
+   "colourType": 6,
+   "hasAlpha": true,
+   "iccOrGamma": [],
+   "unknownChunks": [],
+   "bytes": 763240,
+   "import": {
+    "present": true,
+    "importer": "texture",
+    "compressMode": 0,
+    "mipmaps": "true",
+    "sizeLimit": 0,
+    "detect3dTo": 1,
+    "vramTexture": "false",
+    "premultAlpha": "false",
+    "fixAlphaBorder": "true"
+   },
+   "boundTo": [],
+   "repairs": [],
+   "assembly": [],
+   "density": []
+  },
+  {
+   "file": "RealRacing/Source/2019_f1_ferrari_sf90/2019_f1_ferrari_sf90_driver_5.png",
+   "pixels": "1024x1024",
+   "width": 1024,
+   "height": 1024,
+   "bitDepth": 8,
+   "colourType": 6,
+   "hasAlpha": true,
+   "iccOrGamma": [],
+   "unknownChunks": [],
+   "bytes": 725763,
+   "import": {
+    "present": true,
+    "importer": "texture",
+    "compressMode": 0,
+    "mipmaps": "true",
+    "sizeLimit": 0,
+    "detect3dTo": 1,
+    "vramTexture": "false",
+    "premultAlpha": "false",
+    "fixAlphaBorder": "true"
+   },
+   "boundTo": [],
+   "repairs": [],
+   "assembly": [],
+   "density": []
+  },
+  {
+   "file": "RealRacing/Source/2019_f1_ferrari_sf90/2019_f1_ferrari_sf90_int.png",
+   "pixels": "512x512",
+   "width": 512,
+   "height": 512,
+   "bitDepth": 8,
+   "colourType": 6,
+   "hasAlpha": true,
+   "iccOrGamma": [],
+   "unknownChunks": [],
+   "bytes": 70571,
+   "import": {
+    "present": true,
+    "importer": "texture",
+    "compressMode": 0,
+    "mipmaps": "true",
+    "sizeLimit": 0,
+    "detect3dTo": 1,
+    "vramTexture": "false",
+    "premultAlpha": "false",
+    "fixAlphaBorder": "true"
+   },
+   "boundTo": [
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_MIRROR_GLASS_RIGHT_mm_int",
+     "guid": "c829acec3cfab5fdfb71b119a6fffd49",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_INTERIOR_mm_int",
+     "guid": "c829acec3cfab5fdfb71b119a6fffd49",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_BODY_mm_int",
+     "guid": "c829acec3cfab5fdfb71b119a6fffd49",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_MIRROR_GLASS_LEFT_mm_int",
+     "guid": "c829acec3cfab5fdfb71b119a6fffd49",
+     "slot": "_BaseMap"
+    }
+   ],
+   "repairs": [],
+   "assembly": [],
+   "density": []
+  },
+  {
+   "file": "RealRacing/Source/2019_f1_ferrari_sf90/2019_f1_ferrari_sf90_lights.png",
+   "pixels": "512x512",
+   "width": 512,
+   "height": 512,
+   "bitDepth": 8,
+   "colourType": 6,
+   "hasAlpha": true,
+   "iccOrGamma": [],
+   "unknownChunks": [],
+   "bytes": 98656,
+   "import": {
+    "present": true,
+    "importer": "texture",
+    "compressMode": 0,
+    "mipmaps": "true",
+    "sizeLimit": 0,
+    "detect3dTo": 1,
+    "vramTexture": "false",
+    "premultAlpha": "false",
+    "fixAlphaBorder": "true"
+   },
+   "boundTo": [
+    {
+     "car": 16,
+     "renderer": "LOD_A_BODY_mm_lights",
+     "guid": "f491358d555b3805980baa8cc28a4ef9",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_REARBUMPER_mm_lights",
+     "guid": "f491358d555b3805980baa8cc28a4ef9",
+     "slot": "_BaseMap"
+    }
+   ],
+   "repairs": [],
+   "assembly": [],
+   "density": []
+  },
+  {
+   "file": "RealRacing/Source/2019_f1_ferrari_sf90/2019_f1_ferrari_sf90_mask.png",
+   "pixels": "1024x1024",
+   "width": 1024,
+   "height": 1024,
+   "bitDepth": 8,
+   "colourType": 6,
+   "hasAlpha": true,
+   "iccOrGamma": [],
+   "unknownChunks": [],
+   "bytes": 41420,
+   "import": {
+    "present": true,
+    "importer": "texture",
+    "compressMode": 0,
+    "mipmaps": "true",
+    "sizeLimit": 0,
+    "detect3dTo": 1,
+    "vramTexture": "false",
+    "premultAlpha": "false",
+    "fixAlphaBorder": "true"
+   },
+   "boundTo": [
+    {
+     "car": 16,
+     "renderer": "LOD_A_FRONTBUMPER_mm_ext",
+     "guid": "449e4db78ecc6e21c9bd11a7fbf05975",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_HAND_GEAR",
+     "guid": "aed61c8bdfb990d77961becb3daf5a23",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_MIRROR_GLASS_RIGHT_mm_misc",
+     "guid": "aed61c8bdfb990d77961becb3daf5a23",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INTERIOR_mm_cab",
+     "guid": "3f4b5473ee123db8a83b388031369843",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_MIRROR_GLASS_LEFT_mm_misc",
+     "guid": "aed61c8bdfb990d77961becb3daf5a23",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_STEERING_WHEEL_SHIFT_LIT_07_mm_sw",
+     "guid": "4734243d4ddc9bad6b9e52b57dbffefc",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_STEERING_WHEEL_SHIFT_LIT_11_mm_sw",
+     "guid": "4734243d4ddc9bad6b9e52b57dbffefc",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_MIRROR_GLASS_RIGHT_mm_int",
+     "guid": "c829acec3cfab5fdfb71b119a6fffd49",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_CHASSIS_mm_misc",
+     "guid": "aed61c8bdfb990d77961becb3daf5a23",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_WHEELGUARD_FRONT_LEFT_mm_chassis",
+     "guid": "17b01929136258a46b9f04a07aff71c7",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_STEERING_WHEEL_SHIFT_LIT_01_mm_sw",
+     "guid": "4734243d4ddc9bad6b9e52b57dbffefc",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_BODY_mm_badges",
+     "guid": "a903631edbed0e5cf8f2a64dc5a09eb2",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_STEERING_WHEEL_SHIFT_LIT_03_mm_sw",
+     "guid": "4734243d4ddc9bad6b9e52b57dbffefc",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_STRUT_UPPER_FRONT_LEFT_mm_ext",
+     "guid": "449e4db78ecc6e21c9bd11a7fbf05975",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_STEERING_WHEEL_SHIFT_LIT_09_mm_sw",
+     "guid": "4734243d4ddc9bad6b9e52b57dbffefc",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_BODY_mm_ext",
+     "guid": "449e4db78ecc6e21c9bd11a7fbf05975",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_STEERING_WHEEL_SHIFT_LIT_10_mm_sw",
+     "guid": "4734243d4ddc9bad6b9e52b57dbffefc",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_CHASSIS_mm_chassis",
+     "guid": "17b01929136258a46b9f04a07aff71c7",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_STRUT_LOWER_REAR_RIGHT_mm_misc",
+     "guid": "aed61c8bdfb990d77961becb3daf5a23",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_STEERING_WHEEL_SHIFT_LIT_02_mm_sw",
+     "guid": "4734243d4ddc9bad6b9e52b57dbffefc",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_BODY_mm_ext",
+     "guid": "449e4db78ecc6e21c9bd11a7fbf05975",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_WHEEL_REAR_mm_wheel",
+     "guid": "78fcd2c95e54b5a4aac5fd8b0941c679",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_WHEELGUARD_FRONT_RIGHT_mm_misc",
+     "guid": "aed61c8bdfb990d77961becb3daf5a23",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_EXHAUST_mm_ext",
+     "guid": "449e4db78ecc6e21c9bd11a7fbf05975",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_STEERING_WHEEL_LED_mm_sw",
+     "guid": "4734243d4ddc9bad6b9e52b57dbffefc",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_HAND_STEER",
+     "guid": "aed61c8bdfb990d77961becb3daf5a23",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_WHEELGUARD_FRONT_LEFT_mm_misc",
+     "guid": "aed61c8bdfb990d77961becb3daf5a23",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_WHEEL_mm_wheel",
+     "guid": "78fcd2c95e54b5a4aac5fd8b0941c679",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_INTERIOR_mm_int",
+     "guid": "c829acec3cfab5fdfb71b119a6fffd49",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_HOOD_mm_ext",
+     "guid": "449e4db78ecc6e21c9bd11a7fbf05975",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_STEERING_WHEEL_SHIFT_LIT_08_mm_sw",
+     "guid": "4734243d4ddc9bad6b9e52b57dbffefc",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_STEERING_WHEEL_mm_cab",
+     "guid": "3f4b5473ee123db8a83b388031369843",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_MIRROR_RIGHT_mm_ext",
+     "guid": "449e4db78ecc6e21c9bd11a7fbf05975",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_REARBUMPER_mm_ext",
+     "guid": "449e4db78ecc6e21c9bd11a7fbf05975",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_BODY_mm_lights",
+     "guid": "f491358d555b3805980baa8cc28a4ef9",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_DOOR_RIGHT_mm_ext",
+     "guid": "449e4db78ecc6e21c9bd11a7fbf05975",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_MIRROR_LEFT_mm_ext",
+     "guid": "449e4db78ecc6e21c9bd11a7fbf05975",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_REARBUMPER_mm_badges",
+     "guid": "a903631edbed0e5cf8f2a64dc5a09eb2",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_STRUT_LOWER_FRONT_RIGHT_mm_ext",
+     "guid": "449e4db78ecc6e21c9bd11a7fbf05975",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_BODY_mm_int",
+     "guid": "c829acec3cfab5fdfb71b119a6fffd49",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_MIRROR_GLASS_LEFT_mm_int",
+     "guid": "c829acec3cfab5fdfb71b119a6fffd49",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_STEERING_WHEEL_SHIFT_LIT_06_mm_sw",
+     "guid": "4734243d4ddc9bad6b9e52b57dbffefc",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_REARBUMPER_mm_misc",
+     "guid": "aed61c8bdfb990d77961becb3daf5a23",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_STEERING_WHEEL_SHIFT_LIT_05_mm_sw",
+     "guid": "4734243d4ddc9bad6b9e52b57dbffefc",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_MIRROR_LEFT_mm_ext",
+     "guid": "449e4db78ecc6e21c9bd11a7fbf05975",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_STEERING_WHEEL_SHIFT_LIT_04_mm_sw",
+     "guid": "4734243d4ddc9bad6b9e52b57dbffefc",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_STRUT_LOWER_FRONT_RIGHT_mm_misc",
+     "guid": "aed61c8bdfb990d77961becb3daf5a23",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_STEERING_WHEEL_mm_sw",
+     "guid": "4734243d4ddc9bad6b9e52b57dbffefc",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_DOOR_LEFT_mm_ext",
+     "guid": "449e4db78ecc6e21c9bd11a7fbf05975",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_STRUT_UPPER_FRONT_RIGHT_mm_ext",
+     "guid": "449e4db78ecc6e21c9bd11a7fbf05975",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_FRONTBUMPER_mm_misc",
+     "guid": "aed61c8bdfb990d77961becb3daf5a23",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_REARBUMPER_mm_lights",
+     "guid": "f491358d555b3805980baa8cc28a4ef9",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_STRUT_LOWER_REAR_LEFT_mm_misc",
+     "guid": "aed61c8bdfb990d77961becb3daf5a23",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_STRUT_LOWER_FRONT_LEFT_mm_misc",
+     "guid": "aed61c8bdfb990d77961becb3daf5a23",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_STRUT_UPPER_FRONT_LEFT_mm_ext",
+     "guid": "449e4db78ecc6e21c9bd11a7fbf05975",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_STRUT_UPPER_REAR_LEFT_mm_misc",
+     "guid": "aed61c8bdfb990d77961becb3daf5a23",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_STRUT_UPPER_REAR_RIGHT_mm_misc",
+     "guid": "aed61c8bdfb990d77961becb3daf5a23",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_FRONTBUMPER_mm_badges",
+     "guid": "a903631edbed0e5cf8f2a64dc5a09eb2",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_MIRROR_RIGHT_mm_ext",
+     "guid": "449e4db78ecc6e21c9bd11a7fbf05975",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_WHEELGUARD_FRONT_RIGHT_mm_chassis",
+     "guid": "17b01929136258a46b9f04a07aff71c7",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_STEERING_WHEEL_LED_EMISSIVE_mm_sw",
+     "guid": "4734243d4ddc9bad6b9e52b57dbffefc",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_STRUT_UPPER_FRONT_RIGHT_mm_ext",
+     "guid": "449e4db78ecc6e21c9bd11a7fbf05975",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_BODY_mm_misc",
+     "guid": "aed61c8bdfb990d77961becb3daf5a23",
+     "slot": "_MaskMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_STRUT_LOWER_FRONT_LEFT_mm_ext",
+     "guid": "449e4db78ecc6e21c9bd11a7fbf05975",
+     "slot": "_MaskMap"
+    }
+   ],
+   "repairs": [
+    {
+     "key": "16/LOD_A_FRONTBUMPER_mm_ext",
+     "scale": [
+      1,
+      -1
+     ],
+     "offset": [
+      0,
+      1
+     ],
+     "pending": false
+    },
+    {
+     "key": "16/LOD_A_BODY_mm_badges",
+     "scale": [
+      1,
+      -1
+     ],
+     "offset": [
+      0,
+      1
+     ],
+     "pending": true
+    },
+    {
+     "key": "16/LOD_A_STRUT_UPPER_FRONT_LEFT_mm_ext",
+     "scale": [
+      1,
+      -1
+     ],
+     "offset": [
+      0,
+      1
+     ],
+     "pending": true
+    },
+    {
+     "key": "16/LOD_A_BODY_mm_ext",
+     "scale": [
+      1,
+      -1
+     ],
+     "offset": [
+      0,
+      1
+     ],
+     "pending": false
+    },
+    {
+     "key": "16/LOD_A_EXHAUST_mm_ext",
+     "scale": [
+      1,
+      -1
+     ],
+     "offset": [
+      0,
+      1
+     ],
+     "pending": true
+    },
+    {
+     "key": "16/LOD_A_REARBUMPER_mm_ext",
+     "scale": [
+      1,
+      -1
+     ],
+     "offset": [
+      0,
+      1
+     ],
+     "pending": false
+    },
+    {
+     "key": "16/LOD_A_DOOR_RIGHT_mm_ext",
+     "scale": [
+      1,
+      -1
+     ],
+     "offset": [
+      0,
+      1
+     ],
+     "pending": true
+    },
+    {
+     "key": "16/LOD_A_MIRROR_LEFT_mm_ext",
+     "scale": [
+      1,
+      -1
+     ],
+     "offset": [
+      0,
+      1
+     ],
+     "pending": true
+    },
+    {
+     "key": "16/LOD_A_REARBUMPER_mm_badges",
+     "scale": [
+      1,
+      -1
+     ],
+     "offset": [
+      0,
+      1
+     ],
+     "pending": true
+    },
+    {
+     "key": "16/LOD_A_DOOR_LEFT_mm_ext",
+     "scale": [
+      1,
+      -1
+     ],
+     "offset": [
+      0,
+      1
+     ],
+     "pending": true
+    },
+    {
+     "key": "16/LOD_A_FRONTBUMPER_mm_badges",
+     "scale": [
+      1,
+      -1
+     ],
+     "offset": [
+      0,
+      1
+     ],
+     "pending": true
+    },
+    {
+     "key": "16/LOD_A_MIRROR_RIGHT_mm_ext",
+     "scale": [
+      1,
+      -1
+     ],
+     "offset": [
+      0,
+      1
+     ],
+     "pending": true
+    },
+    {
+     "key": "16/LOD_A_STRUT_UPPER_FRONT_RIGHT_mm_ext",
+     "scale": [
+      1,
+      -1
+     ],
+     "offset": [
+      0,
+      1
+     ],
+     "pending": true
+    }
+   ],
+   "assembly": [],
+   "density": []
+  },
+  {
+   "file": "RealRacing/Source/2019_f1_ferrari_sf90/2019_f1_ferrari_sf90_misc.png",
+   "pixels": "512x512",
+   "width": 512,
+   "height": 512,
+   "bitDepth": 8,
+   "colourType": 6,
+   "hasAlpha": true,
+   "iccOrGamma": [],
+   "unknownChunks": [],
+   "bytes": 19374,
+   "import": {
+    "present": true,
+    "importer": "texture",
+    "compressMode": 0,
+    "mipmaps": "true",
+    "sizeLimit": 0,
+    "detect3dTo": 1,
+    "vramTexture": "false",
+    "premultAlpha": "false",
+    "fixAlphaBorder": "true"
+   },
+   "boundTo": [
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_HAND_GEAR",
+     "guid": "aed61c8bdfb990d77961becb3daf5a23",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_MIRROR_GLASS_RIGHT_mm_misc",
+     "guid": "aed61c8bdfb990d77961becb3daf5a23",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_MIRROR_GLASS_LEFT_mm_misc",
+     "guid": "aed61c8bdfb990d77961becb3daf5a23",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_CHASSIS_mm_misc",
+     "guid": "aed61c8bdfb990d77961becb3daf5a23",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_STRUT_LOWER_REAR_RIGHT_mm_misc",
+     "guid": "aed61c8bdfb990d77961becb3daf5a23",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_WHEELGUARD_FRONT_RIGHT_mm_misc",
+     "guid": "aed61c8bdfb990d77961becb3daf5a23",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_HAND_STEER",
+     "guid": "aed61c8bdfb990d77961becb3daf5a23",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_WHEELGUARD_FRONT_LEFT_mm_misc",
+     "guid": "aed61c8bdfb990d77961becb3daf5a23",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_REARBUMPER_mm_misc",
+     "guid": "aed61c8bdfb990d77961becb3daf5a23",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_STRUT_LOWER_FRONT_RIGHT_mm_misc",
+     "guid": "aed61c8bdfb990d77961becb3daf5a23",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_FRONTBUMPER_mm_misc",
+     "guid": "aed61c8bdfb990d77961becb3daf5a23",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_STRUT_LOWER_REAR_LEFT_mm_misc",
+     "guid": "aed61c8bdfb990d77961becb3daf5a23",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_STRUT_LOWER_FRONT_LEFT_mm_misc",
+     "guid": "aed61c8bdfb990d77961becb3daf5a23",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_STRUT_UPPER_REAR_LEFT_mm_misc",
+     "guid": "aed61c8bdfb990d77961becb3daf5a23",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_STRUT_UPPER_REAR_RIGHT_mm_misc",
+     "guid": "aed61c8bdfb990d77961becb3daf5a23",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_BODY_mm_misc",
+     "guid": "aed61c8bdfb990d77961becb3daf5a23",
+     "slot": "_BaseMap"
+    }
+   ],
+   "repairs": [],
+   "assembly": [],
+   "density": []
+  },
+  {
+   "file": "RealRacing/Source/2019_f1_ferrari_sf90/2019_f1_ferrari_sf90_sha.png",
+   "pixels": "256x256",
+   "width": 256,
+   "height": 256,
+   "bitDepth": 8,
+   "colourType": 6,
+   "hasAlpha": true,
+   "iccOrGamma": [],
+   "unknownChunks": [],
+   "bytes": 20683,
+   "import": {
+    "present": true,
+    "importer": "texture",
+    "compressMode": 0,
+    "mipmaps": "true",
+    "sizeLimit": 0,
+    "detect3dTo": 1,
+    "vramTexture": "false",
+    "premultAlpha": "false",
+    "fixAlphaBorder": "true"
+   },
+   "boundTo": [],
+   "repairs": [],
+   "assembly": [],
+   "density": []
+  },
+  {
+   "file": "RealRacing/Source/2019_f1_ferrari_sf90/2019_f1_ferrari_sf90_sw.png",
+   "pixels": "1024x1024",
+   "width": 1024,
+   "height": 1024,
+   "bitDepth": 8,
+   "colourType": 6,
+   "hasAlpha": true,
+   "iccOrGamma": [],
+   "unknownChunks": [],
+   "bytes": 288075,
+   "import": {
+    "present": true,
+    "importer": "texture",
+    "compressMode": 0,
+    "mipmaps": "true",
+    "sizeLimit": 0,
+    "detect3dTo": 1,
+    "vramTexture": "false",
+    "premultAlpha": "false",
+    "fixAlphaBorder": "true"
+   },
+   "boundTo": [
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_STEERING_WHEEL_SHIFT_LIT_07_mm_sw",
+     "guid": "4734243d4ddc9bad6b9e52b57dbffefc",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_STEERING_WHEEL_SHIFT_LIT_11_mm_sw",
+     "guid": "4734243d4ddc9bad6b9e52b57dbffefc",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_STEERING_WHEEL_SHIFT_LIT_01_mm_sw",
+     "guid": "4734243d4ddc9bad6b9e52b57dbffefc",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_STEERING_WHEEL_SHIFT_LIT_03_mm_sw",
+     "guid": "4734243d4ddc9bad6b9e52b57dbffefc",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_STEERING_WHEEL_SHIFT_LIT_09_mm_sw",
+     "guid": "4734243d4ddc9bad6b9e52b57dbffefc",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_STEERING_WHEEL_SHIFT_LIT_10_mm_sw",
+     "guid": "4734243d4ddc9bad6b9e52b57dbffefc",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_STEERING_WHEEL_SHIFT_LIT_02_mm_sw",
+     "guid": "4734243d4ddc9bad6b9e52b57dbffefc",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_STEERING_WHEEL_LED_mm_sw",
+     "guid": "4734243d4ddc9bad6b9e52b57dbffefc",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_STEERING_WHEEL_SHIFT_LIT_08_mm_sw",
+     "guid": "4734243d4ddc9bad6b9e52b57dbffefc",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_STEERING_WHEEL_SHIFT_LIT_06_mm_sw",
+     "guid": "4734243d4ddc9bad6b9e52b57dbffefc",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_STEERING_WHEEL_SHIFT_LIT_05_mm_sw",
+     "guid": "4734243d4ddc9bad6b9e52b57dbffefc",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_STEERING_WHEEL_SHIFT_LIT_04_mm_sw",
+     "guid": "4734243d4ddc9bad6b9e52b57dbffefc",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_STEERING_WHEEL_mm_sw",
+     "guid": "4734243d4ddc9bad6b9e52b57dbffefc",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_STEERING_WHEEL_LED_EMISSIVE_mm_sw",
+     "guid": "4734243d4ddc9bad6b9e52b57dbffefc",
+     "slot": "_BaseMap"
+    }
+   ],
+   "repairs": [],
+   "assembly": [],
+   "density": []
+  },
+  {
+   "file": "RealRacing/Source/2019_f1_ferrari_sf90/2019_f1_ferrari_sf90_wheel.png",
+   "pixels": "512x512",
+   "width": 512,
+   "height": 512,
+   "bitDepth": 8,
+   "colourType": 6,
+   "hasAlpha": true,
+   "iccOrGamma": [],
+   "unknownChunks": [],
+   "bytes": 51423,
+   "import": {
+    "present": true,
+    "importer": "texture",
+    "compressMode": 0,
+    "mipmaps": "true",
+    "sizeLimit": 0,
+    "detect3dTo": 1,
+    "vramTexture": "false",
+    "premultAlpha": "false",
+    "fixAlphaBorder": "true"
+   },
+   "boundTo": [
+    {
+     "car": 16,
+     "renderer": "LOD_A_WHEEL_REAR_mm_wheel",
+     "guid": "78fcd2c95e54b5a4aac5fd8b0941c679",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_WHEEL_mm_wheel",
+     "guid": "78fcd2c95e54b5a4aac5fd8b0941c679",
+     "slot": "_BaseMap"
+    }
+   ],
+   "repairs": [],
+   "assembly": [],
+   "density": []
+  },
+  {
+   "file": "RealRacing/Source/2019_f1_ferrari_sf90/2019_f1_ferrari_sf90_wheel_blur.png",
+   "pixels": "512x512",
+   "width": 512,
+   "height": 512,
+   "bitDepth": 8,
+   "colourType": 6,
+   "hasAlpha": true,
+   "iccOrGamma": [],
+   "unknownChunks": [],
+   "bytes": 93248,
+   "import": {
+    "present": true,
+    "importer": "texture",
+    "compressMode": 0,
+    "mipmaps": "true",
+    "sizeLimit": 0,
+    "detect3dTo": 1,
+    "vramTexture": "false",
+    "premultAlpha": "false",
+    "fixAlphaBorder": "true"
+   },
+   "boundTo": [],
+   "repairs": [],
+   "assembly": [],
+   "density": []
+  },
+  {
+   "file": "RealRacing/Source/2019_f1_ferrari_sf90/livery/2019_f1_ferrari_sf90_ext_16.png",
+   "pixels": "1024x1024",
+   "width": 1024,
+   "height": 1024,
+   "bitDepth": 8,
+   "colourType": 6,
+   "hasAlpha": true,
+   "iccOrGamma": [],
+   "unknownChunks": [],
+   "bytes": 646169,
+   "import": {
+    "present": true,
+    "importer": "texture",
+    "compressMode": 0,
+    "mipmaps": "true",
+    "sizeLimit": 0,
+    "detect3dTo": 1,
+    "vramTexture": "false",
+    "premultAlpha": "false",
+    "fixAlphaBorder": "true"
+   },
+   "boundTo": [
+    {
+     "car": 16,
+     "renderer": "LOD_A_FRONTBUMPER_mm_ext",
+     "guid": "449e4db78ecc6e21c9bd11a7fbf05975",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_STRUT_UPPER_FRONT_LEFT_mm_ext",
+     "guid": "449e4db78ecc6e21c9bd11a7fbf05975",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_BODY_mm_ext",
+     "guid": "449e4db78ecc6e21c9bd11a7fbf05975",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_BODY_mm_ext",
+     "guid": "449e4db78ecc6e21c9bd11a7fbf05975",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_EXHAUST_mm_ext",
+     "guid": "449e4db78ecc6e21c9bd11a7fbf05975",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_HOOD_mm_ext",
+     "guid": "449e4db78ecc6e21c9bd11a7fbf05975",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_MIRROR_RIGHT_mm_ext",
+     "guid": "449e4db78ecc6e21c9bd11a7fbf05975",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_REARBUMPER_mm_ext",
+     "guid": "449e4db78ecc6e21c9bd11a7fbf05975",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_DOOR_RIGHT_mm_ext",
+     "guid": "449e4db78ecc6e21c9bd11a7fbf05975",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_MIRROR_LEFT_mm_ext",
+     "guid": "449e4db78ecc6e21c9bd11a7fbf05975",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_STRUT_LOWER_FRONT_RIGHT_mm_ext",
+     "guid": "449e4db78ecc6e21c9bd11a7fbf05975",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_MIRROR_LEFT_mm_ext",
+     "guid": "449e4db78ecc6e21c9bd11a7fbf05975",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_DOOR_LEFT_mm_ext",
+     "guid": "449e4db78ecc6e21c9bd11a7fbf05975",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_STRUT_UPPER_FRONT_RIGHT_mm_ext",
+     "guid": "449e4db78ecc6e21c9bd11a7fbf05975",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_STRUT_UPPER_FRONT_LEFT_mm_ext",
+     "guid": "449e4db78ecc6e21c9bd11a7fbf05975",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_MIRROR_RIGHT_mm_ext",
+     "guid": "449e4db78ecc6e21c9bd11a7fbf05975",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_STRUT_UPPER_FRONT_RIGHT_mm_ext",
+     "guid": "449e4db78ecc6e21c9bd11a7fbf05975",
+     "slot": "_BaseMap"
+    },
+    {
+     "car": 16,
+     "renderer": "LOD_A_INT_STRUT_LOWER_FRONT_LEFT_mm_ext",
+     "guid": "449e4db78ecc6e21c9bd11a7fbf05975",
+     "slot": "_BaseMap"
+    }
+   ],
+   "repairs": [
+    {
+     "key": "16/LOD_A_FRONTBUMPER_mm_ext",
+     "scale": [
+      1,
+      -1
+     ],
+     "offset": [
+      0,
+      1
+     ],
+     "pending": false
+    },
+    {
+     "key": "16/LOD_A_STRUT_UPPER_FRONT_LEFT_mm_ext",
+     "scale": [
+      1,
+      -1
+     ],
+     "offset": [
+      0,
+      1
+     ],
+     "pending": true
+    },
+    {
+     "key": "16/LOD_A_BODY_mm_ext",
+     "scale": [
+      1,
+      -1
+     ],
+     "offset": [
+      0,
+      1
+     ],
+     "pending": false
+    },
+    {
+     "key": "16/LOD_A_EXHAUST_mm_ext",
+     "scale": [
+      1,
+      -1
+     ],
+     "offset": [
+      0,
+      1
+     ],
+     "pending": true
+    },
+    {
+     "key": "16/LOD_A_REARBUMPER_mm_ext",
+     "scale": [
+      1,
+      -1
+     ],
+     "offset": [
+      0,
+      1
+     ],
+     "pending": false
+    },
+    {
+     "key": "16/LOD_A_DOOR_RIGHT_mm_ext",
+     "scale": [
+      1,
+      -1
+     ],
+     "offset": [
+      0,
+      1
+     ],
+     "pending": true
+    },
+    {
+     "key": "16/LOD_A_MIRROR_LEFT_mm_ext",
+     "scale": [
+      1,
+      -1
+     ],
+     "offset": [
+      0,
+      1
+     ],
+     "pending": true
+    },
+    {
+     "key": "16/LOD_A_DOOR_LEFT_mm_ext",
+     "scale": [
+      1,
+      -1
+     ],
+     "offset": [
+      0,
+      1
+     ],
+     "pending": true
+    },
+    {
+     "key": "16/LOD_A_MIRROR_RIGHT_mm_ext",
+     "scale": [
+      1,
+      -1
+     ],
+     "offset": [
+      0,
+      1
+     ],
+     "pending": true
+    },
+    {
+     "key": "16/LOD_A_STRUT_UPPER_FRONT_RIGHT_mm_ext",
+     "scale": [
+      1,
+      -1
+     ],
+     "offset": [
+      0,
+      1
+     ],
+     "pending": true
+    }
+   ],
+   "assembly": [],
+   "density": []
+  },
+  {
+   "file": "RealRacing/Source/2019_f1_ferrari_sf90/livery/2019_f1_ferrari_sf90_ext_5.png",
+   "pixels": "1024x1024",
+   "width": 1024,
+   "height": 1024,
+   "bitDepth": 8,
+   "colourType": 6,
+   "hasAlpha": true,
+   "iccOrGamma": [],
+   "unknownChunks": [],
+   "bytes": 642946,
+   "import": {
+    "present": true,
+    "importer": "texture",
+    "compressMode": 0,
+    "mipmaps": "true",
+    "sizeLimit": 0,
+    "detect3dTo": 1,
+    "vramTexture": "false",
+    "premultAlpha": "false",
+    "fixAlphaBorder": "true"
+   },
+   "boundTo": [],
+   "repairs": [],
+   "assembly": [],
+   "density": []
+  }
+ ],
+ "notes": [
+  "orientation classes and defect columns live in the turn report; this tool emits measured facts only",
+  "density pxPerMetre = textureWidth / metresPerUv0, valid only when --assembly supplies metresPerUv0"
+ ]
+}

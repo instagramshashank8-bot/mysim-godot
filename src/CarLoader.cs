@@ -21,6 +21,14 @@ public static class CarLoader {
     m.SetSurfaceOverrideMaterial(s, mat);
    }
   }
+  // Opt-in A/B diagnostic for duplicated body shells: hide a _mm_misc renderer only where the same
+  // renderer exists as _mm_ext (same source part imported once per material). Logs every hide; the
+  // assembly audit records the flag. Default off; nothing is deleted and no UV/geometry changes.
+  if(System.Environment.GetEnvironmentVariable("MYSIM_MISC_TWIN_HIDE_DIAGNOSTIC")=="1"){
+   var names=new System.Collections.Generic.HashSet<string>();foreach(var n in root.FindChildren("*","MeshInstance3D",true,false))names.Add(((Node3D)n).Name.ToString());
+   int hidden=0;foreach(var n in root.FindChildren("*","MeshInstance3D",true,false)){var mesh=(Node3D)n;string name=mesh.Name.ToString();if(!name.EndsWith("_mm_misc",System.StringComparison.Ordinal))continue;string twin=name.Substring(0,name.Length-"_mm_misc".Length)+"_mm_ext";if(!names.Contains(twin))continue;mesh.Visible=false;mesh.SetMeta("misc_twin_hidden",true);GD.Print("MISC_TWIN_HIDE_DIAGNOSTIC ",name," hidden, twin ",twin," present; A/B evidence only");hidden++;}
+   GD.Print("MISC_TWIN_HIDE_DIAGNOSTIC hidden=",hidden," opt-in diagnostic; originals recoverable, geometry/UV untouched");
+  }
   WindingFixer.Fix(root,out int windingSurfaces);
   return root;
  }
@@ -38,8 +46,13 @@ static Godot.Collections.Dictionary carMap;
   if(System.Environment.GetEnvironmentVariable("MYSIM_DISABLE_SURFACE_UV_REPAIRS")=="1")return material;
   surfaceUvRepairs??=Json.ParseString(FileAccess.GetFileAsString("res://data/car_surface_uv_repairs.json")).AsGodotDictionary();string key=car+"/"+renderer;if(!surfaceUvRepairs.ContainsKey(key))return material;
   var spec=surfaceUvRepairs[key].AsGodotDictionary();var shader=material as ShaderMaterial;var texture=shader?.GetShaderParameter("base").As<Texture2D>();
+  // Review-pending candidates stay inert in production; the dedicated comparison run opts in per environment.
+  // Two spellings accepted: this gate's canonical MYSIM_SURFACE_UV_CANDIDATES and the integration
+  // harness spelling MYSIM_SOURCE_UV_CANDIDATES (run 41798036351 wired the latter while this gate
+  // read the former, so that run's candidate leg stayed inert; both names now enable the candidates).
+  if(spec.ContainsKey("pending")&&spec["pending"].AsBool()&&System.Environment.GetEnvironmentVariable("MYSIM_SURFACE_UV_CANDIDATES")!="1"&&System.Environment.GetEnvironmentVariable("MYSIM_SOURCE_UV_CANDIDATES")!="1")return material;
   if(shader==null||guid!=spec["source_guid"].AsString()||texture?.ResourcePath!=spec["texture"].AsString())throw new System.InvalidOperationException("Reviewed surface UV repair source mismatch: "+key);
-  var repaired=(ShaderMaterial)shader.Duplicate();var scale=spec["scale"].AsGodotArray();var offset=spec["offset"].AsGodotArray();repaired.SetShaderParameter("uv_scale",new Vector2(scale[0].AsSingle(),scale[1].AsSingle()));repaired.SetShaderParameter("uv_offset",new Vector2(offset[0].AsSingle(),offset[1].AsSingle()));GD.Print("SURFACE_UV_REPAIR ",key);return repaired;
+  var repaired=(ShaderMaterial)shader.Duplicate();var scale=spec["scale"].AsGodotArray();var offset=spec["offset"].AsGodotArray();repaired.SetShaderParameter("uv_scale",new Vector2(scale[0].AsSingle(),scale[1].AsSingle()));repaired.SetShaderParameter("uv_offset",new Vector2(offset[0].AsSingle(),offset[1].AsSingle()));GD.Print(spec.ContainsKey("pending")&&spec["pending"].AsBool()?"SURFACE_UV_REPAIR_CANDIDATE ":"SURFACE_UV_REPAIR ",key);return repaired;
  }
  static float MaterialFloat(Godot.Collections.Dictionary values,string key,float fallback) => values!=null && values.ContainsKey(key) ? values[key].AsSingle() : fallback;
  static string Res(string p) { if (p == null) return null; int i = p.IndexOf("Assets/RealRacing/"); return i < 0 ? null : "res://assets/" + p.Substring(i + "Assets/".Length); }

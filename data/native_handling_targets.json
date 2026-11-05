@@ -1,0 +1,77 @@
+{
+  "scope": "Measurable handling targets derived from the purchased-reference gameplay review (MONOPOSTO_BATCH_REVIEW_NOTES.md and REFERENCE_REVIEW_AND_WET_PHYSICS_20261030.json: predictable, responsive handling; car silhouette stays coherent; tyre smoke appears and dissipates through downshifts and slides; camera rolls over kerbs/run-off while the car stays recoverable). The purchased title's physics data is NOT known and none is claimed: numeric anchors below come from this project's own recovered vehicle profiles, the in-model tyre knee, and the precedent native grid/straight gates. Each target names the validation metric that measures it and the profile that runs it. All statuses are pending first cloud run; none is accepted.",
+  "targets": [
+    {
+      "id": "braking_distance_from_speed",
+      "referenceObservable": "Recognisable, repeatable braking distances; no abrupt unphysical stops or unlimited skids",
+      "metric": "pathLength:brake",
+      "profile": "braking_60_0",
+      "acceptance": "between 0.7x and 1.45x of this car's recovered 60mph stop distance (RecoveredVehicleProfiles.Brakes[car]*0.3048); also measured from 27.5 m/s so the v^2/d relationship can be checked across speeds in analysis",
+      "status": "pending-cloud-run"
+    },
+    {
+      "id": "acceleration_response",
+      "referenceObservable": "Progressive, repeatable acceleration out of corners and on straights",
+      "metric": "duration:launch",
+      "profile": "acceleration_0_60",
+      "acceptance": "0-26.82 m/s within 0.55x-1.9x of this car's recovered 0-60 mph spec; full v(t) curve recorded for backend comparisons",
+      "status": "pending-cloud-run"
+    },
+    {
+      "id": "steering_rate_low_speed",
+      "referenceObservable": "Responsive steering: full lock reached quickly at low speed without lag",
+      "metric": "steerSettleRatio:step_right_low",
+      "profile": "steering_rate_step",
+      "acceptance": "full lock reached in 0.5x-1.4x of target/3.2rad/s + 50ms; response onset under 200ms",
+      "status": "pending-cloud-run"
+    },
+    {
+      "id": "steering_lock_at_speed",
+      "referenceObservable": "Stable high-speed steering: small lock at speed, no twitch, no infinite lock",
+      "metric": "steerTrackingRatio:step_right_high",
+      "profile": "steering_rate_step",
+      "acceptance": "achieved lock equals the model's speed-dependent SteeringLock(30 m/s) within 10 percent; no full-lock maneuver possible at speed that spins the car (yawRatePeakAbs < 4 rad/s)",
+      "status": "pending-cloud-run"
+    },
+    {
+      "id": "straight_line_stability",
+      "referenceObservable": "Car holds a straight line without visible correction at speed",
+      "metric": "headingDriftAbs:coast",
+      "profile": "straight_stability",
+      "acceptance": "hands-off heading drift under 0.25 rad over 4 s at 30 m/s dry; lateral drift under 3 m; consistent with the existing native straight-line gate (maximumYaw < 0.15 rad under the scripted straight)",
+      "status": "pending-cloud-run"
+    },
+    {
+      "id": "kerb_and_edge_stability",
+      "referenceObservable": "Camera rolls and the car stays recoverable over kerbs and run-off excursions; no uncontrolled spins from surface edges",
+      "metric": "yawRateEndAbs:recover",
+      "profile": "edge_excursion",
+      "acceptance": "after an edge excursion at race-relevant speed the yaw rate decays below 0.5 rad/s within the recovery window, the car stays upright (uprightMinCosine >= 0.9) and remains drivable (endLongitudinalSpeed > 5 m/s); suspension response and grip difference are recorded. Dedicated kerb-geometry targeting needs track-surface metadata coordination and is a follow-up",
+      "status": "pending-cloud-run"
+    },
+    {
+      "id": "slip_visibility",
+      "referenceObservable": "Slides are visible: tyre smoke appears and dissipates around loss of grip events (downshifts, hard cornering)",
+      "metric": "slipAnglePeakAbs",
+      "profile": "steering_rate_step",
+      "acceptance": "during full-lock manoeuvres the recorded slip channels must show the slide (lateralSlipAngle beyond the model knee, 0.12 rad scaled by the tanh knee, i.e. peaks above ~0.06 rad must appear; peaks must stay finite). Requires rotational tyres, which steering_rate_step now enforces. Clean-lap calibration (run 41799538756, jolt/240Hz/rotational): lateral slip-angle peaks of ~0.219 rad were already recorded during a normal AI lap, so the channel is live and the threshold is reachable. Smoke/audio visualisation of these channels belongs to other owners; this target only requires the slip evidence to exist and be readable",
+      "status": "pending-cloud-run"
+    },
+    {
+      "id": "suspension_travel_compliance",
+      "referenceObservable": "Suspension visibly works over kerbs and bumps; car does not sit on its bump stops permanently",
+      "metric": "suspensionCompressionMin",
+      "profile": "braking_60_0",
+      "acceptance": "spring travel, measured over grounded wheels only (non-supported wheels report an airborne sentinel length and are excluded since the turn-2 calibration), stays strictly inside the rest-length envelope during braking and cornering events; compression below static sag toward the bump-stop reserve is acceptable and recorded; negative or non-finite travel is a failure. Clean-lap observation: compression min ~0.059 m (static ~0.11 m), no negative travel; NOTE the separate finding that chassis hulls rest on the drive surface continuously (see the turn-2 agent report), which is a ride-height calibration question, not a spring-travel failure",
+      "status": "pending-cloud-run"
+    },
+    {
+      "id": "impact_recovery",
+      "referenceObservable": "Contacts happen, show a visible outcome, and the car remains a controllable vehicle afterwards; no teleport-style rescue visible",
+      "metric": "speedGainAfterImpact",
+      "profile": "impact_wall_recovery",
+      "acceptance": "controlled wall contact at ~12 m/s records at least one impact event and a DeltaV in 0.5-30 m/s via NativeImpactDamage, position stays continuous (no teleport), and the car drives away under its own power afterwards",
+      "status": "pending-cloud-run"
+    }
+  ]
+}

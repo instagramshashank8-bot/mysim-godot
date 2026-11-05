@@ -2,7 +2,7 @@ using Godot;
 using MySimulator.Rebuild;
 namespace MySim {
 // Player drive loop: recovered Race simulation steps the car, the model is placed on the drive-surface mesh by raycast,
-// chase camera 7.2 m back / 2.65 m up with speed lookahead (revised Unity values), no artificial shake.
+// chase camera ~6.0 m back / ~2.5 m up (tighter Monoposto-like framing; car fills more of the frame at speed), no artificial shake.
 public partial class DriveController : Node3D {
  public int CarIndex; public Race Race; public Vehicle Player; public Node3D Car; public Camera3D Cam; public bool AutoDrive; public float AutoSeconds = 8; public Hud Hud; float? lastGroundY, prevY; float groundSmooth; bool groundInit; float minY = 1e9f, maxY = -1e9f, maxDy; float steerCmd; public Vector3 CarSize = new Vector3(2, 1.2f, 4.7f); public int TrackIndex; public Node3D[] WheelPivots; float spinAngle; public int Laps = 3; public bool AiTest; string lastSt = ""; float finT;
  int CamMode = int.Parse(System.Environment.GetEnvironmentVariable("MYSIM_CAM") ?? "0"); bool cWas; bool tabWas = true; ulong pausedAt; float t, camYaw; int shownMode = -1; bool camInit;Vector3 chaseOffset;
@@ -39,6 +39,22 @@ protected float lastLift; Node3D crew; Node3D[] crewFig; Vector3[] crewHome;
   }
  }
 AudioStreamPlayer engineSnd, whineSnd; AudioStreamPlayer[] sfxPool; int sfxNext; float lastE = -1f; bool mWas;
+// Transmission whine driven by the source game's own layer spec (AudioRamps.json default_transmission_*):
+// authentic rpm fade windows, reference pitch and gains; no invented curves, no fake loops. Car-specific
+// turbo/spool sets and wind/tyre-skid samples are NOT bound: the source sample files do not survive in assets.
+class WhineRamp { public string Clip; public float In0, In1, Out0, Out1, Base, GainMin, GainMax; public bool On; }
+System.Collections.Generic.List<WhineRamp> whineRamps; string whineClip;
+void LoadWhineRamps() {
+ if (whineRamps != null) return; whineRamps = new System.Collections.Generic.List<WhineRamp>();
+ try {
+  var doc = System.Text.Json.JsonDocument.Parse(FileAccess.GetFileAsString("res://assets/Resources/RealRacing/AudioRamps.json"));
+  foreach (var layer in doc.RootElement.GetProperty("layers").EnumerateArray()) {
+   var name = layer.GetProperty("name").GetString(); if (name == null || !name.StartsWith("default_transmission_")) continue;
+   var p = layer.GetProperty("parameters"); if (p.GetArrayLength() < 8) continue;
+   whineRamps.Add(new WhineRamp { Clip = layer.GetProperty("clip").GetString(), In0 = p[0].GetSingle(), In1 = p[1].GetSingle(), Out0 = p[2].GetSingle(), Out1 = p[3].GetSingle(), Base = Mathf.Max(1f, p[4].GetSingle()), GainMin = Mathf.Clamp(p[5].GetSingle(), 0f, 1f), GainMax = Mathf.Clamp(p[6].GetSingle(), 0f, 1f), On = p[7].GetSingle() > 0.5f });
+  }
+ } catch (System.Exception rampError) { GD.PushError("AUDIO_RAMPS parse failed; whine keeps the single static sample: ", rampError.Message); }
+}
  static AudioStreamWav LoopWav(string path) { var w = GD.Load<AudioStreamWav>(path); if (w == null) return null; w = (AudioStreamWav)w.Duplicate(); int bytes = w.Format == AudioStreamWav.FormatEnum.Format16Bits ? 2 : 1; if (w.Stereo) bytes *= 2; w.LoopMode = AudioStreamWav.LoopModeEnum.Forward; w.LoopBegin = 0; w.LoopEnd = w.Data.Length / bytes - 1; return w; }
  void EnsureAudio() {
   if (engineSnd != null) return;
@@ -52,7 +68,27 @@ AudioStreamPlayer engineSnd, whineSnd; AudioStreamPlayer[] sfxPool; int sfxNext;
   bool mNow = ControlBindings.Held(7); if (mNow && !mWas) { Settings.Set("mute", !Settings.Get("mute", true)); Settings.ApplyAudio(); } mWas = mNow;
   float rpm = Mathf.Clamp(Player.rpm, 800f, 10000f), thr = Player.servicing ? 0f : Mathf.Clamp(Player.input.throttle, 0f, 1f);
   if (engineSnd.Stream != null) { engineSnd.PitchScale = Mathf.Clamp(0.55f + rpm / 2600f, 0.6f, 4.2f); engineSnd.VolumeDb = Mathf.Lerp(-22f, -8f, thr * 0.8f + Mathf.Clamp(rpm / 10000f, 0, 1) * 0.2f); }
-  if (whineSnd.Stream != null) { whineSnd.PitchScale = Mathf.Clamp(0.5f + Player.speed / 40f, 0.5f, 3f); whineSnd.VolumeDb = Player.speed < 3f ? -60f : Mathf.Lerp(-34f, -22f, Mathf.Clamp(Player.speed / 70f, 0, 1)); }
+  LoadWhineRamps();
+  if (whineSnd.Stream != null && whineRamps != null && whineRamps.Count > 0) {
+   // The authentic layer set: pick by the LIVE transmission state (throttle on/off) and the LIVE rpm fade window.
+   bool on = thr > .04f; WhineRamp layer = null; float bestEdge = float.MaxValue;
+   foreach (var candidate in whineRamps) {
+    if (candidate.On != on) continue;
+    if (rpm >= candidate.In0 && rpm <= candidate.Out1) { float edge = rpm < candidate.In1 ? candidate.In1 - rpm : rpm > candidate.Out0 ? rpm - candidate.Out0 : 0f; if (edge < bestEdge) { bestEdge = edge; layer = candidate; } }
+   }
+   if (layer == null) { float bestMid = float.MaxValue; foreach (var candidate in whineRamps) { if (candidate.On != on) continue; float mid = (candidate.In0 + candidate.Out1) * .5f; float d = Mathf.Abs(rpm - mid); if (d < bestMid) { bestMid = d; layer = candidate; } } }
+   if (layer != null) {
+    string clip = "res://assets/Resources/RealRacing/Audio/" + layer.Clip + ".wav";
+    if (whineClip != clip) { var fresh = LoopWav(clip); if (fresh != null) { whineSnd.Stream = fresh; whineClip = clip; if (!whineSnd.Playing) whineSnd.Play(); } }
+    float fadeT = 1f;
+    if (rpm < layer.In1) fadeT = Mathf.Clamp((rpm - layer.In0) / Mathf.Max(1f, layer.In1 - layer.In0), 0f, 1f);
+    else if (rpm > layer.Out0) fadeT = Mathf.Clamp((layer.Out1 - rpm) / Mathf.Max(1f, layer.Out1 - layer.Out0), 0f, 1f);
+    float gain = Mathf.Lerp(layer.GainMin, layer.GainMax, fadeT);
+    float loud = Player.speed < 3f ? -60f : Mathf.Lerp(-34f, -22f, Mathf.Clamp(Player.speed / 70f, 0, 1));
+    whineSnd.VolumeDb = Mathf.Max(-60f, loud + Mathf.LinearToDb(Mathf.Clamp(gain, 0.02f, 1f)));
+    whineSnd.PitchScale = Mathf.Clamp(rpm / layer.Base, 0.5f, 3f);
+   }
+  } else if (whineSnd.Stream != null) { whineSnd.PitchScale = Mathf.Clamp(0.5f + Player.speed / 40f, 0.5f, 3f); whineSnd.VolumeDb = Player.speed < 3f ? -60f : Mathf.Lerp(-34f, -22f, Mathf.Clamp(Player.speed / 70f, 0, 1)); }
   if (e >= 0 && lastE < 0) { PlaySfx("jack_engage.wav"); }
   if (e >= 0) { for (int i = 0; i < 4; i++) { float off=PitServiceTimeline.Loosen(i),on=PitServiceTimeline.Fit(i); if (lastE < off && e >= off) PlaySfx("wheel_gun_loosen.wav"); if (PitServiceTimeline.Crossed(lastE,e,PitServiceTimeline.Remove(i))) PlaySfx("wheel_set_down.wav"); if (PitServiceTimeline.Crossed(lastE,e,PitServiceTimeline.Secure(i))) PlaySfx("wheel_gun_tighten.wav"); } if (PitServiceTimeline.Crossed(lastE,e,PitServiceTimeline.LowerStart)) PlaySfx("jack_release.wav"); }
   lastE = e;
@@ -90,6 +126,10 @@ AudioStreamPlayer engineSnd, whineSnd; AudioStreamPlayer[] sfxPool; int sfxNext;
  void CaptureShot(string fallback) {
   if (DisplayServer.GetName()=="headless") { GD.Print("SCREENSHOT_SKIPPED headless (logic check only)"); return; }
   string path=System.Environment.GetEnvironmentVariable("MYSIM_SHOT") ?? fallback;GD.Print("SCREENSHOT_BEGIN ",path);
+  if (CamMode == 2 && Car != null && Cam != null) { // verifiable cockpit facts for the reference-evidence audit: authored seat pose, FOV, hidden wheels
+   var seatLocal = Car.GlobalTransform.AffineInverse() * Cam.GlobalPosition; float drift = (seatLocal - new Vector3(CarCatalog.RaceClass(CarIndex)==1?0:-0.35f, 0.88f, 0.05f)).Length(); bool wheelsHidden = true; if (WheelPivots != null) foreach (var wp in WheelPivots) wheelsHidden &= !wp.Visible;
+   GD.Print("COCKPIT_VIEW mode=2 fov=", Cam.Fov, " seatLocal=", seatLocal, " seatOffsetFromAuthored=", drift.ToString("0.000"), " wheelsHidden=", wheelsHidden);
+  }
   if(System.Environment.GetEnvironmentVariable("MYSIM_CAMERA_FRAME_CHECK")=="1"){
    var size=GetViewport().GetVisibleRect().Size;Vector2 minimum=new Vector2(float.MaxValue,float.MaxValue),maximum=new Vector2(float.MinValue,float.MinValue);int points=0;
    foreach(var node in Car.FindChildren("*","MeshInstance3D",true,false)){
@@ -99,6 +139,7 @@ AudioStreamPlayer engineSnd, whineSnd; AudioStreamPlayer[] sfxPool; int sfxNext;
    if(points==0||minimum.X<size.X*.02f||minimum.Y<size.Y*.02f||maximum.X>size.X*.98f||maximum.Y>size.Y*.98f)throw new System.Exception("Camera framing crops assembled car: "+minimum+".."+maximum+" viewport "+size);
    GD.Print("PASS complete gameplay car framing ",minimum,"..",maximum);
   }
+  if (System.Environment.GetEnvironmentVariable("MYSIM_HUD_RECTS")=="1" && Hud != null) Hud.EmitRects();
   var image=GetViewport().GetTexture().GetImage();var error=image.SavePng(path);GD.Print("SCREENSHOT_END ",error," size=",image.GetWidth(),"x",image.GetHeight());if(error!=Error.Ok)throw new System.IO.IOException("Screenshot failed: "+error);
  }
  ulong lastHeartbeat; double worstRenderMs;
@@ -172,11 +213,11 @@ AudioStreamPlayer engineSnd, whineSnd; AudioStreamPlayer[] sfxPool; int sfxNext;
   if (System.Environment.GetEnvironmentVariable("MYSIM_TREEVIEW") != null) { if (treeTarget == null) { int want = int.Parse(System.Environment.GetEnvironmentVariable("MYSIM_TREEVIEW")); var cands = new System.Collections.Generic.List<(float, MeshInstance3D)>(); foreach (var tn in GetTree().Root.FindChildren("*", "MeshInstance3D", true, false)) { var tmi = (MeshInstance3D)tn; string tnm = tmi.Name.ToString().ToLowerInvariant(); if (!tnm.StartsWith("org_tree")) continue; var tab = tmi.GlobalTransform * tmi.GetAabb(); if (tab.Size.Y < 3f) continue; cands.Add(((tab.GetCenter() - Car.GlobalPosition).Length(), tmi)); } cands.Sort((x, y) => x.Item1.CompareTo(y.Item1)); if (cands.Count > 0) { treeTarget = cands[Mathf.Min(want, cands.Count - 1)].Item2; var tb = treeTarget.GlobalTransform * treeTarget.GetAabb(); { var tm = treeTarget.Mesh; for (int si = 0; si < tm.GetSurfaceCount(); si++) { var arr = tm.SurfaceGetArrays(si); var vv = (Vector3[])arr[(int)Mesh.ArrayType.Vertex]; var mt = treeTarget.GetActiveMaterial(si) as StandardMaterial3D; GD.Print("TREESURF ", si, " verts=", vv.Length, " tex=", mt?.AlbedoTexture?.ResourcePath, " transp=", mt?.Transparency, " scissor=", mt?.AlphaScissorThreshold, " cull=", mt?.CullMode, " vis=", treeTarget.Visible, " layers=", treeTarget.Layers); } } GD.Print("TREEVIEW ", treeTarget.Name, " dist=", cands[Mathf.Min(want, cands.Count - 1)].Item1, " size=", tb.Size, " center=", tb.GetCenter()); } } if (treeTarget != null) { var tab2 = treeTarget.GlobalTransform * treeTarget.GetAabb(); var tc = tab2.GetCenter(); float dist = Mathf.Max(tab2.Size.Y * 1.8f, 12f); Cam.GlobalPosition = tc + new Vector3(dist * 0.7f, tab2.Size.Y * 0.1f, dist * 0.7f); Cam.LookAt(tc); } }
   float speed = Player.speed; float look = Mathf.Clamp(speed / 20f, 0, 1) * 4f + 3f;
   if (CamMode == 0 || CamMode == 1) {
-   float len = Mathf.Max(CarSize.Z, 3.5f), hgt = Mathf.Max(CarSize.Y, 1.0f); float back = CamMode == 0 ? len * 1.5f : len * 2.1f, up = CamMode == 0 ? Mathf.Clamp(hgt * 1.7f + 0.3f,2.2f,3.2f) : hgt * 2.2f; var target = ObstructCam(Car.Position + Vector3.Up * (hgt * 0.8f), Car.Position - fwd * back + Vector3.Up * up);
+   float len = Mathf.Max(CarSize.Z, 3.5f), hgt = Mathf.Max(CarSize.Y, 1.0f); float back = CamMode == 0 ? len * 1.28f : len * 1.85f, up = CamMode == 0 ? Mathf.Clamp(hgt * 1.45f + 0.22f,2.0f,2.8f) : hgt * 2.0f; var target = ObstructCam(Car.Position + Vector3.Up * (hgt * 0.8f), Car.Position - fwd * back + Vector3.Up * up);
    // Smooth the offset, not absolute world translation: position lerp creates speed/rate metres of lag.
    if (!camInit) { chaseOffset = target-Car.Position; camInit = true; }
    chaseOffset = chaseOffset.Lerp(target-Car.Position, 1f-Mathf.Exp(-6f*(float)delta));
-   Cam.Position = ObstructCam(Car.Position + Vector3.Up * (hgt * 0.8f), Car.Position+chaseOffset); Cam.LookAt(Car.Position + fwd * look + Vector3.Up * 1.0f); Cam.Fov = Mathf.Lerp(Cam.Fov, 46f + Mathf.Clamp(speed / 80f, 0, 1) * 6f, 1f - Mathf.Exp(-3f * (float)delta));
+   Cam.Position = ObstructCam(Car.Position + Vector3.Up * (hgt * 0.8f), Car.Position+chaseOffset); Cam.LookAt(Car.Position + fwd * look + Vector3.Up * 1.0f); Cam.Fov = Mathf.Lerp(Cam.Fov, 43f + Mathf.Clamp(speed / 80f, 0, 1) * 5f, 1f - Mathf.Exp(-3f * (float)delta));
   } else if (CamMode == 2) { Cam.Position = Car.GlobalTransform * new Vector3(CarCatalog.RaceClass(CarIndex)==1?0:-0.35f, 0.88f, 0.05f); Cam.GlobalTransform = new Transform3D(Car.GlobalTransform.Basis.Rotated(Car.GlobalTransform.Basis.Y.Normalized(), Mathf.Pi), Cam.Position); Cam.Fov = 75f; camInit = false; }
   else { Cam.Position = Car.GlobalTransform * new Vector3(0, 0.62f, 1.9f); Cam.GlobalTransform = new Transform3D(Car.GlobalTransform.Basis.Rotated(Car.GlobalTransform.Basis.Y.Normalized(), Mathf.Pi), Cam.Position); Cam.Fov = 70f; camInit = false; }
   if(AutoDrive&&AiTest&&AutoSeconds>250&&t>=AutoSeconds&&!Player.finished){GD.PrintErr("FAIL full-race simulation deadline track=",TrackIndex," progress=",Player.progress," lap=",Player.completedLaps," wallHits=",WallHits," damage=",Player.damage);CleanExit.Request(this,1);return;}

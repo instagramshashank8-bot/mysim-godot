@@ -1,0 +1,96 @@
+{
+ "updated": "2026-11-03",
+ "scope": "Full MySim 15-stage rebuild per instructions.md; zero stages at full end-to-end acceptance",
+ "blocked": [],
+ "stages": [
+  {
+   "id": 1,
+   "name": "failures/combined runtime",
+   "state": "partial",
+   "verified": "24-car dry Interlagos passes recorded; fence blend 41632524155 rejected; hash candidate 2c3fd66 awaiting admin dispatch; dispatch ability confirmed under exported owner token (runs 41647350933/41656712889 SUCCESS)"
+  },
+  {
+   "id": 2,
+   "name": "one reference experience",
+   "state:in_progress,verified": "Formula16/track0: 1030-vertex tyre contact quanti, grid hold/release, 13 recording seconds reviewed; graphics REJECTED (fence speckle, bright grass, rear panels)",
+   "next": "fence_hash candidate; then whole-car assembly",
+   "state": "in_progress"
+  },
+  {
+   "id": 3,
+   "name": "core physics",
+   "state": "partial",
+   "verified": "CCD 0.1/240Hz, contact planes -1.571..+1.168mm, wet sensitivity confirmed; NOT calibrated",
+   "railings": "CCD 0.1/240Hz, contact planes -1.571..+1.168mm, wet sensitivity confirmed; NOT calibrated"
+  },
+  {
+   "id": 4,
+   "name": "24 cars",
+   "state": "sparse",
+   "verified": "per-car records partial; wire textures 5 full-res reviewed zero accepted; rear-appearance unresolved"
+  },
+  {
+   "id": 5,
+   "name": "60 layouts",
+   "state": "minimal",
+   "verified": "track0(Hatch/Brands) focus only; fence/wire surfaces counted (234/155/1)"
+  },
+  {
+   "id": 6,
+   "name": "lighting/weather",
+   "state": "minimal",
+   "verified": "rain sensitivity runs only"
+  },
+  {
+   "id": 7,
+   "name": "racing",
+   "state": "partial",
+   "verified": "grid 5-light fixture, solo release, AI laps"
+  },
+  {
+   "id": 8,
+   "name": "pits",
+   "state": "minimal",
+   "verified": "no full pit acceptance"
+  },
+  {
+   "id": 9,
+   "name": "UI/controls/cameras",
+   "state": "partial",
+   "verified": "desktop touch policy OK 1280 shots; UI underdesigned, no final acceptance"
+  },
+  {
+   "id": 10,
+   "name": "championship/persistence",
+   "state": "unverified"
+  },
+  {
+   "id": 11,
+   "name": "LAN",
+   "state": "unverified"
+  },
+  {
+   "id": 12,
+   "name": "audio",
+   "state": "unverified"
+  },
+  {
+   "id": 13,
+   "name": "optimisation",
+   "state": "unverified"
+  },
+  {
+   "id": 14,
+   "name": "asset acceptance",
+   "state": "in_progress",
+   "verified": "23962/98,553+ mesh overviews (parts 1-73), zero final accepted; next part 74 needs new rewrap run (dispatch also admin-blocked)"
+  },
+  {
+   "id": 15,
+   "name": "final Windows",
+   "state": "unverified",
+   "verified": "41501666313 narrow package/tag/smoke only"
+  }
+ ],
+ "rules": "Every acceptance: requirement -> commit -> exact run -> manual evidence -> verdict. No git add .; no local engine; secrets inside private dirs only."
+}

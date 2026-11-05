@@ -1,4 +1,4 @@
-import os,pathlib,subprocess,json,sys,time
+import os,pathlib,re,subprocess,json,sys,time
 r=pathlib.Path.cwd();out=r/'outputs/cloud-game';out.mkdir(parents=True,exist_ok=True);g=os.environ['GODOT_BIN'];shard=int(os.environ.get('SHARD','0'));rows=[]
 def run(label,values,args=None,timeout=300):
  env={k:v for k,v in os.environ.items() if not k.startswith('MYSIM_')};env.update(values);env.setdefault('MYSIM_INTERLAGOS_SPIN_DIAGONAL',os.environ.get('INTERLAGOS_SPIN_DIAGONAL','0'));env.setdefault('MYSIM_CONTACT_CAPTURE_AFTER',os.environ.get('CONTACT_CAPTURE_AFTER','0'));env.setdefault('MYSIM_NATIVE_COMBINED_ASSIST',os.environ.get('NATIVE_COMBINED_ASSIST','0'));env.setdefault('MYSIM_INTERLAGOS_SEAM_WELD',os.environ.get('INTERLAGOS_SEAM_WELD','0'));env.setdefault('MYSIM_CHIRON_RECONSTRUCTED_WING',os.environ.get('MYSIM_CHIRON_RECONSTRUCTED_WING','0'));env.setdefault('MYSIM_SOURCE_AXLE_FIT',os.environ.get('SOURCE_AXLE_FIT','0'));env.setdefault('MYSIM_COPLANAR_ROAD_CANDIDATE',os.environ.get('ROAD_COPLANAR_CANDIDATE','0'));env.setdefault('MYSIM_NATIVE_PHYSICS_HZ',os.environ.get('NATIVE_PHYSICS_HZ','120'));env.setdefault('MYSIM_NATIVE_ROTATIONAL_TYRES',os.environ.get('NATIVE_ROTATIONAL_TYRES','0'));env.setdefault('MYSIM_NATIVE_DAMAGE',os.environ.get('NATIVE_DAMAGE','0'));env.setdefault('MYSIM_NATIVE_CCD',os.environ.get('NATIVE_CCD','1'));env.setdefault('MYSIM_NATIVE_RIDE_HEIGHT',os.environ.get('NATIVE_RIDE_HEIGHT','0'));env.setdefault('MYSIM_SOURCE_RUNOFF_SUPPORT',os.environ.get('SOURCE_RUNOFF_SUPPORT','0'));env.setdefault('MYSIM_VERTICAL_ROAD_PLAN',os.environ.get('NATIVE_VERTICAL_ROAD_PLAN','0'));env['MYSIM_NATIVE_FACE_EVIDENCE']='1' if os.environ.get('NATIVE_GEOMETRY_RECOVERY')=='1' else '0';env['MYSIM_BINDING_AUDIT']=str(out/label);log=out/(label+'.log')
@@ -92,6 +92,48 @@ if os.environ.get('NATIVE_RETIREMENT')=='1':
  assert 'PASS actual empty-fuel native retirement and DNF results' in text and 'PASS retirement to fresh restart' in text and 'PASS retirement restart to main menu' in text
  assert 'NATIVE_SOURCE_BODY_COLLIDERS' in text and 'NATIVE_COLLISION_FIXTURE_PROXY' not in text
  print('PASS actual native empty-fuel retirement/results/restart/menu; no completed-lap substitution',flush=True);sys.exit(0)
+if os.environ.get('MYSIM_PRODUCTCHECKS')=='1' and os.environ.get('SETTINGS_PERSIST_REVIEW')!='1':
+ text=run('product-controls',{'MYSIM_PRODUCTCHECKS':'1','MYSIM_TRACK':'0','MYSIM_CAR':'16','MYSIM_SECONDS':'120','MYSIM_RIVALS':'0','MYSIM_SHOT':str(out/'product-controls.png')},['--resolution','1280x720'],timeout=900)
+ assert 'CHECKS productControls=ok' in text,'Product controls gate missing: see saved product-controls log'
+ if not (out/'product-controls.png').exists():raise SystemExit('product controls capture missing')
+ (out/'product-controls-summary.json').write_text(json.dumps({'ok':True,'gate':'CHECKS productControls=ok','scope':'live-state HUD/panel/focus/pit assertions; visual hierarchy acceptance stays with the human reviewer'},indent=2))
+ print('COMPLETE product controls; live-state readouts, focus, escape-close, standings order asserted',flush=True);sys.exit(0)
+if os.environ.get('DRIVING_VALIDATION')=='1':
+ manifest=pathlib.Path(os.environ.get('DRIVING_VALIDATION_MANIFEST','data/native_driving_validation_core.json'))
+ spec=json.loads(manifest.read_text())
+ cases=[x for x in spec['cases'] if x['track']%12==shard]
+ assert cases,'Shard '+str(shard)+' has no driving validation cases'
+ impact=os.environ.get('DRIVING_VALIDATION_IMPACT')=='1'
+ assert impact==any('impact_wall_recovery' in c['drivingValidation'] for c in spec['cases']),'impact flag must match manifest; damage stays off for non-impact validation'
+ if 'wet' in manifest.name:assert all(c.get('weather',0)>0 for c in spec['cases']),'wet manifest must carry wet weather'
+ summary=[]
+ for case in cases:
+  car,track=case['car'],case['track'];assert 0<=car<24 and 0<=track<60,'Invalid validation case'
+  label=f'driving-validation-track-{track:02}-car-{car:02}';report=out/(label+'.json')
+  values={'MYSIM_TRACK':str(track),'MYSIM_CAR':str(car),'MYSIM_NATIVE_GAMEPLAY':'1','MYSIM_COMPONENT_MOUNTS':'1','MYSIM_REQUIRE_NATIVE_CAR_HULLS':'1','MYSIM_DRIVING_VALIDATION':'1','MYSIM_DRIVING_VALIDATION_REPORT':str(report),'MYSIM_LAPS':'1','MYSIM_SECONDS':'900','MYSIM_RIVALS':'0','MYSIM_ASSISTS':'0',
+   # Session activation: without the auto-drive/AI session boot the native race never leaves grid hold
+   # (DV run 41828824418: full throttle for the whole session, car motionless at the grid) - the same
+   # activation flags the proven clean-lap runs use; the validation input overrides the auto-driver.
+   'MYSIM_AI':'1','MYSIM_AUTODRIVE':'1','MYSIM_PRECISE_AI':'3'}
+  if 'weather' in case:
+   assert isinstance(case['weather'],int) and 0<=case['weather']<=3 and isinstance(case['compound'],int) and 0<=case['compound']<=3,'Invalid validation weather/compound'
+   values.update(MYSIM_WET=str(case['weather']),MYSIM_STARTING_COMPOUND=str(case['compound']))
+  if impact:values['MYSIM_NATIVE_DAMAGE']='1'
+  text=run(label,values,['--headless'],timeout=1800)
+  assert report.exists(),'Driving validation report missing for '+label
+  result=json.loads(report.read_text())
+  assert result.get('ok') is True and result.get('completed') is True and result.get('allPassed') is True and 'PASS driving validation scenarios' in text,'Driving validation failed for '+label+': '+str(result.get('firstFailure'))+' / '+str(result.get('abortReason'))
+  assert result['rotationalTyres'] is True,'Validation requires rotational tyres for slip evidence; dispatch with rotational_tyres=true'
+  assert result['assistsOff'] is True,'Validation requires assists off'
+  expected=set(case['drivingValidation']);seen={r['profile'] for r in result['runs']}
+  assert seen==expected,'Profile coverage mismatch: expected '+str(sorted(expected))+' got '+str(sorted(seen))
+  for r in result['runs']:
+   assert r.get('ok') is True and r.get('completed') is True and not r.get('abortReason'),'Profile '+r['profile']+' did not pass: '+str(r.get('firstFailure'))
+   assert len(r.get('assertions') or [])>0,'Profile '+r['profile']+' has zero assertions (vacuous pass)'
+   assert (r.get('sampleCount') or 0)>20,'Profile '+r['profile']+' lacks timeline samples ('+str(r.get('sampleCount'))+')'
+  summary.append({'label':label,'car':car,'track':track,'profiles':sorted(seen),'assertions':sum(len(r['assertions']) for r in result['runs']),'samples':sum(r.get('sampleCount') or 0 for r in result['runs']),'ok':True})
+ (out/'driving-validation-summary.json').write_text(json.dumps({'manifest':str(manifest),'impact':impact,'cases':summary},indent=2))
+ print('COMPLETE driving validation; '+str(sum(s['assertions'] for s in summary))+' assertions across '+str(len(summary))+' cases; scenario rig evidence only, no lap/pacing/realism claim',flush=True);sys.exit(0)
 if os.environ.get('NATIVE_MOUNTED_LAPS')=='1':
  cars=[int(x) for x in os.environ.get('NATIVE_CARS','0,16').split(',')]
  assert cars and len(set(cars))==len(cars) and all(0<=car<24 for car in cars),'Invalid requested car coverage'
@@ -235,21 +277,192 @@ if os.environ.get('NIGHT_FIXTURE_AUDIT')=='1':
  data=json.loads(report.read_text());assert data['track']==track and data['sourceMeshes'] and data['candidateAttachments'] and 'SOURCE_NIGHT_FIXTURE_AUDIT' in text
  assert all(not row['validated'] for row in data['candidateAttachments']),'Source extraction is not placement validation'
  print('COMPLETE source fixture component audit; all attachments remain unvalidated',flush=True);sys.exit(0)
+if os.environ.get('CUTOUT_MIPREPAIR_REVIEW')=='1' and os.environ.get('NIGHT_CUTOUT_REVIEW')!='1':
+ print('WRONG-MODE TRIPWIRE: fence_miprepair_review requires the NIGHT_CUTOUT_REVIEW gate; refusing to fall through to the generic suite (wrong-mode class of 41785711764)',flush=True);sys.exit(2)
 if os.environ.get('NIGHT_CUTOUT_REVIEW')=='1':
  # Prior matched alpha/shadow modes failed to remove the observed grid.
  filtered=os.environ.get('FENCE_FILTER_REVIEW')=='1'
  identity=os.environ.get('CUTOUT_IDENTITY_REVIEW')=='1'
- for mode in ('baseline','identity' if identity else 'fence_blend_candidate' if filtered else 'opaque_metal_candidate'):
+ miprepair=os.environ.get('CUTOUT_MIPREPAIR_REVIEW')=='1'
+ modes=['baseline']+(['identity'] if identity else (['fence_blend_candidate','fence_a2c_candidate'] if filtered else ['opaque_metal_candidate']))
+ if miprepair:modes=['baseline','fence_miprepair_candidate','family_isolate_fence','family_isolate_stands','family_isolate_foliage']
+ for mode in modes:
   label=('day0-filtered-fence-' if filtered else 'night25-cutout-')+mode;shot=out/(label+'.png')
   text=run(label,{'MYSIM_TRACK':'0' if filtered else '25','MYSIM_CAR':'16','MYSIM_TOD':'0' if filtered else '3','MYSIM_WET':'0','MYSIM_TRACK_FLOODLIGHTS':'0' if filtered else '1','MYSIM_TRACK_CUTOUT_DIAGNOSTIC':mode,'MYSIM_BINDING_AUDIT':str(out),'MYSIM_AI':'1','MYSIM_AUTODRIVE':'1','MYSIM_NOPIT':'1','MYSIM_RIVALS':'0','MYSIM_SECONDS':'5','MYSIM_SHOT':str(shot)})
   assert shot.exists() and 'TRACK_CUTOUT_DIAGNOSTIC' in text
  if filtered and not identity:
-  reports=[json.loads(path.read_text()) for path in out.rglob('cutout-*-fence_blend_candidate.json')]
-  changed=[surface for report in reports for surface in report['surfaces'] if surface['sourceTransparency']!=surface['actualTransparency']]
+  reports=[json.loads(path.read_text()) for path in sorted(list(out.rglob('cutout-*-fence_blend_candidate.json'))+list(out.rglob('cutout-*-fence_a2c_candidate.json')))]
+  changed=[surface for report in reports for surface in report['surfaces'] if surface['sourceTransparency']!=surface['actualTransparency'] or surface['sourceAlphaAA']!=surface['actualAlphaAA']]
   assert changed,'Filtered fence diagnostic changed no actual surfaces'
-  assert all(surface['actualTransparency']=='Alpha' and pathlib.Path(surface['texture']).name in ('mat_fence_wire_04.png','mat_fence_small_wire_01.png','mat_fence_metal_catch_01.png') for surface in changed),'Unexpected filtered surface change'
-  (out/'filtered-fence-summary.json').write_text(json.dumps({'changedSurfaces':len(changed),'accepted':False,'scope':'Three actual fence textures, true alpha blending without depth prepass; manual hole/order/alias review required'},indent=2))
+  assert all(pathlib.Path(surface['texture']).name in ('mat_fence_wire_04.png','mat_fence_small_wire_01.png','mat_fence_metal_catch_01.png') for surface in changed),'Unexpected filtered surface change'
+  assert all(surface['actualTransparency']=='Alpha' for surface in changed if surface['actualAlphaAA']=='Off'),'Blend candidate must use true Alpha'
+  assert all(surface['actualTransparency']=='AlphaScissor' and surface['actualAlphaAA']=='AlphaToCoverageAndToOne' for surface in changed if surface['actualTransparency']!='Alpha'),'A2C candidate must keep scissor depth with alpha-to-coverage'
+  (out/'filtered-fence-summary.json').write_text(json.dumps({'changedSurfaces':len(changed),'accepted':False,'scope':'Three actual fence textures: true alpha blend and alpha-to-coverage scissor candidates; manual hole/order/alias review required'},indent=2))
+ if miprepair:
+  reports_mip=[json.loads(path.read_text()) for path in sorted(out.rglob('cutout-*-fence_miprepair_candidate.json'))]
+  mchanged=[s for report in reports_mip for s in report.get('surfaces',[]) if pathlib.Path(s['texture']).name in ('mat_fence_wire_04.png','mat_fence_small_wire_01.png','mat_fence_metal_catch_01.png')]
+  assert mchanged and all(s.get('mipRepaired') is True for s in mchanged),'MIP repair must flag every repaired fence surface'
+  ev=[r for r in reports_mip if 'mipRepair' in r]
+  assert ev and len(ev[0].get('mipRepair',[]))==3 and all(e.get('anomaly') is False for e in ev[0]['mipRepair']),'mipRepair evidence must cover exactly the three textures with anomaly=false'
+  for entry in ev[0]['mipRepair']:
+   base5=entry.get('level0KeptAt05');base35=entry.get('level0KeptAt035')
+   assert base5 is not None and base35 is not None,'mipRepair entry missing level0 keep fractions (C# emits flat level0KeptAt05/level0KeptAt035); keys='+str(sorted(entry.keys()))
+   for level in entry.get('levels',[]):
+    assert abs(level['keptAt05']-base5)<=0.02 and abs(level['keptAt035']-base35)<=0.02,'per-level keep fraction drifted beyond 0.02'
+  for family in ('fence','stands','foliage'):
+   iso_path=out/('day0-filtered-fence-family_isolate_'+family+'.json')
+   assert iso_path.exists(),'family_isolate_'+family+' report missing'
+   iso=json.loads(iso_path.read_text())
+   assert iso.get('isolatedCount',0)>0,'family_isolate_'+family+' returned no isolated rows'
+  (out/'miprepair-summary.json').write_text(json.dumps({'mipRepairedCount':len(mchanged),'accepted':False,'scope':'alpha-CDF-preserving mip rebuild on the three fence textures; acceptance = human visual comparison only'},indent=1))
  print('COMPLETE matched cutout isolation, no alpha or shadow policy promoted',flush=True);sys.exit(0)
+if os.environ.get('SETTINGS_PERSIST_REVIEW')=='1':
+ # Settings persistence fixture orchestrator: one workflow dispatch runs ALL scenarios, each as a FRESH
+ # Godot process with ISOLATED user data (per-scenario HOME/XDG_DATA_HOME on Linux; Windows acceptance of
+ # atomic replacement stays a separate later requirement per review). Uses the shared run() helper only.
+ import shutil
+ home_root=pathlib.Path('/tmp/mysim-persist-homes');shutil.rmtree(home_root,ignore_errors=True);home_root.mkdir(parents=True,exist_ok=True)
+ scenarios=('legacy','foreign','corrupt','malformed','failures')
+ required_cases={'legacy':('legacy_seed_save','legacy_readback','legacy_get_did_not_write_disk','legacy_long_roundtrip','legacy_set_stamps','legacy_marker_and_values_persisted','atomic_replace_saved','atomic_replace_final_bytes'),
+  'foreign':('foreign_seed_save','foreign_readback','foreign_set_succeeds','foreign_marker_kept'),
+  'corrupt':('corrupt_defaults_typed','corrupt_no_crash','corrupt_no_value_resurrection','corrupt_file_intact','corrupt_load_error_evidence'),
+  'malformed':('malformed_seed_save','malformed_defaults_typed','malformed_disk_untouched_by_get','malformed_set_migrates_marker'),
+  'failures':('baseline_saved','temp_failure_rejected','temp_no_tmp','temp_live_kept','rename_fault_rejected','rename_tmp_recovery_kept','rename_live_kept','atomic_success_after_faults')}
+ summary={'scenarios':{}}
+ for scenario in scenarios:
+  home=home_root/scenario;(home/'.local/share'/'godot').mkdir(parents=True,exist_ok=True)
+  rep=out/f'settings-persist-{scenario}.json'
+  def scenario_boot(label,values,timeout=180):
+   # Isolation wrapper: strip MYSIM_*, then set per-scenario user data via HOME/XDG_DATA_HOME (real Godot user-dir mechanism on Linux).
+   env2={k:v for k,v in os.environ.items() if not k.startswith('MYSIM_')};env2.update(values)
+   env2['HOME']=str(home);env2['XDG_DATA_HOME']=str(home/'.local/share')
+   proc=subprocess.run([g,'--path',str(r),'--no-window','--fixed-fps','60','--audio-driver','Dummy'],env=env2,capture_output=True,text=True,timeout=timeout)
+   return proc.returncode,proc.stdout+proc.stderr
+  code,text=scenario_boot('settings-'+scenario,{'MYSIM_SETTINGS_PERSIST':'1','MYSIM_SETTINGSPERSIST_SCENARIO':scenario,'MYSIM_SETTINGS_REPORT':str(rep)})
+  data=None
+  try:data=json.loads(rep.read_text()) if rep.exists() else None
+  except Exception:data=None
+  got=(data or {}).get('cases') or []
+  missing=[c for c in required_cases[scenario] if not any(case.startswith(c) for case in got)]
+  ok=data is not None and (data.get('failed')==0) and (data.get('passed',0)>0) and not missing and code==0
+  summary['scenarios'][scenario]={'exit':code,'passed':(data or {}).get('passed'),'failed':(data or {}).get('failed'),'missingCases':missing,'failures':(data or {}).get('failures',[]),'ok':ok}
+ summary['all_ok']=all(v['ok'] for v in summary['scenarios'].values())
+ (out/'settings-persist-summary.json').write_text(json.dumps(summary,indent=1))
+ assert summary['all_ok'],'settings persistence fixture FAILED: '+json.dumps(summary['scenarios'])
+ print('COMPLETE settings persistence: '+str(sum(1 for v in summary['scenarios'].values() if v['ok']))+'/'+str(len(summary['scenarios']))+' scenarios green (isolated user data; not a fence render)',flush=True);sys.exit(0)
+if os.environ.get('NIGHT_EVIDENCE')=='1':
+ # Night lighting candidate evidence: SAME-camera paired frames across the flag legs (off/pool/ambient/exposure/all)
+ # × {night-dry, night-wet} on the reference track and the archived rejected-night track (25). Provisional art
+ # candidates only; every leg is independently flag-gated and the defaults are bit-identical to current behaviour.
+ flag_legs=(('off',{}),('pool',{'MYSIM_NIGHT_POOL_GAIN':'2.0'}),('ambient',{'MYSIM_NIGHT_AMBIENT_LIFT':'2.5'}),('exposure',{'MYSIM_NIGHT_EXPOSURE':'1.35'}),('all',{'MYSIM_NIGHT_POOL_GAIN':'2.0','MYSIM_NIGHT_AMBIENT_LIFT':'2.5','MYSIM_NIGHT_EXPOSURE':'1.35'}))
+ night_extra={'MYSIM_SOURCE_UV_CANDIDATES':'0','MYSIM_MISC_TWIN_HIDE_DIAGNOSTIC':'0'}
+ missing=[];capture_count=0
+ for track in (0,25):
+  for leg,vals in flag_legs:
+   for scene,wet in (('dry','0'),('wet','2')):
+    shot=out/f'night-{track:02}-{leg}-{scene}.png'
+    text=run(f'night-{track:02}-{leg}-{scene}',{**night_extra,'MYSIM_TRACK':str(track),'MYSIM_CAR':'16','MYSIM_TOD':'3','MYSIM_WET':wet,'MYSIM_AI':'1','MYSIM_AUTODRIVE':'1','MYSIM_SECONDS':'9','MYSIM_CAM':'0','MYSIM_SHOT':str(shot),'MYSIM_NOPIT':'1','MYSIM_RIVALS':'0','MYSIM_NATIVE_RECORD_FPS':'30',**vals},timeout=600)
+    if shot.exists():capture_count+=1
+    else:missing.append(f'track-{track:02}-{leg}-{scene}')
+ (out/'night-evidence-summary.json').write_text(json.dumps({'captures':capture_count,'missing':missing,'legs':[l for l,_ in flag_legs],'scope':'paired same-camera night evidence; provisional art candidates; no real-circuit photometry claims'},indent=2))
+ if missing:raise SystemExit(f'night evidence missing: {missing}')
+ print('COMPLETE night evidence: '+str(capture_count)+' paired frames across legs/conditions',flush=True);sys.exit(0)
+if os.environ.get('FLEET_EVIDENCE')=='1':
+ # Same-HEAD fleet evidence batches: every catalogued car (0..23) gets the labelled capture set
+ # (front/rear/left/right/top views, four wheel closeups + the cockpit), split across shards by car index.
+ # Shard 0 additionally renders track0 day+night representative views (MYSIM_TOD 0/3).
+ # Survey semantics: a failing car records its defect rows and the batch CONTINUES; the run still exits
+ # non-zero if anything is missing, so the manifest of defects rides the failure, not a green tick.
+ view_defs=(('front','0,1.35,5.6'),('rear','0,1.35,-5.6'),('left','-5.6,1.35,0'),('right','5.6,1.35,0'),('top','0,9.0,0.02'))
+ fleet_shards=int(os.environ.get('FLEET_SHARDS','6'))
+ cars=[c for c in range(24) if c%fleet_shards==shard]
+ car_extra={'MYSIM_SOURCE_UV_CANDIDATES':os.environ.get('SOURCE_UV_CANDIDATES','0'),'MYSIM_MISC_TWIN_HIDE_DIAGNOSTIC':os.environ.get('MISC_TWIN_HIDE','0')}
+ missing=[];capture_count=0
+ for car in cars:
+  try:
+   for view,cam in view_defs:
+    shot=out/f'fleet-car-{car:02}-{view}.png'
+    run(f'fleet-car-{car:02}-view-{view}',{**car_extra,'MYSIM_CARVIEW':str(car),'MYSIM_FITVIEW':'1','MYSIM_CAMPOS':cam,'MYSIM_SHOT':str(shot)},timeout=420)
+    if shot.exists():capture_count+=1
+    else:missing.append(f'car-{car:02}-{view}')
+   for closeup,wheel in ((1,'fl'),(0,'fr'),(3,'rl'),(2,'rr')):
+    shot=out/f'fleet-car-{car:02}-wheel-{wheel}.png'
+    text=run(f'fleet-car-{car:02}-wheel-{wheel}',{**car_extra,'MYSIM_CARVIEW':str(car),'MYSIM_WHEEL_CLOSEUP':str(closeup),'MYSIM_WHEEL_OBLIQUE':'1','MYSIM_SHOT':str(shot)},timeout=420)
+    if shot.exists():capture_count+=1
+    if not shot.exists() or 'PASS complete visible wheel framing' not in text:missing.append(f'car-{car:02}-wheel-{wheel}')
+   shot=out/f'fleet-car-{car:02}-cockpit.png'
+   text=run(f'fleet-car-{car:02}-cockpit',{'MYSIM_TRACK':'0','MYSIM_CAR':str(car),'MYSIM_AI':'1','MYSIM_AUTODRIVE':'1','MYSIM_CAM':'2','MYSIM_SECONDS':'9','MYSIM_SHOT':str(shot),'MYSIM_NOPIT':'1','MYSIM_RIVALS':'0','MYSIM_NATIVE_RECORD_FPS':'30'},timeout=600)
+   if shot.exists():capture_count+=1
+   if not shot.exists() or 'COCKPIT_VIEW mode=2' not in text:missing.append(f'car-{car:02}-cockpit')
+  except Exception as e:missing.append(f'car-{car:02}: {e}')
+ if shard==0:
+  for tod,label in ((0,'day'),(3,'night')):
+   shot=out/f'fleet-track-00-{label}.png'
+   text=run(f'fleet-track-00-{label}',{**car_extra,'MYSIM_TRACK':'0','MYSIM_CAR':'16','MYSIM_TOD':str(tod),'MYSIM_AI':'1','MYSIM_AUTODRIVE':'1','MYSIM_SECONDS':'9','MYSIM_CAM':'0','MYSIM_SHOT':str(shot),'MYSIM_NOPIT':'1','MYSIM_RIVALS':'0','MYSIM_NATIVE_RECORD_FPS':'30'},timeout=600)
+   if shot.exists():capture_count+=1
+   else:missing.append(f'track-00-{label}')
+ (out/'fleet-evidence-summary.json').write_text(json.dumps({'shard':shard,'shardCars':cars,'captures':capture_count,'missing':missing,'scope':'same-HEAD labelled fleet batches; machine capture evidence only, visual acceptance stays with the human reviewer'},indent=2))
+ if missing:raise SystemExit(f'fleet evidence missing on shard {shard}: {missing}')
+ print('COMPLETE fleet evidence shard '+str(shard)+': '+str(len(cars))+' cars, '+str(capture_count)+' captures, day/night views handled'+(', this shard hosts them' if shard==0 else ' elsewhere'),flush=True);sys.exit(0)
+if os.environ.get('REFERENCE_EVIDENCE')=='1':
+ # Reference car16/track0 baseline evidence at the exact commit: static body views via
+ # MYSIM_CAMPOS+FITVIEW; wheel closeups via the REAL MYSIM_WHEEL_CLOSEUP pivot-index branch
+ # (car_pivots order 0..3: front axle z>0; rendered car-left=+x per the CoreChecks screen-right
+ # convention => 0=front-right, 1=front-left, 2=rear-right, 3=rear-left); cockpit via the REAL
+ # in-game camera (DriveController CamMode 2, MYSIM_CAM=2 autodrive boot; free CAMPOS cameras
+ # cannot produce wheel-closeup or cockpit evidence). No material modifications.
+ views=(('front','0,1.35,5.6'),('rear','0,1.35,-5.6'),('left','-5.6,1.35,0'),('right','5.6,1.35,0'),('top','0,9.0,0.02'))
+ car_extra={'MYSIM_SOURCE_UV_CANDIDATES':os.environ.get('SOURCE_UV_CANDIDATES','0'),'MYSIM_MISC_TWIN_HIDE_DIAGNOSTIC':os.environ.get('MISC_TWIN_HIDE','0')}
+ missing=[]
+ for view,cam in views:
+  shot=out/f'ref-car16-{view}.png'
+  label=f'ref-car16-view-{view}'
+  text=run(label,{**car_extra,'MYSIM_CARVIEW':'16','MYSIM_FITVIEW':'1','MYSIM_CAMPOS':cam,'MYSIM_SHOT':str(shot)},timeout=420)
+  if not shot.exists():missing.append(view)
+ for closeup,wheel in ((1,'fl'),(0,'fr'),(3,'rl'),(2,'rr')):
+  shot=out/f'ref-car16-wheel-{wheel}.png'
+  text=run(f'ref-car16-wheel-{wheel}',{**car_extra,'MYSIM_CARVIEW':'16','MYSIM_WHEEL_CLOSEUP':str(closeup),'MYSIM_WHEEL_OBLIQUE':'1','MYSIM_SHOT':str(shot)},timeout=420)
+  if not shot.exists() or 'PASS complete visible wheel framing' not in text:missing.append(f'wheel-{wheel}')
+ shot=out/'ref-car16-wheel-fl-steered.png'
+ text=run('ref-car16-wheel-fl-steered',{**car_extra,'MYSIM_CARVIEW':'16','MYSIM_WHEEL_CLOSEUP':'1','MYSIM_WHEEL_OBLIQUE':'1','MYSIM_WHEEL_FIT_STEER':'-20','MYSIM_SHOT':str(shot)},timeout=420)
+ if not shot.exists() or 'PASS complete visible wheel framing' not in text:missing.append('wheel-fl-steered')
+ shot=out/'ref-car16-cockpit.png'
+ text=run('ref-car16-cockpit',{'MYSIM_TRACK':'0','MYSIM_CAR':'16','MYSIM_AI':'1','MYSIM_AUTODRIVE':'1','MYSIM_CAM':'2','MYSIM_SECONDS':'9','MYSIM_SHOT':str(shot),'MYSIM_NOPIT':'1','MYSIM_RIVALS':'0','MYSIM_NATIVE_RECORD_FPS':'30'},timeout=600)
+ if not shot.exists() or 'COCKPIT_VIEW mode=2' not in text or 'wheelsHidden=True' not in text or 'seatOffsetFromAuthored=0.000' not in text:missing.append('cockpit')
+ if missing:raise SystemExit(f'reference evidence views missing: {missing}')
+ # HUD safe bounds across the supported resolutions/aspects: every label must stay inside the frame
+ # (defect #2 regression watch; 960x540 covered by ref-lap-near below).
+ hud_missing=[]
+ for resolution in ('640x360','1280x720','1920x1080','1920x1200','2560x1080'):
+  shot=out/f'ref-hud-{resolution}.png'
+  text=run(f'ref-hud-{resolution}',{**car_extra,'MYSIM_TRACK':'0','MYSIM_CAR':'16','MYSIM_AI':'1','MYSIM_AUTODRIVE':'1','MYSIM_SECONDS':'4','MYSIM_SHOT':str(shot),'MYSIM_NOPIT':'1','MYSIM_RIVALS':'0','MYSIM_NATIVE_RECORD_FPS':'30','MYSIM_HUD_RECTS':'1'},['--resolution',resolution],timeout=600)
+  if not shot.exists():hud_missing.append(resolution)
+  rects=[line for line in text.splitlines() if line.startswith('HUD_RECTS viewport=')]
+  assert len(rects)==1,f'ref-hud-{resolution}: expected one HUD_RECTS line, got {len(rects)}'
+  vm=re.match(r'HUD_RECTS viewport=\(([-\d.e]+), ([-\d.e]+)\)',rects[0])
+  assert vm,f'ref-hud-{resolution}: unparsable HUD_RECTS line'
+  vw,vh=float(vm.group(1)),float(vm.group(2))
+  # CanvasItems scaling: GetVisibleRect reports the DESIGN canvas, not raw window pixels. Observed modes
+  # (fbx-era runs + the 41825439700 capture): 16:9/4:3 windows keep the 1280x720 base; taller/wider expand it
+  # (1920x1200 -> 1280x800, 2560x1080 -> 1706x720). The invariants that hold across every supported window:
+  # the design canvas covers the 1280x720 base and every HUD element stays inside the canvas.
+  assert vw>=1280 and vh>=720,f'ref-hud-{resolution}: design canvas {(vw,vh)} smaller than the 1280x720 base'
+  parsed=re.findall(r'(\w+)=\(([-\d.e]+), ([-\d.e]+)\), \(([-\d.e]+), ([-\d.e]+)\)',rects[0])
+  assert parsed,f'ref-hud-{resolution}: no HUD element rects parsed (format is name=(px, py), (w, h))'
+  for name,px,py,rw,rh in parsed:
+   if name=='viewport':continue
+   px,py,rw,rh=float(px),float(py),float(rw),float(rh)
+   assert px>=0 and py>=0 and px+rw<=vw and py+rh<=vh,f'ref-hud-{resolution}: HUD element {name} outside viewport: ({px}, {py}) size ({rw}, {rh})'
+ if hud_missing:raise SystemExit(f'reference HUD captures missing: {hud_missing}')
+ # Live driving frames at fixed 30 fps (sim time identical; physics hz unchanged), 600 s budget
+ # (llvmpipe software rendering runs ~20x wall time at fixed 60 fps).
+ drive_count=0
+ for seconds,label,cam_mode in (('9','ref-lap-near','0'),('14','ref-lap-wide','1')):
+  shot=out/f'{label}.png'
+  text=run(label,{**car_extra,'MYSIM_TRACK':'0','MYSIM_CAR':'16','MYSIM_AI':'1','MYSIM_AUTODRIVE':'1','MYSIM_SECONDS':seconds,'MYSIM_CAM':cam_mode,'MYSIM_SHOT':str(shot),'MYSIM_NOPIT':'1','MYSIM_RIVALS':'0','MYSIM_NATIVE_RECORD_FPS':'30'},timeout=600)
+  if shot.exists():drive_count+=1
+ if drive_count==0:raise SystemExit('reference drive frames missing')
+ print(f'COMPLETE reference evidence: {len(views)} body views, 5 wheel closeups, 1 cockpit, {5+drive_count} live frames captured',flush=True);sys.exit(0)
 if os.environ.get('F1_PAINT_REVIEW')=='1':
  car=15+shard
  for candidate in (0,1):
@@ -340,11 +553,15 @@ if os.environ.get('SOURCE_KINGPIN_REVIEW')=='1':
    if candidate:assert 'SOURCE_KINGPIN_VISUAL' in text,'Source joint rig did not initialize'
  print('COMPLETE W10 matched visual steering rig evidence; native hub unchanged, not production acceptance',flush=True);sys.exit(0)
 if os.environ.get('WHEEL_FIT_REVIEW')=='1':
- car=15+shard
+ # Batch fleet sweeps: the cars input's n-th entry maps to the n-th shard (default keeps the historical 15+shard).
+ _cars=[int(x) for x in os.environ.get('NATIVE_CARS','16').split(',')]
+ car=_cars[shard] if shard<len(_cars) else 15+shard
  for steer in (-23,0,23):
   label=f'wheel-fit-car-{car}-steer-{steer}';shot=out/(label+'.png');metadata=out/(label+'.json')
-  text=run(label,{'MYSIM_CARVIEW':str(car),'MYSIM_REBUILT_RIMS':'1','MYSIM_REBUILT_TYRES':'1','MYSIM_WHEEL_FIT_STEER':str(steer),'MYSIM_SOURCE_AXLE_FIT':os.environ.get('SOURCE_AXLE_REVIEW','0'),'MYSIM_SOURCE_AXLE_REPORT':str(out/(label+'-source-axle.json')),'MYSIM_WHEEL_FIT_AUDIT':str(metadata),'MYSIM_CAR_ASSEMBLY_AUDIT':str(out/(label+'-assembly.json')),'MYSIM_FITVIEW':'1','MYSIM_CAMPOS':'3.5,4.5,5','MYSIM_SHOT':str(shot)})
+  text=run(label,{'MYSIM_CARVIEW':str(car),'MYSIM_REBUILT_RIMS':'1','MYSIM_REBUILT_TYRES':'1','MYSIM_WHEEL_FIT_STEER':str(steer),'MYSIM_WHEEL_CLEARANCE_SWEEP':'1','MYSIM_SOURCE_AXLE_FIT':os.environ.get('SOURCE_AXLE_REVIEW','0'),'MYSIM_SOURCE_AXLE_REPORT':str(out/(label+'-source-axle.json')),'MYSIM_WHEEL_FIT_AUDIT':str(metadata),'MYSIM_CAR_ASSEMBLY_AUDIT':str(out/(label+'-assembly.json')),'MYSIM_FITVIEW':'1','MYSIM_CAMPOS':'3.5,4.5,5','MYSIM_SHOT':str(shot)},timeout=1500)
   assert shot.exists() and metadata.exists() and 'PASS wheel fit evidence' in text
+  sweep=json.loads(metadata.read_text()).get('sweep') if metadata.exists() else None
+  assert sweep and sweep.get('perWheel'),'wheel fit case missing the clearance sweep v2 per-wheel evidence'
  print('COMPLETE wheel fit diagnostic; overlap findings require repair, not acceptance',flush=True);sys.exit(0)
 if os.environ.get('REBUILT_WHEEL_REVIEW')=='1':
  custom=os.environ.get('F1_WHEEL_REVIEW')=='1';car=15+shard if custom else (1,6,16)[shard]

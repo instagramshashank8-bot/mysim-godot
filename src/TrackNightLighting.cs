@@ -16,6 +16,7 @@ public partial class TrackNightLighting : Node3D {
  float routeLength,longestUnlitGap,nearestStartStation=-1;
  bool built;float updateAge,auditAge;int rejectedMounts;string auditPath;
  static float Read(System.Text.Json.JsonElement p,string key)=>p.GetProperty(key).GetSingle();
+ static float EnvFloat(string key,float fallback)=>float.TryParse(System.Environment.GetEnvironmentVariable(key),System.Globalization.NumberStyles.Float,System.Globalization.CultureInfo.InvariantCulture,out float parsed)?parsed:fallback;
  public override void _PhysicsProcess(double delta) {
   if(!built){built=true;Build();}
   updateAge+=(float)delta;auditAge+=(float)delta;if(updateAge<.1f)return;updateAge=0;
@@ -40,6 +41,10 @@ public partial class TrackNightLighting : Node3D {
   if(auditPath!=null&&selectionSamples.Count<16&&(selectionSamples.Count==0||auditAge>=1f)){auditAge=0;selectionSamples.Add(new{camera=new[]{origin.X,origin.Y,origin.Z},forward=new[]{forward.X,forward.Y,forward.Z},selected});WriteAudit();}
  }
  void Build(){
+  // One controlled night candidate: a pool-energy multiplier. Source profile placement values are untouched;
+  // the gain multiplies both the spot-light energy and the visible emitter strips so the heads stay consistent
+  // with the light they represent. Default unset = 1 = exact current behaviour.
+  float poolGain=EnvFloat("MYSIM_NIGHT_POOL_GAIN",1f);
   using var document=System.Text.Json.JsonDocument.Parse(FileAccess.GetFileAsString("res://data/track_floodlights.json"));var p=document.RootElement;
   float spacing=Read(p,"spacing"),height=Read(p,"height"),range=Read(p,"range");var offsets=new List<float>();
   foreach(var candidate in p.GetProperty("routeOffsets").EnumerateArray()){float offset=candidate.GetSingle();if(!float.IsFinite(offset)||offset<9||offset>24||offsets.Contains(offset))throw new System.InvalidOperationException("Invalid floodlight roadside offset");offsets.Add(offset);}
@@ -48,7 +53,7 @@ public partial class TrackNightLighting : Node3D {
   var supportedChainages=new List<float>();
   void Reject(string reason,float chainage,float side,float offset){rejectionReasons.TryGetValue(reason,out int count);rejectionReasons[reason]=count+1;placementAttempts.Add(new{chainage,side,offset,accepted=false,reason});}
   var steel=new StandardMaterial3D{AlbedoColor=new Color(.16f,.18f,.20f),Metallic=.7f,Roughness=.5f};
-  var emitter=new StandardMaterial3D{AlbedoColor=new Color(.78f,.85f,.92f),EmissionEnabled=true,Emission=new Color(.78f,.85f,.92f),EmissionEnergyMultiplier=2f,Roughness=.4f};
+  var emitter=new StandardMaterial3D{AlbedoColor=new Color(.78f,.85f,.92f),EmissionEnabled=true,Emission=new Color(.78f,.85f,.92f),EmissionEnergyMultiplier=2f*poolGain,Roughness=.4f};
   for(int segment=0;segment<route.points.Length;segment++){
    var a=route.points[segment];var b=route.points[(segment+1)%route.points.Length];float length=(b-a).Magnitude;if(length<.001f)continue;
    while(next<walked+length){float chainage=next,t=(next-walked)/length;next+=spacing;var centre=a+(b-a)*t;var right=(b-a).Normalized.Right;int siteMounts=0;
@@ -81,10 +86,10 @@ public partial class TrackNightLighting : Node3D {
   routeLength=walked;longestUnlitGap=routeLength;
   if(supportedChainages.Count>0){longestUnlitGap=0;nearestStartStation=routeLength;for(int i=0;i<supportedChainages.Count;i++){float here=supportedChainages[i],nextStation=i+1<supportedChainages.Count?supportedChainages[i+1]:supportedChainages[0]+routeLength;longestUnlitGap=Mathf.Max(longestUnlitGap,nextStation-here);nearestStartStation=Mathf.Min(nearestStartStation,Mathf.Min(here,routeLength-here));}}
   int budget=p.GetProperty("activeLights").GetInt32();if(budget<2||budget>12)throw new System.InvalidOperationException("Floodlight pool must remain bounded");
-  for(int i=0;i<budget;i++){var light=new SpotLight3D{Visible=false,SpotRange=range,SpotAngle=Read(p,"coneAngle"),SpotAttenuation=1f,LightEnergy=Read(p,"energy"),LightColor=new Color(.82f,.89f,1f),ShadowEnabled=i<2,ShadowBias=.03f,ShadowNormalBias=1f,DistanceFadeEnabled=true,DistanceFadeBegin=110f,DistanceFadeLength=45f};AddChild(light);pool.Add(light);assignments.Add(-1);}
-  GD.Print("TRACK_FLOODLIGHTS candidate track=",TrackIndex," supportedMounts=",lamps.Count," rejected=",rejected," activeBudget=",pool.Count," longestStationGap=",longestUnlitGap," nearestStartStation=",nearestStartStation," rejectReasons=",System.Text.Json.JsonSerializer.Serialize(rejectionReasons));
+  for(int i=0;i<budget;i++){var light=new SpotLight3D{Visible=false,SpotRange=range,SpotAngle=Read(p,"coneAngle"),SpotAttenuation=1f,LightEnergy=Read(p,"energy")*poolGain,LightColor=new Color(.82f,.89f,1f),ShadowEnabled=i<2,ShadowBias=.03f,ShadowNormalBias=1f,DistanceFadeEnabled=true,DistanceFadeBegin=110f,DistanceFadeLength=45f};AddChild(light);pool.Add(light);assignments.Add(-1);}
+  GD.Print("TRACK_FLOODLIGHTS candidate track=",TrackIndex," supportedMounts=",lamps.Count," rejected=",rejected," activeBudget=",pool.Count," poolGain=",poolGain," longestStationGap=",longestUnlitGap," nearestStartStation=",nearestStartStation," rejectReasons=",System.Text.Json.JsonSerializer.Serialize(rejectionReasons));
   rejectedMounts=rejected;auditPath=System.Environment.GetEnvironmentVariable("MYSIM_TRACK_LIGHT_AUDIT");WriteAudit();
  }
- void WriteAudit(){if(auditPath==null)return;var folder=System.IO.Path.GetDirectoryName(auditPath);if(!string.IsNullOrEmpty(folder))System.IO.Directory.CreateDirectory(folder);var stations=new List<object>();foreach(var lamp in lamps)stations.Add(new{mount=new[]{lamp.mount.X,lamp.mount.Y,lamp.mount.Z},aim=new[]{lamp.aim.X,lamp.aim.Y,lamp.aim.Z},lamp.offset,lamp.chainage,lamp.side});System.IO.File.WriteAllText(auditPath,System.Text.Json.JsonSerializer.Serialize(new{track=TrackIndex,candidate=true,supportedMounts=lamps.Count,rejected=rejectedMounts,rejectionReasons,routeLength,longestStationGap=longestUnlitGap,nearestStartStation,routeCoverage,placementAttempts,activeBudget=pool.Count,selectionPolicy="two-nearby-plus-forward-weighted-hysteresis",stations,selectionSamples,scope="Ray-supported procedural candidate. Station gaps measure placement, not lux/illumination; requires full track night/shadow/clearance review before promotion"}));}
+ void WriteAudit(){if(auditPath==null)return;var folder=System.IO.Path.GetDirectoryName(auditPath);if(!string.IsNullOrEmpty(folder))System.IO.Directory.CreateDirectory(folder);var stations=new List<object>();foreach(var lamp in lamps)stations.Add(new{mount=new[]{lamp.mount.X,lamp.mount.Y,lamp.mount.Z},aim=new[]{lamp.aim.X,lamp.aim.Y,lamp.aim.Z},lamp.offset,lamp.chainage,lamp.side});System.IO.File.WriteAllText(auditPath,System.Text.Json.JsonSerializer.Serialize(new{track=TrackIndex,candidate=true,poolGain=EnvFloat("MYSIM_NIGHT_POOL_GAIN",1f),supportedMounts=lamps.Count,rejected=rejectedMounts,rejectionReasons,routeLength,longestStationGap=longestUnlitGap,nearestStartStation,routeCoverage,placementAttempts,activeBudget=pool.Count,selectionPolicy="two-nearby-plus-forward-weighted-hysteresis",stations,selectionSamples,scope="Ray-supported procedural candidate. Station gaps measure placement, not lux/illumination; requires full track night/shadow/clearance review before promotion"}));}
 }
 }

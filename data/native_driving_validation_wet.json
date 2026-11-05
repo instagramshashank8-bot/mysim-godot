@@ -1,0 +1,19 @@
+{
+  "cases": [
+    {
+      "car": 16,
+      "track": 0,
+      "weather": 2,
+      "compound": 3,
+      "drivingValidation": ["braking_60_wet", "steering_rate_step", "edge_excursion"]
+    },
+    {
+      "car": 0,
+      "track": 0,
+      "weather": 2,
+      "compound": 3,
+      "drivingValidation": ["braking_60_wet", "steering_rate_step"]
+    }
+  ],
+  "scope": "Wet controlled continuous-driving validation: identical scripted scenarios to the dry core with ONLY the weather (Rain profile) and starting compound (Wet) changed; everything else identical, car reset to the same spawn between profiles. Compare against native_driving_validation_core results on the same car to isolate surface-water and compound effects. Dispatch with assists off and rotational tyres on. Requires the dedicated driving_validation runner depth."
+}

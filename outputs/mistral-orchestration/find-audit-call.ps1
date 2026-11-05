@@ -1,0 +1,1 @@
+Select-String -Path C:/Users/shash/Documents/MySimGodot/.github/workflows/game-review.yml -Pattern 'cloud_game_audit','MYSIM_AUDIT','REFERENCE' | ForEach-Object { Write-Output ("" + $_.LineNumber + ": " + $_.Line.Trim().Substring(0,[Math]::Min(140,$_.Line.Trim().Length))) }

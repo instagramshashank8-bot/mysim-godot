@@ -1,0 +1,39 @@
+{
+  "scope": "Dry/wet comparison matrix, Tier A (runs under the existing native_geometry_recovery named-case depth once its case_set entry is wired). Controlled variables: same car, same track (0), same lap count (1), same AI precision mode, zero rivals; ONLY weather and starting compound vary between cells of a row. Water accumulates from the weather profile's initialWater and evolves during the lap. Cross-case comparisons are computed afterwards from mounted-native-layout-results.json; direction expectations below are checks for the analyst, not machine-enforced gates. The already-completed Rain/Medium-slick cell (run 41625514977, cars 0+16, WET_SLICK_COMPARISON_ACTUAL.json) is deliberately NOT repeated here.",
+  "controlledVariables": {
+    "track": 0,
+    "laps": 1,
+    "rivals": 0,
+    "aiMode": 3,
+    "carSet": [0, 16],
+    "varied": ["weather", "compound"],
+    "fixed": ["track", "car", "laps", "aiMode", "rivals", "physics", "assists"]
+  },
+  "cases": [
+    { "car": 16, "track": 0, "weather": 0, "compound": 1, "cell": "dry_reference", "note": "Clear profile, initialWater 0; baseline for the row" },
+    { "car": 16, "track": 0, "weather": 1, "compound": 1, "cell": "overcast_control", "note": "initialWater 0, so physical grip equals dry_reference by construction; controls for visual/atmosphere differences only" },
+    { "car": 16, "track": 0, "weather": 2, "compound": 3, "cell": "wet_wet_tyre", "note": "Rain profile (initialWater 0.55, rain continues), Wet compound" },
+    { "car": 0, "track": 0, "weather": 0, "compound": 1, "cell": "dry_reference_road_class" },
+    { "car": 0, "track": 0, "weather": 1, "compound": 1, "cell": "overcast_control_road_class", "note": "initialWater 0; visual-only control" },
+    { "car": 0, "track": 0, "weather": 2, "compound": 3, "cell": "wet_wet_tyre_road_class" }
+  ],
+  "alreadyCompletedCells": {
+    "scope": "These cells are already measured and must NOT be listed under cases (they would be re-run); they are recorded here so each row is complete.",
+    "cells": [
+      { "car": 16, "track": 0, "weather": 2, "compound": 1, "cell": "wet_slick", "evidence": "run 41625514977, WET_SLICK_COMPARISON_ACTUAL.json" },
+      { "car": 0, "track": 0, "weather": 2, "compound": 1, "cell": "wet_slick_road_class", "evidence": "run 41625514977, WET_SLICK_COMPARISON_ACTUAL.json" }
+    ]
+  },
+  "expectedOrderings": {
+    "scope": "Direction-only checks for the analyst comparing mounted-native-layout-results.json across cells of one car row. Ordering claims, never magnitude claims; failure of a direction is a finding to investigate, not something to tune away silently.",
+    "perCarComparisons": [
+      "lapTime(dry_reference) < lapTime(wet_wet_tyre) < lapTime(wet_slick): wet laps slower on the same compound family, and slicks slower still in the wet",
+      "lapTime(dry_reference) ~ lapTime(overcast_control): initialWater is 0 in both, so any pace difference beyond run noise indicates an unintended weather coupling",
+      "water(wet cells) > 0 and water(dry_reference, overcast_control) == 0"
+    ],
+    "alreadyCompletedEvidence": {
+      "wet_slick_cells": "run 41625514977 (Rain2/Medium1, cars 0+16): slick slower by 16.979185 s (car 0) and 1.849546 s (car 16) versus prior Wet3 reference 41620748966",
+      "caveat": "Those runs confirm sensitivity, not real-world calibration (see instructions.md section 5)"
+    }
+  }
+}

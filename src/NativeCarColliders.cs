@@ -8,7 +8,7 @@ namespace MySim {
 // They are encrypted with the build; no hull vertex data is written to public Git or diagnostics.
 public static class NativeCarColliders {
  const string Root="res://assets/generated_native_car_hulls/";
- static bool WheelTemplate(string name)=>System.Text.RegularExpressions.Regex.IsMatch(name,@"^LOD_A_(TYRE|TIRE|WHEEL|CALIPER|BRAKE_DISC|DISC|ROTOR|HUB)(_|$)",System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+ static bool WheelTemplate(string name)=>System.Text.RegularExpressions.Regex.IsMatch(name,@"^LOD_A_(WHEELGUARD|TYRE|TIRE|WHEEL|CALIPER|BRAKE_CALIPER|BRAKE_DISC|DISC|ROTOR|HUB)(_|$)",System.Text.RegularExpressions.RegexOptions.IgnoreCase);
  static List<Vector3> Volume(List<Vector3> points){if(points.Count<3)return null;var origin=points[0];Vector3 axis=Vector3.Zero,cross=Vector3.Zero;foreach(var p in points)if((p-origin).LengthSquared()>axis.LengthSquared())axis=p-origin;if(axis.LengthSquared()<.000001f)return null;foreach(var p in points){var n=axis.Cross(p-origin);if(n.LengthSquared()>cross.LengthSquared())cross=n;}if(cross.LengthSquared()<.00000001f)return null;cross=cross.Normalized();foreach(var p in points)if(Mathf.Abs(cross.Dot(p-origin))>.001f)return points;
   // A rendered planar body panel still needs a physical skin; only the collision copy gains 4mm thickness.
   var thick=new List<Vector3>(points.Count*2);foreach(var p in points)thick.Add(p+cross*.002f);foreach(var p in points)thick.Add(p-cross*.002f);return thick;

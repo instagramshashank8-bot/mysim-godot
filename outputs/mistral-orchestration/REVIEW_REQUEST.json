@@ -1,0 +1,52 @@
+{
+  "packet": "REVIEW_PACKET.md",
+  "status": "READY_FOR_INDEPENDENT_REVIEW",
+  "updated": "2026-11-04 session 2 (coordinator; supersedes the verification-agent snapshot inside VERSION HISTORY below)",
+  "branch": "codex/repair-20261029",
+  "head": {
+    "remote": "d3629e8 was pushed mid-session; later commits 4afae34 (driving_validation depth), 076363b (HUD_RECTS bounds verification) pushed after; read `git log` for the exact tip. Worktrees on mistral/* branch Specialists hold parallel proposals.",
+    "uncommitted_note": "orchestration outputs (registry/packet) are documentation files and may trail the last commit; source+workflow+tools are always committed before any dispatch."
+  },
+  "version_history_note": "The verification-agent REVIEW_REQUEST content (dfe0ed3-era) is preserved in git history of this file and summarised in REVIEW_PACKET HISTORY. Superseded claims: linux re-run required (DONE, 41798040383), windows step proposed (NOW COMMITTED at d3629e8 and dispatched as 41819498045/41819498045-family).",
+  "verification_state": {
+    "linux_persistence": "PASS re-proven at e8b80bb run 41798040383: 5 scenarios, 28/28 real (non-vacuous after dfe0ed3-vacuity fix), contract_sync green. NEW at 9ff443c: legacy_long_roundtrip case added after the CI probe found Settings.Get<long> always returned the default (regression c1701d9 -> controls probe 41795630650 caught it; fix 9ff443c). Linux at 9ff443c expects 29 cases - dispatch 41818941902 queued.",
+    "windows_persistence": "IN FLIGHT. Coordinator committed tools/cloud_windows_persist.py + workflow step at d3629e8 (earlier 'wired' claim was wrong for the committed tree - disclosed in REVIEW_PACKET). First tagged run 41819498045 (windows-candidate-d3629e8430fcddcd5544153221e07467f7499120) pending: build+smoke+persist in the packaged player; expect 32 assertions incl. 3 win_sharing_violation_*; delete-then-rename risk stands as documented.",
+    "contract_sync": "Triple-checked now in THREE files: fixture BaseCases, cloud_game_audit required_cases, cloud_windows_persist required (verification specialist double-checks at HEAD; findings land in agents/verification-turn2.md).",
+    "continuous_lap": "CLEAN LAP achieved at 5d21c56 (jolt/240/CCD/rotational): 0 impacts, 0 damage, 0 rule resets, bestLap 87.52s. Video+telemetry decrypted, supervisor-reviewable. Earlier source/120 failure preserved (41794252920).",
+    "car_evidence": "Run 41798036351 at e8b80bb: engine gates PASS (full car framing corners=376; real wheel closeups corners=32; genuine cockpit mode=2 seatOffsetFromAuthored=0.000 wheelsHidden=True). PNGs decrypted; human visual review pending; mirrored-logo and foliage/fence defects NOT dispositioned by this run.",
+    "reference_visual": "NOT granted. Baseline defects from VISUAL_REVIEW.md stand until the human reviewer passes the new evidence: fence mip-repair candidate (retry 41818948189 in flight at 9ff443c), HUD bounds machine-proofs (41820839687 at 076363b)."
+  },
+  "runs": {
+    "41820839687": {"head": "076363b", "conclusion": "in_flight", "note": "reference_evidence with HUD_RECTS bounds asserts at 5 resolutions"},
+    "41820348686": {"head": "4afae34", "conclusion": "in_flight", "note": "driving_validation core (8 scripted profiles, rotational tyres, assists off; per-profile assertion gates)"},
+    "41819498045": {"head": "d3629e8", "conclusion": "pending", "note": "windows build + smoke + settings persist (packaged player, 5 scenarios, 32 expected)"},
+    "41819114117": {"head": "9ff443c", "conclusion": "in_flight", "note": "windows build+smoke only (superseded for persist; useful build evidence)"},
+    "41818948189": {"head": "9ff443c", "conclusion": "in_flight", "note": "fence_miprepair_review retry after the controls-probe fix"},
+    "41818941902": {"head": "9ff443c", "conclusion": "queued", "note": "settings_persist_review incl. legacy_long_roundtrip (29 expected)"},
+    "41799538756": {"head": "5d21c56", "conclusion": "success", "note": "CLEAN continuous lap evidence (video+telemetry)"},
+    "41798040383": {"head": "e8b80bb", "conclusion": "success", "note": "persist 28/28 re-proof"},
+    "41798036351": {"head": "e8b80bb", "conclusion": "success", "note": "car_evidence gates + PNGs"},
+    "41795630650": {"head": "5288329", "conclusion": "failure", "note": "miprepair: controls probe caught Settings long-regression; retained"},
+    "41794252920": {"head": "71dfc6c", "conclusion": "failure", "note": "source/120 lap 17 impacts; retained"},
+    "41797648627": {"head": "d195794", "conclusion": "failure", "note": "lap retry dispatch precondition; retained"},
+    "41712623422": {"head": "d5d42ce", "conclusion": "failure", "note": "reference wide-capture timeout; retained"}
+  },
+  "dispatch_policies_honored": "single dispatch per verification; failures retained; tag-ref fallback used for windows-build when branch pushes hit GitHub 500s; every dispatch recorded in JOB_REGISTRY.json with head+result",
+  "changed_files_this_session": [
+    "src/Settings.cs (long branch in TypedValue)",
+    "src/SettingsPersistChecks.cs (legacy_long_roundtrip + contract order)",
+    "src/NativeRaceController.cs (MYSIM_DRIVING_VALIDATION_REPORT env hook)",
+    "tools/cloud_game_audit.py (driving_validation depth branch; HUD_RECTS bounds asserts; required_cases sync)",
+    ".github/workflows/game-review.yml (driving_validation depth + case_set driving_core/impact/wet + shard map)",
+    ".github/workflows/windows-build.yml (persist step + diagnostics artifact paths)",
+    "tools/cloud_windows_persist.py (long-roundtrip in required contract)",
+    "src/Hud.cs + src/DriveController.cs (HUD_RECTS emission)",
+    "outputs/mistral-orchestration/JOB_REGISTRY.json + REVIEW_PACKET.md (session-2 status)"
+  ],
+  "open_questions_for_reviewer": [
+    "Windows delete-then-rename non-atomicity: accept as documented risk with tmp recovery, or require a File.Replace-based fix + determinstic fault test before stage-10 closes?",
+    "Solver split: clean lap is jolt/240; shipped default remains source/120 - accept per-backend records, or require one authoritative backend for all acceptance gates?",
+    "Mirror-logo fix policy after root-cause lands: engine detector + targeted UV fix vs livery re-authoring (costs differ; we recommend detector-first)."
+  ],
+  "constraints_honored": ["no git add .", "no local engine/render/build - cloud runs everything", "failure history preserved", "no assertion weakened (two vacuous asserts + long-typed gap closed with real case)", "no duplicate unchanged dispatches", "specialists: proposals only, coordinator integrates"]
+}

@@ -1,0 +1,1667 @@
+{
+ "scope": "read-only fleet/track manifest from catalog sources (CarCatalog.cs, SourceRoutes.cs, runtime TrackList.json); no mutation, no rendering",
+ "catalogSource": "src/Logic/CarCatalog.cs",
+ "routesSource": "src/Logic/SourceRoutes.cs",
+ "trackListRuntime": "assets/RealRacing/TrackList.json",
+ "counts": {
+  "cars": 24,
+  "tracks": 60,
+  "sourceRoutes": 60
+ },
+ "assertsPassed": true,
+ "problems": [],
+ "notes": [],
+ "cars": [
+  {
+   "id": 0,
+   "name": "FERRARI 488 GT3",
+   "folder": "assets/RealRacing/Source/2018_ferrari_488_gt3/",
+   "raceClass": 0,
+   "fbx": 11,
+   "textures": 15,
+   "liveriesOnDisk": [
+    "2018_ferrari_488_gt3_ext_51.png",
+    "2018_ferrari_488_gt3_ext_63.png",
+    "2018_ferrari_488_gt3_ext_64.png",
+    "2018_ferrari_488_gt3_ext_82.png",
+    "2018_ferrari_488_gt3_ext_esports_28.png"
+   ],
+   "boundLivery": "2018_ferrari_488_gt3_ext_51.png",
+   "boundRenderers": 105,
+   "pivots": 4,
+   "uvRepairsPromoted": [],
+   "uvRepairsPending": [],
+   "specialPaths": []
+  },
+  {
+   "id": 1,
+   "name": "AUDI R8 GT4",
+   "folder": "assets/RealRacing/Source/2018_audi_r8_gt4/",
+   "raceClass": 0,
+   "fbx": 11,
+   "textures": 12,
+   "liveriesOnDisk": [
+    "2018_audi_r8_gt4_ext.png",
+    "2018_audi_r8_gt4_ext_fictional_23.png"
+   ],
+   "boundLivery": "2018_audi_r8_gt4_ext_fictional_23.png",
+   "boundRenderers": 103,
+   "pivots": 4,
+   "uvRepairsPromoted": [],
+   "uvRepairsPending": [],
+   "specialPaths": []
+  },
+  {
+   "id": 2,
+   "name": "BMW M4 GT4",
+   "folder": "assets/RealRacing/Source/2018_bmw_m4_gt4/",
+   "raceClass": 0,
+   "fbx": 11,
+   "textures": 11,
+   "liveriesOnDisk": [
+    "2018_bmw_m4_gt4_ext.png"
+   ],
+   "boundLivery": null,
+   "boundRenderers": 106,
+   "pivots": 4,
+   "uvRepairsPromoted": [],
+   "uvRepairsPending": [],
+   "specialPaths": []
+  },
+  {
+   "id": 3,
+   "name": "CAMARO GT4.R",
+   "folder": "assets/RealRacing/Source/2018_chevrolet_camaro_gt4r/",
+   "raceClass": 0,
+   "fbx": 11,
+   "textures": 12,
+   "liveriesOnDisk": [
+    "2018_chevrolet_camaro_gt4r_ext.png",
+    "2018_chevrolet_camaro_gt4r_ext_fictional_12.png"
+   ],
+   "boundLivery": "2018_chevrolet_camaro_gt4r_ext_fictional_12.png",
+   "boundRenderers": 94,
+   "pivots": 4,
+   "uvRepairsPromoted": [],
+   "uvRepairsPending": [],
+   "specialPaths": []
+  },
+  {
+   "id": 4,
+   "name": "BMW M8 GTE",
+   "folder": "assets/RealRacing/Source/2018_bmw_m8_gte/",
+   "raceClass": 0,
+   "fbx": 11,
+   "textures": 12,
+   "liveriesOnDisk": [
+    "2018_bmw_m8_gte_ext_1.png"
+   ],
+   "boundLivery": "2018_bmw_m8_gte_ext_1.png",
+   "boundRenderers": 94,
+   "pivots": 4,
+   "uvRepairsPromoted": [],
+   "uvRepairsPending": [],
+   "specialPaths": []
+  },
+  {
+   "id": 5,
+   "name": "CAMARO ZL1 1LE",
+   "folder": "assets/RealRacing/Source/2018_chevrolet_camaro_zl1_1le/",
+   "raceClass": 0,
+   "fbx": 11,
+   "textures": 16,
+   "liveriesOnDisk": [
+    "2018_chevrolet_camaro_zl1_1le_ext_black.png",
+    "2018_chevrolet_camaro_zl1_1le_ext_bright_yellow.png",
+    "2018_chevrolet_camaro_zl1_1le_ext_hyper_blue.png",
+    "2018_chevrolet_camaro_zl1_1le_ext_krypton_green.png",
+    "2018_chevrolet_camaro_zl1_1le_ext_red_hot.png",
+    "2018_chevrolet_camaro_zl1_1le_ext_summit_white.png"
+   ],
+   "boundLivery": "2018_chevrolet_camaro_zl1_1le_ext_black.png",
+   "boundRenderers": 120,
+   "pivots": 4,
+   "uvRepairsPromoted": [],
+   "uvRepairsPending": [],
+   "specialPaths": []
+  },
+  {
+   "id": 6,
+   "name": "HURACAN GT3",
+   "folder": "assets/RealRacing/Source/2018_lamborghini_huracan_gt3/",
+   "raceClass": 0,
+   "fbx": 11,
+   "textures": 17,
+   "liveriesOnDisk": [
+    "2018_lamborghini_huracan_gt3_ext_fictional_08.png",
+    "2018_lamborghini_huracan_gt3_ext_fictional_09.png",
+    "2018_lamborghini_huracan_gt3_ext_fictional_17.png",
+    "2018_lamborghini_huracan_gt3_ext_fictional_18.png",
+    "2018_lamborghini_huracan_gt3_ext_grt_11.png",
+    "2018_lamborghini_huracan_gt3_ext_grt_19.png"
+   ],
+   "boundLivery": "2018_lamborghini_huracan_gt3_ext_fictional_08.png",
+   "boundRenderers": 104,
+   "pivots": 4,
+   "uvRepairsPromoted": [
+    "6/LOD_A_HOOD_mm_misc"
+   ],
+   "uvRepairsPending": [],
+   "specialPaths": []
+  },
+  {
+   "id": 7,
+   "name": "MERCEDES-AMG GT3",
+   "folder": "assets/RealRacing/Source/2016_mercedes_amg_gt3/",
+   "raceClass": 0,
+   "fbx": 11,
+   "textures": 16,
+   "liveriesOnDisk": [
+    "2016_mercedes_amg_gt3_ext.png",
+    "2016_mercedes_amg_gt3_ext_fictional_2.png",
+    "2016_mercedes_amg_gt3_ext_fictional_3.png",
+    "2016_mercedes_amg_gt3_ext_fictional_4.png",
+    "2016_mercedes_amg_gt3_ext_fictional_5.png",
+    "2016_mercedes_amg_gt3_ext_fictional_6.png"
+   ],
+   "boundLivery": "2016_mercedes_amg_gt3_ext_fictional_2.png",
+   "boundRenderers": 99,
+   "pivots": 4,
+   "uvRepairsPromoted": [],
+   "uvRepairsPending": [],
+   "specialPaths": []
+  },
+  {
+   "id": 8,
+   "name": "McLAREN 650S GT3",
+   "folder": "assets/RealRacing/Source/2015_mclaren_650s_gt3/",
+   "raceClass": 0,
+   "fbx": 11,
+   "textures": 11,
+   "liveriesOnDisk": [
+    "2015_mclaren_650s_gt3_ext_59.png"
+   ],
+   "boundLivery": "2015_mclaren_650s_gt3_ext_59.png",
+   "boundRenderers": 96,
+   "pivots": 4,
+   "uvRepairsPromoted": [],
+   "uvRepairsPending": [],
+   "specialPaths": []
+  },
+  {
+   "id": 9,
+   "name": "ACURA NSX GT3",
+   "folder": "assets/RealRacing/Source/2018_acura_nsx_gt3/",
+   "raceClass": 0,
+   "fbx": 11,
+   "textures": 17,
+   "liveriesOnDisk": [
+    "2018_acura_nsx_gt3_ext_fictional_40.png",
+    "2018_acura_nsx_gt3_ext_fictional_56.png",
+    "2018_acura_nsx_gt3_ext_fictional_57.png",
+    "2018_acura_nsx_gt3_ext_gradient_racing_llc_36.png",
+    "2018_acura_nsx_gt3_ext_hart_69.png",
+    "2018_acura_nsx_gt3_ext_msr_86.png",
+    "2018_acura_nsx_gt3_ext_msr_93.png"
+   ],
+   "boundLivery": "2018_acura_nsx_gt3_ext_fictional_40.png",
+   "boundRenderers": 99,
+   "pivots": 4,
+   "uvRepairsPromoted": [],
+   "uvRepairsPending": [],
+   "specialPaths": []
+  },
+  {
+   "id": 10,
+   "name": "BMW M6 GT3",
+   "folder": "assets/RealRacing/Source/2018_bmw_m6_gt3/",
+   "raceClass": 0,
+   "fbx": 11,
+   "textures": 15,
+   "liveriesOnDisk": [
+    "2018_bmw_m6_gt3_ext_fictional_34.png",
+    "2018_bmw_m6_gt3_ext_fictional_35.png",
+    "2018_bmw_m6_gt3_ext_fictional_46.png",
+    "2018_bmw_m6_gt3_ext_fictional_47.png",
+    "2018_bmw_m6_gt3_ext_turner_motorsport.png"
+   ],
+   "boundLivery": "2018_bmw_m6_gt3_ext_fictional_34.png",
+   "boundRenderers": 91,
+   "pivots": 4,
+   "uvRepairsPromoted": [],
+   "uvRepairsPending": [],
+   "specialPaths": []
+  },
+  {
+   "id": 11,
+   "name": "PORSCHE 911 RSR",
+   "folder": "assets/RealRacing/Source/2018_porsche_911_rsr/",
+   "raceClass": 0,
+   "fbx": 11,
+   "textures": 11,
+   "liveriesOnDisk": [
+    "2018_porsche_911_rsr_ext.png"
+   ],
+   "boundLivery": null,
+   "boundRenderers": 110,
+   "pivots": 4,
+   "uvRepairsPromoted": [],
+   "uvRepairsPending": [],
+   "specialPaths": []
+  },
+  {
+   "id": 12,
+   "name": "FORD GT LM",
+   "folder": "assets/RealRacing/Source/2016_ford_gt_lm/",
+   "raceClass": 0,
+   "fbx": 11,
+   "textures": 15,
+   "liveriesOnDisk": [
+    "2016_ford_gt_lm_ext_66.png",
+    "2016_ford_gt_lm_ext_67.png",
+    "2016_ford_gt_lm_ext_68.png",
+    "2016_ford_gt_lm_ext_69.png"
+   ],
+   "boundLivery": "2016_ford_gt_lm_ext_66.png",
+   "boundRenderers": 104,
+   "pivots": 4,
+   "uvRepairsPromoted": [],
+   "uvRepairsPending": [],
+   "specialPaths": []
+  },
+  {
+   "id": 13,
+   "name": "ASTON MARTIN GTE",
+   "folder": "assets/RealRacing/Source/2018_astonmartin_gte/",
+   "raceClass": 0,
+   "fbx": 11,
+   "textures": 11,
+   "liveriesOnDisk": [
+    "2018_astonmartin_gte_ext.png"
+   ],
+   "boundLivery": null,
+   "boundRenderers": 98,
+   "pivots": 4,
+   "uvRepairsPromoted": [],
+   "uvRepairsPending": [],
+   "specialPaths": []
+  },
+  {
+   "id": 14,
+   "name": "CORVETTE C7.R",
+   "folder": "assets/RealRacing/Source/2016_chevrolet_c7r/",
+   "raceClass": 0,
+   "fbx": 11,
+   "textures": 12,
+   "liveriesOnDisk": [
+    "2016_chevrolet_c7r_ext_63.png",
+    "2016_chevrolet_c7r_ext_64.png"
+   ],
+   "boundLivery": "2016_chevrolet_c7r_ext_63.png",
+   "boundRenderers": 101,
+   "pivots": 4,
+   "uvRepairsPromoted": [],
+   "uvRepairsPending": [],
+   "specialPaths": []
+  },
+  {
+   "id": 15,
+   "name": "MERCEDES W10",
+   "folder": "assets/RealRacing/Source/2019_f1_mercedes_w10/",
+   "raceClass": 1,
+   "fbx": 11,
+   "textures": 16,
+   "liveriesOnDisk": [
+    "2019_f1_mercedes_w10_ext_44.png",
+    "2019_f1_mercedes_w10_ext_77.png"
+   ],
+   "boundLivery": "2019_f1_mercedes_w10_ext_44.png",
+   "boundRenderers": 78,
+   "pivots": 4,
+   "uvRepairsPromoted": [],
+   "uvRepairsPending": [],
+   "specialPaths": [
+    "f1_suspension_visual_builder",
+    "tyre_compound_markings(formula-only)",
+    "f1 rim/brake candidate branch",
+    "f1_paint_candidate(opt-in)"
+   ]
+  },
+  {
+   "id": 16,
+   "name": "FERRARI SF90",
+   "folder": "assets/RealRacing/Source/2019_f1_ferrari_sf90/",
+   "raceClass": 1,
+   "fbx": 11,
+   "textures": 15,
+   "liveriesOnDisk": [
+    "2019_f1_ferrari_sf90_ext_16.png",
+    "2019_f1_ferrari_sf90_ext_5.png"
+   ],
+   "boundLivery": "2019_f1_ferrari_sf90_ext_16.png",
+   "boundRenderers": 71,
+   "pivots": 4,
+   "uvRepairsPromoted": [
+    "16/LOD_A_BODY_mm_ext",
+    "16/LOD_A_FRONTBUMPER_mm_ext",
+    "16/LOD_A_REARBUMPER_mm_ext"
+   ],
+   "uvRepairsPending": [
+    "16/LOD_A_BODY_mm_badges",
+    "16/LOD_A_DOOR_LEFT_mm_ext",
+    "16/LOD_A_DOOR_RIGHT_mm_ext",
+    "16/LOD_A_EXHAUST_mm_ext",
+    "16/LOD_A_FRONTBUMPER_mm_badges",
+    "16/LOD_A_MIRROR_LEFT_mm_ext",
+    "16/LOD_A_MIRROR_RIGHT_mm_ext",
+    "16/LOD_A_REARBUMPER_mm_badges",
+    "16/LOD_A_STRUT_UPPER_FRONT_LEFT_mm_ext",
+    "16/LOD_A_STRUT_UPPER_FRONT_RIGHT_mm_ext"
+   ],
+   "specialPaths": [
+    "f1_suspension_visual_builder",
+    "tyre_compound_markings(formula-only)",
+    "f1 rim/brake candidate branch",
+    "f1_paint_candidate(opt-in)"
+   ]
+  },
+  {
+   "id": 17,
+   "name": "RED BULL RB15",
+   "folder": "assets/RealRacing/Source/2019_f1_red_bull_rb15/",
+   "raceClass": 1,
+   "fbx": 11,
+   "textures": 16,
+   "liveriesOnDisk": [
+    "2019_f1_red_bull_rb15_ext_23.png",
+    "2019_f1_red_bull_rb15_ext_33.png"
+   ],
+   "boundLivery": "2019_f1_red_bull_rb15_ext_23.png",
+   "boundRenderers": 74,
+   "pivots": 4,
+   "uvRepairsPromoted": [],
+   "uvRepairsPending": [],
+   "specialPaths": [
+    "f1_suspension_visual_builder",
+    "tyre_compound_markings(formula-only)",
+    "f1 rim/brake candidate branch",
+    "f1_paint_candidate(opt-in)"
+   ]
+  },
+  {
+   "id": 18,
+   "name": "McLAREN MCL34",
+   "folder": "assets/RealRacing/Source/2019_f1_mclaren_mcl34/",
+   "raceClass": 1,
+   "fbx": 11,
+   "textures": 15,
+   "liveriesOnDisk": [
+    "2019_f1_mclaren_mcl34_ext_4.png",
+    "2019_f1_mclaren_mcl34_ext_55.png"
+   ],
+   "boundLivery": "2019_f1_mclaren_mcl34_ext_4.png",
+   "boundRenderers": 78,
+   "pivots": 4,
+   "uvRepairsPromoted": [],
+   "uvRepairsPending": [],
+   "specialPaths": [
+    "f1_suspension_visual_builder",
+    "tyre_compound_markings(formula-only)",
+    "f1 rim/brake candidate branch",
+    "f1_paint_candidate(opt-in)"
+   ]
+  },
+  {
+   "id": 19,
+   "name": "McLAREN P1 GTR",
+   "folder": "assets/RealRacing/Source/2015_mclaren_p1_gtr/",
+   "raceClass": 3,
+   "fbx": 11,
+   "textures": 11,
+   "liveriesOnDisk": [
+    "2015_mclaren_p1_gtr_ext_51.png"
+   ],
+   "boundLivery": "2015_mclaren_p1_gtr_ext_51.png",
+   "boundRenderers": 93,
+   "pivots": 4,
+   "uvRepairsPromoted": [],
+   "uvRepairsPending": [],
+   "specialPaths": []
+  },
+  {
+   "id": 20,
+   "name": "BUGATTI CHIRON",
+   "folder": "assets/RealRacing/Source/2017_bugatti_chiron/",
+   "raceClass": 3,
+   "fbx": 11,
+   "textures": 24,
+   "liveriesOnDisk": [
+    "2017_bugatti_chiron_ext_blue.png",
+    "2017_bugatti_chiron_ext_champane.png",
+    "2017_bugatti_chiron_ext_darkred.png",
+    "2017_bugatti_chiron_ext_red.png",
+    "2017_bugatti_chiron_ext_silver.png",
+    "2017_bugatti_chiron_ext_white.png"
+   ],
+   "boundLivery": "2017_bugatti_chiron_ext_blue.png",
+   "boundRenderers": 110,
+   "pivots": 4,
+   "uvRepairsPromoted": [
+    "20/LOD_A_BODY_mm_ext",
+    "20/LOD_A_BOOT_mm_ext",
+    "20/LOD_A_DOOR_LEFT_mm_ext",
+    "20/LOD_A_DOOR_RIGHT_mm_ext",
+    "20/LOD_A_EXHAUST_mm_ext",
+    "20/LOD_A_FRONTBUMPER_mm_ext",
+    "20/LOD_A_HOOD_mm_ext",
+    "20/LOD_A_MIRROR_LEFT_mm_ext",
+    "20/LOD_A_MIRROR_RIGHT_mm_ext",
+    "20/LOD_A_REARBUMPER_mm_ext",
+    "20/LOD_A_WING_mm_ext"
+   ],
+   "uvRepairsPending": [],
+   "specialPaths": [
+    "chiron_reconstructed_wing(opt-in)",
+    "chiron_atlas_dihedral_diagnostic(opt-in)"
+   ]
+  },
+  {
+   "id": 21,
+   "name": "PORSCHE 919 EVO",
+   "folder": "assets/RealRacing/Source/2018_porsche_919_hybrid_evo/",
+   "raceClass": 2,
+   "fbx": 11,
+   "textures": 11,
+   "liveriesOnDisk": [
+    "2018_porsche_919_hybrid_evo_ext.png"
+   ],
+   "boundLivery": null,
+   "boundRenderers": 70,
+   "pivots": 4,
+   "uvRepairsPromoted": [],
+   "uvRepairsPending": [],
+   "specialPaths": []
+  },
+  {
+   "id": 22,
+   "name": "ORECA 07 LMP2",
+   "folder": "assets/RealRacing/Source/2017_oreca_07_lmp2/",
+   "raceClass": 2,
+   "fbx": 11,
+   "textures": 12,
+   "liveriesOnDisk": [
+    "2017_oreca_07_lmp2_ext.png"
+   ],
+   "boundLivery": null,
+   "boundRenderers": 98,
+   "pivots": 4,
+   "uvRepairsPromoted": [],
+   "uvRepairsPending": [],
+   "specialPaths": []
+  },
+  {
+   "id": 23,
+   "name": "PORSCHE 911 GT3 RS",
+   "folder": "assets/RealRacing/Source/2018_porsche_911_gt3_rs/",
+   "raceClass": 3,
+   "fbx": 11,
+   "textures": 22,
+   "liveriesOnDisk": [
+    "2018_porsche_911_gt3_rs_ext.png",
+    "2018_porsche_911_gt3_rs_ext_black.png",
+    "2018_porsche_911_gt3_rs_ext_lava_orange.png",
+    "2018_porsche_911_gt3_rs_ext_miami_blue.png",
+    "2018_porsche_911_gt3_rs_ext_white.png",
+    "2018_porsche_911_gt3_rs_ext_yellow.png"
+   ],
+   "boundLivery": "2018_porsche_911_gt3_rs_ext_black.png",
+   "boundRenderers": 120,
+   "pivots": 4,
+   "uvRepairsPromoted": [],
+   "uvRepairsPending": [],
+   "specialPaths": []
+  }
+ ],
+ "tracks": [
+  {
+   "id": 0,
+   "name": "BRANDS HATCH INDY",
+   "map": "Brands_Hatch",
+   "layout": "indy",
+   "scene": "processed/high/hatch.fbx",
+   "sceneBytes": 32656048,
+   "baseTrackIndex": 0,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/Brands_Hatch/indy/high/hatch_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "BRANDS HATCH INDY",
+   "sourceSplineSha": "ndy/hatch.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 1,
+   "name": "LAGUNA SECA",
+   "map": "Laguna_Seca",
+   "layout": "circuit",
+   "scene": "processed/high/seca.fbx",
+   "sceneBytes": 31087248,
+   "baseTrackIndex": 1,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/Laguna_Seca/circuit/high/seca_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "LAGUNA SECA",
+   "sourceSplineSha": "cuit/seca.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 2,
+   "name": "DUBAI AUTODROME CLUB",
+   "map": "Dubai_Autodrome",
+   "layout": "club",
+   "scene": "processed/high/dubai.fbx",
+   "sceneBytes": 37323744,
+   "baseTrackIndex": 2,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/Dubai_Autodrome/club/high/dubai_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "DUBAI AUTODROME CLUB",
+   "sourceSplineSha": "lub/dubai.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 3,
+   "name": "BATHURST",
+   "map": "Bathurst",
+   "layout": "circuit",
+   "scene": "processed/high/bathurst.fbx",
+   "sceneBytes": 59506608,
+   "baseTrackIndex": 3,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/Bathurst/circuit/high/bathurst_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "BATHURST",
+   "sourceSplineSha": "/bathurst.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 4,
+   "name": "INTERLAGOS",
+   "map": "brazil",
+   "layout": "circuit",
+   "scene": "processed/high/brazil.fbx",
+   "sceneBytes": 39722496,
+   "baseTrackIndex": 4,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/brazil/circuit/high/brazil_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "INTERLAGOS",
+   "sourceSplineSha": "it/brazil.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 5,
+   "name": "CIRCUIT DE CATALUNYA",
+   "map": "Circuit_de_Catalunya",
+   "layout": "gp",
+   "scene": "processed/high/catalunya.fbx",
+   "sceneBytes": 46205760,
+   "baseTrackIndex": 5,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/Circuit_de_Catalunya/gp/high/catalunya_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "CIRCUIT DE CATALUNYA",
+   "sourceSplineSha": "catalunya.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 6,
+   "name": "CIRCUIT OF THE AMERICAS",
+   "map": "cota",
+   "layout": "gp",
+   "scene": "processed/high/cota.fbx",
+   "sceneBytes": 23201632,
+   "baseTrackIndex": 6,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/cota/gp/high/cota_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "CIRCUIT OF THE AMERICAS",
+   "sourceSplineSha": "a/gp/cota.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 7,
+   "name": "DAYTONA SPEEDWAY",
+   "map": "Daytona",
+   "layout": "speedway",
+   "scene": "processed/high/daytona.fbx",
+   "sceneBytes": 42005952,
+   "baseTrackIndex": 7,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/Daytona/speedway/high/daytona_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "DAYTONA SPEEDWAY",
+   "sourceSplineSha": "y/daytona.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 8,
+   "name": "HOCKENHEIM",
+   "map": "Hockenheim",
+   "layout": "gp",
+   "scene": "processed/high/hockenheim.fbx",
+   "sceneBytes": 40951872,
+   "baseTrackIndex": 8,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/Hockenheim/gp/high/hockenheim_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "HOCKENHEIM",
+   "sourceSplineSha": "ockenheim.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 9,
+   "name": "HONG KONG",
+   "map": "Hongkong",
+   "layout": "circuit",
+   "scene": "processed/high/hongkong.fbx",
+   "sceneBytes": 21971616,
+   "baseTrackIndex": 9,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/Hongkong/circuit/high/hongkong_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "HONG KONG",
+   "sourceSplineSha": "/hongkong.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 10,
+   "name": "INDIANAPOLIS SPEEDWAY",
+   "map": "Indianapolis",
+   "layout": "speedway",
+   "scene": "processed/high/indianapolis.fbx",
+   "sceneBytes": 26140208,
+   "baseTrackIndex": 10,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/Indianapolis/speedway/high/indianapolis_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "INDIANAPOLIS SPEEDWAY",
+   "sourceSplineSha": "ianapolis.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 11,
+   "name": "LEIPZIG KLEINERKURS",
+   "map": "Leipzig",
+   "layout": "kleinerkurs",
+   "scene": "processed/high/leipzig.fbx",
+   "sceneBytes": 29634384,
+   "baseTrackIndex": 11,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/Leipzig/kleinerkurs/high/leipzig_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "LEIPZIG KLEINERKURS",
+   "sourceSplineSha": "s/leipzig.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 12,
+   "name": "LEMANS",
+   "map": "lemans",
+   "layout": "circuit",
+   "scene": "processed/high/lemans.fbx",
+   "sceneBytes": 137784624,
+   "baseTrackIndex": 12,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/lemans/circuit/high/lemans_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "LEMANS",
+   "sourceSplineSha": "it/lemans.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 13,
+   "name": "LIME ROCK",
+   "map": "limerock",
+   "layout": "circuit",
+   "scene": "processed/high/limerock.fbx",
+   "sceneBytes": 21071840,
+   "baseTrackIndex": 13,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/limerock/circuit/high/limerock_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "LIME ROCK",
+   "sourceSplineSha": "/limerock.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 14,
+   "name": "MELBOURNE",
+   "map": "Melbourne",
+   "layout": "circuit",
+   "scene": "processed/high/melbourne.fbx",
+   "sceneBytes": 42693136,
+   "baseTrackIndex": 14,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/Melbourne/circuit/high/melbourne_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "MELBOURNE",
+   "sourceSplineSha": "melbourne.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 15,
+   "name": "MONACO",
+   "map": "monaco",
+   "layout": "gp",
+   "scene": "processed/high/monaco.fbx",
+   "sceneBytes": 30958576,
+   "baseTrackIndex": 15,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/monaco/gp/high/monaco_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "MONACO",
+   "sourceSplineSha": "gp/monaco.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 16,
+   "name": "MONZA",
+   "map": "Monza",
+   "layout": "circuit",
+   "scene": "processed/high/monza.fbx",
+   "sceneBytes": 52879968,
+   "baseTrackIndex": 16,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/Monza/circuit/high/monza_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "MONZA",
+   "sourceSplineSha": "uit/monza.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 17,
+   "name": "NEW YORK",
+   "map": "NewYork",
+   "layout": "circuit",
+   "scene": "processed/high/newyork.fbx",
+   "sceneBytes": 23080976,
+   "baseTrackIndex": 17,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/NewYork/circuit/high/newyork_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "NEW YORK",
+   "sourceSplineSha": "t/newyork.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 18,
+   "name": "NEW YORK 2021",
+   "map": "NewYork2021",
+   "layout": "circuit",
+   "scene": "processed/high/newyork2021.fbx",
+   "sceneBytes": 24893056,
+   "baseTrackIndex": 18,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/NewYork2021/circuit/high/newyork2021_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "NEW YORK 2021",
+   "sourceSplineSha": "wyork2021.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 19,
+   "name": "N\u00dcRBURGRING",
+   "map": "Nuerburgring",
+   "layout": "gp",
+   "scene": "processed/high/nuerburgring.fbx",
+   "sceneBytes": 44909248,
+   "baseTrackIndex": 19,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/Nuerburgring/gp/high/nuerburgring_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "N\u00dcRBURGRING",
+   "sourceSplineSha": "rburgring.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 20,
+   "name": "BERLIN FORMULAE",
+   "map": "r3Berlin",
+   "layout": "formulae",
+   "scene": "processed/high/r3berlin.fbx",
+   "sceneBytes": 16083616,
+   "baseTrackIndex": 20,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/r3Berlin/formulae/high/r3berlin_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "BERLIN FORMULAE",
+   "sourceSplineSha": "/r3berlin.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 21,
+   "name": "RED BULL RING",
+   "map": "redbull",
+   "layout": "gp",
+   "scene": "processed/high/redbull.fbx",
+   "sceneBytes": 33858448,
+   "baseTrackIndex": 21,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/redbull/gp/high/redbull_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "RED BULL RING",
+   "sourceSplineSha": "p/redbull.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 22,
+   "name": "RICHMOND",
+   "map": "Richmond",
+   "layout": "circuit",
+   "scene": "processed/high/richmond.fbx",
+   "sceneBytes": 19128576,
+   "baseTrackIndex": 22,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/Richmond/circuit/high/richmond_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "RICHMOND",
+   "sourceSplineSha": "/richmond.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 23,
+   "name": "SEBRING",
+   "map": "sebring",
+   "layout": "circuit",
+   "scene": "processed/high/sebring.fbx",
+   "sceneBytes": 47902832,
+   "baseTrackIndex": 23,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/sebring/circuit/high/sebring_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "SEBRING",
+   "sourceSplineSha": "t/sebring.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 24,
+   "name": "SILVERSTONE",
+   "map": "Silverstone",
+   "layout": "gp",
+   "scene": "processed/high/silverstone.fbx",
+   "sceneBytes": 45065424,
+   "baseTrackIndex": 24,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/Silverstone/gp/high/silverstone_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "SILVERSTONE",
+   "sourceSplineSha": "lverstone.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 25,
+   "name": "SINGAPORE",
+   "map": "singapore",
+   "layout": "circuit",
+   "scene": "processed/high/singapore.fbx",
+   "sceneBytes": 46329952,
+   "baseTrackIndex": 25,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/singapore/circuit/high/singapore_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "SINGAPORE",
+   "sourceSplineSha": "singapore.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 26,
+   "name": "SPA",
+   "map": "spa",
+   "layout": "circuit",
+   "scene": "processed/high/spa.fbx",
+   "sceneBytes": 53196544,
+   "baseTrackIndex": 26,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/spa/circuit/high/spa_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "SPA",
+   "sourceSplineSha": "rcuit/spa.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 27,
+   "name": "SUZUKA",
+   "map": "Suzuka",
+   "layout": "gp",
+   "scene": "processed/high/suzuka.fbx",
+   "sceneBytes": 43562976,
+   "baseTrackIndex": 27,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/Suzuka/gp/high/suzuka_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "SUZUKA",
+   "sourceSplineSha": "gp/suzuka.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 28,
+   "name": "YAS MARINA",
+   "map": "YasMarina",
+   "layout": "gp",
+   "scene": "processed/high/yasmarina.fbx",
+   "sceneBytes": 54031728,
+   "baseTrackIndex": 28,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/YasMarina/gp/high/yasmarina_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "YAS MARINA",
+   "sourceSplineSha": "yasmarina.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 29,
+   "name": "CIRCUIT DE CATALUNYA CLUB",
+   "map": "Circuit_de_Catalunya",
+   "layout": "club",
+   "scene": "processed/high/catalunya.fbx",
+   "sceneBytes": 46205760,
+   "baseTrackIndex": 5,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/Circuit_de_Catalunya/club/high/catalunya_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "CIRCUIT DE CATALUNYA CLUB",
+   "sourceSplineSha": "catalunya.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 30,
+   "name": "CIRCUIT DE CATALUNYA NATIONAL",
+   "map": "Circuit_de_Catalunya",
+   "layout": "national",
+   "scene": "processed/high/catalunya.fbx",
+   "sceneBytes": 46205760,
+   "baseTrackIndex": 5,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/Circuit_de_Catalunya/national/high/catalunya_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "CIRCUIT DE CATALUNYA NATIONAL",
+   "sourceSplineSha": "catalunya.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 31,
+   "name": "DAYTONA MOTOGP",
+   "map": "Daytona",
+   "layout": "motogp",
+   "scene": "processed/high/daytona.fbx",
+   "sceneBytes": 42005952,
+   "baseTrackIndex": 7,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/Daytona/motogp/high/daytona_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "DAYTONA MOTOGP",
+   "sourceSplineSha": "p/daytona.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 32,
+   "name": "DAYTONA ROADCOURSE",
+   "map": "Daytona",
+   "layout": "roadcourse",
+   "scene": "processed/high/daytona.fbx",
+   "sceneBytes": 42005952,
+   "baseTrackIndex": 7,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/Daytona/roadcourse/high/daytona_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "DAYTONA ROADCOURSE",
+   "sourceSplineSha": "e/daytona.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 33,
+   "name": "DUBAI AUTODROME GP",
+   "map": "Dubai_Autodrome",
+   "layout": "gp",
+   "scene": "processed/high/dubai.fbx",
+   "sceneBytes": 37323744,
+   "baseTrackIndex": 2,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/Dubai_Autodrome/gp/high/dubai_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "DUBAI AUTODROME GP",
+   "sourceSplineSha": "/gp/dubai.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 34,
+   "name": "DUBAI AUTODROME HILL",
+   "map": "Dubai_Autodrome",
+   "layout": "hill",
+   "scene": "processed/high/dubai.fbx",
+   "sceneBytes": 37323744,
+   "baseTrackIndex": 2,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/Dubai_Autodrome/hill/high/dubai_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "DUBAI AUTODROME HILL",
+   "sourceSplineSha": "ill/dubai.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 35,
+   "name": "DUBAI AUTODROME INTERNATIONAL",
+   "map": "Dubai_Autodrome",
+   "layout": "international",
+   "scene": "processed/high/dubai.fbx",
+   "sceneBytes": 37323744,
+   "baseTrackIndex": 2,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/Dubai_Autodrome/international/high/dubai_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "DUBAI AUTODROME INTERNATIONAL",
+   "sourceSplineSha": "nal/dubai.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 36,
+   "name": "DUBAI AUTODROME NATIONAL",
+   "map": "Dubai_Autodrome",
+   "layout": "national",
+   "scene": "processed/high/dubai.fbx",
+   "sceneBytes": 37323744,
+   "baseTrackIndex": 2,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/Dubai_Autodrome/national/high/dubai_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "DUBAI AUTODROME NATIONAL",
+   "sourceSplineSha": "nal/dubai.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 37,
+   "name": "DUBAI AUTODROME OVAL",
+   "map": "Dubai_Autodrome",
+   "layout": "oval",
+   "scene": "processed/high/dubai.fbx",
+   "sceneBytes": 37323744,
+   "baseTrackIndex": 2,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/Dubai_Autodrome/oval/high/dubai_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "DUBAI AUTODROME OVAL",
+   "sourceSplineSha": "val/dubai.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 38,
+   "name": "HOCKENHEIM NATIONAL",
+   "map": "Hockenheim",
+   "layout": "national",
+   "scene": "processed/high/hockenheim.fbx",
+   "sceneBytes": 40951872,
+   "baseTrackIndex": 8,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/Hockenheim/national/high/hockenheim_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "HOCKENHEIM NATIONAL",
+   "sourceSplineSha": "ockenheim.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 39,
+   "name": "HOCKENHEIM SHORT",
+   "map": "Hockenheim",
+   "layout": "short",
+   "scene": "processed/high/hockenheim.fbx",
+   "sceneBytes": 40951872,
+   "baseTrackIndex": 8,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/Hockenheim/short/high/hockenheim_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "HOCKENHEIM SHORT",
+   "sourceSplineSha": "ockenheim.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 40,
+   "name": "INDIANAPOLIS ROADCOURSE",
+   "map": "Indianapolis",
+   "layout": "roadcourse",
+   "scene": "processed/high/indianapolis.fbx",
+   "sceneBytes": 26140208,
+   "baseTrackIndex": 10,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/Indianapolis/roadcourse/high/indianapolis_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "INDIANAPOLIS ROADCOURSE",
+   "sourceSplineSha": "ianapolis.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 41,
+   "name": "LEIPZIG DYNAMISCHKURS",
+   "map": "Leipzig",
+   "layout": "dynamischkurs",
+   "scene": "processed/high/leipzig.fbx",
+   "sceneBytes": 29634384,
+   "baseTrackIndex": 11,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/Leipzig/dynamischkurs/high/leipzig_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "LEIPZIG DYNAMISCHKURS",
+   "sourceSplineSha": "s/leipzig.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 42,
+   "name": "LEIPZIG GROBERKURS",
+   "map": "Leipzig",
+   "layout": "groberkurs",
+   "scene": "processed/high/leipzig.fbx",
+   "sceneBytes": 29634384,
+   "baseTrackIndex": 11,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/Leipzig/groberkurs/high/leipzig_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "LEIPZIG GROBERKURS",
+   "sourceSplineSha": "s/leipzig.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 43,
+   "name": "MONZA JNR",
+   "map": "Monza",
+   "layout": "jnr",
+   "scene": "processed/high/monza.fbx",
+   "sceneBytes": 52879968,
+   "baseTrackIndex": 16,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/Monza/jnr/high/monza_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "MONZA JNR",
+   "sourceSplineSha": "jnr/monza.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 44,
+   "name": "NUERBURGRING MULLENBACH",
+   "map": "Nuerburgring",
+   "layout": "mullenbach",
+   "scene": "processed/high/nuerburgring.fbx",
+   "sceneBytes": 44909248,
+   "baseTrackIndex": 19,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/Nuerburgring/mullenbach/high/nuerburgring_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "NUERBURGRING MULLENBACH",
+   "sourceSplineSha": "rburgring.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 45,
+   "name": "NUERBURGRING SPRINT",
+   "map": "Nuerburgring",
+   "layout": "sprint",
+   "scene": "processed/high/nuerburgring.fbx",
+   "sceneBytes": 44909248,
+   "baseTrackIndex": 19,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/Nuerburgring/sprint/high/nuerburgring_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "NUERBURGRING SPRINT",
+   "sourceSplineSha": "rburgring.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 46,
+   "name": "SILVERSTONE BRIDGE",
+   "map": "Silverstone",
+   "layout": "bridge",
+   "scene": "processed/high/silverstone.fbx",
+   "sceneBytes": 45065424,
+   "baseTrackIndex": 24,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/Silverstone/bridge/high/silverstone_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "SILVERSTONE BRIDGE",
+   "sourceSplineSha": "lverstone.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 47,
+   "name": "SILVERSTONE NATIONAL",
+   "map": "Silverstone",
+   "layout": "national",
+   "scene": "processed/high/silverstone.fbx",
+   "sceneBytes": 45065424,
+   "baseTrackIndex": 24,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/Silverstone/national/high/silverstone_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "SILVERSTONE NATIONAL",
+   "sourceSplineSha": "lverstone.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 48,
+   "name": "SILVERSTONE SOUTHERN",
+   "map": "Silverstone",
+   "layout": "southern",
+   "scene": "processed/high/silverstone.fbx",
+   "sceneBytes": 45065424,
+   "baseTrackIndex": 24,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/Silverstone/southern/high/silverstone_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "SILVERSTONE SOUTHERN",
+   "sourceSplineSha": "lverstone.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 49,
+   "name": "SUZUKA EAST",
+   "map": "Suzuka",
+   "layout": "east",
+   "scene": "processed/high/suzuka.fbx",
+   "sceneBytes": 43562976,
+   "baseTrackIndex": 27,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/Suzuka/east/high/suzuka_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "SUZUKA EAST",
+   "sourceSplineSha": "st/suzuka.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 50,
+   "name": "SUZUKA WEST",
+   "map": "Suzuka",
+   "layout": "west",
+   "scene": "processed/high/suzuka.fbx",
+   "sceneBytes": 43562976,
+   "baseTrackIndex": 27,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/Suzuka/west/high/suzuka_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "SUZUKA WEST",
+   "sourceSplineSha": "st/suzuka.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 51,
+   "name": "YASMARINA TUTE",
+   "map": "YasMarina",
+   "layout": "tute",
+   "scene": "processed/high/yasmarina.fbx",
+   "sceneBytes": 54031728,
+   "baseTrackIndex": 28,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/YasMarina/tute/high/yasmarina_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "YASMARINA TUTE",
+   "sourceSplineSha": "yasmarina.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 52,
+   "name": "COTA CLUB",
+   "map": "cota",
+   "layout": "club",
+   "scene": "processed/high/cota.fbx",
+   "sceneBytes": 23201632,
+   "baseTrackIndex": 6,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/cota/club/high/cota_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "COTA CLUB",
+   "sourceSplineSha": "club/cota.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 53,
+   "name": "COTA SHORT",
+   "map": "cota",
+   "layout": "short",
+   "scene": "processed/high/cota.fbx",
+   "sceneBytes": 23201632,
+   "baseTrackIndex": 6,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/cota/short/high/cota_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "COTA SHORT",
+   "sourceSplineSha": "hort/cota.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 54,
+   "name": "LEMANS SARTHE",
+   "map": "lemans",
+   "layout": "sarthe",
+   "scene": "processed/high/lemans.fbx",
+   "sceneBytes": 137784624,
+   "baseTrackIndex": 12,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/lemans/sarthe/high/lemans_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "LEMANS SARTHE",
+   "sourceSplineSha": "he/lemans.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 55,
+   "name": "LIMEROCK SOUTH",
+   "map": "limerock",
+   "layout": "south",
+   "scene": "processed/high/limerock.fbx",
+   "sceneBytes": 21071840,
+   "baseTrackIndex": 13,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/limerock/south/high/limerock_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "LIMEROCK SOUTH",
+   "sourceSplineSha": "/limerock.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 56,
+   "name": "LIMEROCK WEST",
+   "map": "limerock",
+   "layout": "west",
+   "scene": "processed/high/limerock.fbx",
+   "sceneBytes": 21071840,
+   "baseTrackIndex": 13,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/limerock/west/high/limerock_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "LIMEROCK WEST",
+   "sourceSplineSha": "/limerock.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 57,
+   "name": "REDBULL SOUTH",
+   "map": "redbull",
+   "layout": "south",
+   "scene": "processed/high/redbull.fbx",
+   "sceneBytes": 33858448,
+   "baseTrackIndex": 21,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/redbull/south/high/redbull_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "REDBULL SOUTH",
+   "sourceSplineSha": "h/redbull.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 58,
+   "name": "SEBRING JOHNSON",
+   "map": "sebring",
+   "layout": "johnson",
+   "scene": "processed/high/sebring.fbx",
+   "sceneBytes": 47902832,
+   "baseTrackIndex": 23,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/sebring/johnson/high/sebring_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "SEBRING JOHNSON",
+   "sourceSplineSha": "n/sebring.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  },
+  {
+   "id": 59,
+   "name": "SEBRING SCHOOL",
+   "map": "sebring",
+   "layout": "school",
+   "scene": "processed/high/sebring.fbx",
+   "sceneBytes": 47902832,
+   "baseTrackIndex": 23,
+   "variationPaths": [
+    {
+     "path": "Assets/RealRacing/Source/sebring/school/high/sebring_variation.fbx",
+     "present": true
+    }
+   ],
+   "routeName": "SEBRING SCHOOL",
+   "sourceSplineSha": "l/sebring.spline",
+   "hasAiPoints": true,
+   "hasCentrePoints": true
+  }
+ ]
+}

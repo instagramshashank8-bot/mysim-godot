@@ -1,0 +1,152 @@
+{
+ "part": 72,
+ "meshes": 348,
+ "sheetsReviewed": 14,
+ "itemsFlagged": 19,
+ "flagTypes": {
+  "blackcard": 19
+ },
+ "overviewsAfter": 23644,
+ "accepted": 0,
+ "basis": "quantitative tile metrics from rewrap 41618971031; metadata mapping pending; overview only, no quality acceptance",
+ "flaggedItems": {
+  "32": {
+   "flags": [
+    "blackcard"
+   ],
+   "object": "arc_nuerburgring_petrol_station_00_mm2__program_0",
+   "sha": "06ef4b2e"
+  },
+  "50": {
+   "flags": [
+    "blackcard"
+   ],
+   "object": "billboarded_corona_yellow_062__program_10",
+   "sha": "9c9e7b95"
+  },
+  "110": {
+   "flags": [
+    "blackcard"
+   ],
+   "object": "billboarded_corona_grandstand_373__program_0",
+   "sha": "44ac29ed"
+  },
+  "111": {
+   "flags": [
+    "blackcard"
+   ],
+   "object": "billboarded_corona_inner_c_165__program_1",
+   "sha": "ceb6965d"
+  },
+  "113": {
+   "flags": [
+    "blackcard"
+   ],
+   "object": "billboarded_corona_inner_c_030__program_3",
+   "sha": "5b15b43f"
+  },
+  "115": {
+   "flags": [
+    "blackcard"
+   ],
+   "object": "billboarded_corona_grandstand_352__program_5",
+   "sha": "75be6090"
+  },
+  "117": {
+   "flags": [
+    "blackcard"
+   ],
+   "object": "billboarded_corona_outer_c_166__program_7",
+   "sha": "5cb25553"
+  },
+  "118": {
+   "flags": [
+    "blackcard"
+   ],
+   "object": "billboarded_corona_outer_h_004__program_8",
+   "sha": "1f225160"
+  },
+  "119": {
+   "flags": [
+    "blackcard"
+   ],
+   "object": "billboarded_corona_pitlight_a_224__program_9",
+   "sha": "fd26e16d"
+  },
+  "257": {
+   "flags": [
+    "blackcard"
+   ],
+   "object": "billboarded_corona_yellow_037__program_0",
+   "sha": "9fb03971"
+  },
+  "267": {
+   "flags": [
+    "blackcard"
+   ],
+   "object": "billboarded_org_tree_x_oak_a_type_d_094__program_11",
+   "sha": "9c2af7ee"
+  },
+  "270": {
+   "flags": [
+    "blackcard"
+   ],
+   "object": "billboarded_corona_grandstand_698__program_2",
+   "sha": "3d6c3f1f"
+  },
+  "271": {
+   "flags": [
+    "blackcard"
+   ],
+   "object": "billboarded_corona_pitlight_b1_032__program_3",
+   "sha": "09b9ff52"
+  },
+  "272": {
+   "flags": [
+    "blackcard"
+   ],
+   "object": "billboarded_corona_inner_c_059__program_4",
+   "sha": "db2afec9"
+  },
+  "273": {
+   "flags": [
+    "blackcard"
+   ],
+   "object": "billboarded_corona_pitlight_a_364__program_5",
+   "sha": "3f5e276b"
+  },
+  "274": {
+   "flags": [
+    "blackcard"
+   ],
+   "object": "billboarded_corona_grandstand_276__program_6",
+   "sha": "75be6090"
+  },
+  "277": {
+   "flags": [
+    "blackcard"
+   ],
+   "object": "billboarded_corona_pitlight_a_147__program_9",
+   "sha": "3f5e276b"
+  },
+  "278": {
+   "flags": [
+    "blackcard"
+   ],
+   "object": "billboarded_corona_outer_c_093__program_10",
+   "sha": "e1660323"
+  },
+  "279": {
+   "flags": [
+    "blackcard"
+   ],
+   "object": "billboarded_corona_outer_b_028__program_11",
+   "sha": "63154298"
+  }
+ },
+ "metadataMapped": true,
+ "mappingBasis": "global tile index = flat geometry.json order; item = tile//4",
+ "flaggedTileCount": 19,
+ "review_class_note": "Quantitative tile metrics only; NO manual image inspection; does not count toward manual review coverage",
+ "review_class": "machine_screened_only"
+}

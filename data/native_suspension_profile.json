@@ -1,7 +1,49 @@
 {
-  "scope": "Authored experimental suspension setup, not measured manufacturer calibration. Original source mesh and tyre dimensions preserved. Reserve includes the explicit CI CCD penetration allowance10mm plus5mm penetration slop; dynamic clearance still requires actual contact/race evidence.",
+  "scope": "EXPERIMENTAL, UNMEASURED CALIBRATION VALUES - pending the RIDE-A/RIDE-B dispatch pair; nothing here is validated physics and the 35 mm minimumStaticClearance in particular is an authored working hypothesis, not a measured or manufacturer-derived number. Authored experimental suspension setup only. Original source mesh and tyre dimensions preserved. Reserve includes the explicit CI CCD penetration allowance10mm plus5mm penetration slop; dynamic clearance still requires actual contact/race evidence.",
   "minimumStaticClearance": 0.035,
+  "minimumStaticClearance_status": "EXPERIMENTAL - held at 0.035 only until the RIDE-A/RIDE-B evidence lands; adoption into defaults is a coordinator decision",
   "maximumPreload": 0.12,
   "bumpStopReserve": 0.02,
-  "bumpStopRateMultiplier": 12
+  "bumpStopRateMultiplier": 12,
+  "geometryProposal": {
+    "status": "PROPOSAL - data block is inert to the current code; the corresponding one-line hull-bake change is coordinator-owned and proposed verbatim in agents/physics-gameplay-turn7.md",
+    "experimentalTarget": "static chassis-floor clearance 0.03-0.05 m for the Formula class, unless source evidence says otherwise",
+    "measured_facts_run_41848766195_native_hull_summary": {
+      "car16": {
+        "chassisFloorY": -0.6,
+        "wheelCentresY": -0.31,
+        "recoveredRadius": 0.2996,
+        "tyreBottomY": -0.6099,
+        "staticStanceWithoutRideMode_m": 0.0099,
+        "lowestHullPart": "LOD_A_WHEELGUARD_FRONT_LEFT/RIGHT",
+        "lowestHullPartY": -0.81,
+        "clearanceAsMeasuredByGate": -0.2001,
+        "requiredPreload": 0.2351,
+        "preloadCeiling": 0.12,
+        "verdict": "ride-by-preload is impossible while wheel guards are rigid hulls; the guards hang 0.2 m below the tyre support envelope"
+      },
+      "car0": {
+        "chassisFloorY": -0.6,
+        "wheelCentresY": -0.349,
+        "recoveredRadius": 0.3007,
+        "tyreBottomY": -0.6497,
+        "staticStanceWithoutRideMode_m": 0.0497,
+        "lowestHullPart": "LOD_A_BRAKE_CALIPER_FRONT_LEFT/RIGHT (+rear at -0.75)",
+        "lowestHullPartY": -0.79,
+        "clearanceAsMeasuredByGate": -0.1403,
+        "requiredPreload": 0.1751,
+        "preloadCeiling": 0.12,
+        "verdict": "same defect class: brake calipers are candidate wheel-assembly parts yet bake as body-fixed hulls below the tyre plane"
+      }
+    },
+    "stanceIdentity": "static floor height above road = recoveredRadius + preload - (wheelCentreY - floorPartY); rest length, static sag and mount offsets cancel out of this identity, so NO rest-length/sag/anchor tuning inside the spring state can restore the stance while the hull datum includes parts below the tyre support envelope",
+    "firstPatch": "exclude LOD_A_WHEELGUARD* and (BRAKE_)CALIPER* wheel-assembly parts from the rigid body hull bake (coordinator-owned NativeCarColliders.WheelTemplate regex one-liner, proposed verbatim in the turn-7 report); source meshes, UVs and visual assembly untouched; hull-exclusion blast radius documented",
+    "then_expectedRideGate": {
+      "car16_requiredPreload": 0.0251,
+      "car0_requiredPreload": 0.0,
+      "car0_note": "post-exclusion static stance 0.0497 m is already inside the 30-50 mm class, so the gate applies no preload (the clearance value is a floor/minimum, not an exact stance)",
+      "both_below_ceiling": true
+    },
+    "verificationChain": "DV core after the bake change must free the frozen car (DV_TRACE: thr=1 with spd rising; 4-wheel support; the 41834771421/41840755243 signature bodyContacts=2 tyreContacts=1 gone) AND the nine-target battery must hold its bands; then the RIDE-A/RIDE-B pair per the turn-5/6 rubric"
+  }
 }

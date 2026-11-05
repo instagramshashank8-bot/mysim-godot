@@ -1,0 +1,16 @@
+{
+  "requested_by": "Mistral Vibe sole session worker",
+  "date": "2026-11-03",
+  "repo": "instagramshashank8-bot/mysim-godot",
+  "branch": "codex/repair-20261029",
+  "head": "bb4c9f8",
+  "reports": ["BATCH_REPORT.md"],
+  "review_points": [
+    {"id": "auth-403", "claim": "403 was shell-ordering (GH_TOKEN unset before dispatch), not a permissions gap; bot admin:true; no permission change requested", "evidence": "gh api user = instagramshashank8-bot under exported owner token; collaborators/.../permission = admin"},
+    {"id": "a2c-naming", "claim": "AlphaToCoverageAndToOne = alpha-to-coverage + alpha-to-one over 4x MSAA; not alpha hashing", "evidence": "GodotSharp 4.7.2 XML doc entries; project.godot msaa_3d=3"},
+    {"id": "machine-screen", "claim": "MESH000{72,73} are machine_screened_only (quant tile metrics; no manual image inspection; excluded from manual coverage)", "evidence": "review_class fields + explicit notes in both JSONs"},
+    {"id": "settings-migration", "claim": "Only an unloadable settings file resets; versionless legacy file preserved and migrated in place; foreign versions kept", "evidence": "src/Settings.cs migration block"}
+  ],
+  "live_run": {"id": 41645765696, "depth": "fence_a2c_review", "head": "bb4c9f8"},
+  "standards": "No local engine compute; originals/history preserved; secrets never printed"
+}

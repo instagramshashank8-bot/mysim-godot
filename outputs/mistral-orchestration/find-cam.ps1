@@ -1,0 +1,1 @@
+Select-String -Path C:/Users/shash/Documents/MySimGodot/src/DriveController.cs -Pattern 'chaseOffset','Fov','camYaw','LookAt' | ForEach-Object { Write-Output ("" + $_.LineNumber + ": " + $_.Line.Trim().Substring(0,[Math]::Min(150,$_.Line.Trim().Length))) }

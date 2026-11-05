@@ -1,0 +1,1 @@
+Select-String -Path C:/Users/shash/Documents/MySimGodot/.github/workflows/game-review.yml -Pattern 'FENCE_FILTER_REVIEW','SETTINGS','SHARD' | ForEach-Object { Write-Output ("" + $_.LineNumber + ": " + $_.Line.Trim().Substring(0,[Math]::Min(150,$_.Line.Trim().Length))) }

@@ -4,7 +4,7 @@ namespace MySim {
 // Classification comes from the race model; no invented time gaps or scripted positions.
 public partial class RaceStandingsPanel : PanelContainer {
  public Race Race;public Vehicle Player;VBoxContainer rows;float elapsed;
- public override void _Ready(){Name="RaceStandings";Position=new Vector2(20,120);CustomMinimumSize=new Vector2(255,0);MouseFilter=MouseFilterEnum.Ignore;Theme=MySimTheme.Build();rows=new VBoxContainer {Name="StandingsRows"};rows.AddThemeConstantOverride("separation",3);AddChild(rows);Refresh();}
+ public override void _Ready(){Name="RaceStandings";Position=new Vector2(12,80);CustomMinimumSize=new Vector2(255,0);MouseFilter=MouseFilterEnum.Ignore;Theme=MySimTheme.Build();rows=new VBoxContainer {Name="StandingsRows"};rows.AddThemeConstantOverride("separation",3);AddChild(rows);Refresh();}
  public override void _Process(double delta){elapsed+=(float)delta;if(elapsed<.2f)return;elapsed=0;Refresh();}
  public void Refresh(){if(rows==null)return;foreach(var n in rows.GetChildren()){rows.RemoveChild(n);n.QueueFree();}if(Race==null)return;
   var title=new Label {Text="CLASSIFICATION"};title.AddThemeFontSizeOverride("font_size",13);rows.AddChild(title);var order=Race.Standings();

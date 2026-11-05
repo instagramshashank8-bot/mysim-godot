@@ -1,0 +1,12 @@
+{
+  "cases": [
+    {
+      "car": 16,
+      "track": 0,
+      "weather": 0,
+      "compound": 1,
+      "drivingValidation": ["impact_wall_recovery"]
+    }
+  ],
+  "scope": "Controlled barrier contact and recovery validation on track0. Dispatch with native_damage=true so the native impact/damage system is active; separate manifest so damage stays disabled for every non-impact validation case. Requires the dedicated driving_validation runner depth."
+}

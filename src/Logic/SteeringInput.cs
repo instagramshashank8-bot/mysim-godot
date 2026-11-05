@@ -10,7 +10,10 @@ public sealed class SteeringInput {
   requested=MathUtil.Finite(requested)?MathUtil.Clamp(requested,-1,1):0;
   if(!MathUtil.Finite(dt)||dt<=0)return Command;
   if(analog){Command=requested;return Command;}
-  float rate=Math.Abs(requested)>.01f?2.6f:5f;
+  // Progressive keyboard attack measured at 2.6/s attenuated a 2 Hz correction sine to 41 percent
+  // (turn-8 harness); 5.0/s keeps the ramp progressive (~0.2 s to full command) and restores most
+  // of the mid-frequency authority. Release and direction-reversal stay at 5/s as measured.
+  float rate=Math.Abs(requested)>.01f?5f:5f;
   if(Math.Sign(requested)!=Math.Sign(Command)&&Math.Abs(requested)>.01f)rate=5f;
   Command+=MathUtil.Clamp(requested-Command,-rate*dt,rate*dt);return Command;
  }

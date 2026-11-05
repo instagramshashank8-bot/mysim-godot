@@ -1,0 +1,1 @@
+Select-String -Path C:/Users/shash/Documents/MySimGodot/tools/cloud_game_audit.py -Pattern 'SETTINGS_PERSIST','settings-persist','F1_PAINT_REVIEW','AUDITCARS' | ForEach-Object { Write-Output ("" + $_.LineNumber + ": " + $_.Line.Trim().Substring(0,[Math]::Min(110,$_.Line.Trim().Length))) }

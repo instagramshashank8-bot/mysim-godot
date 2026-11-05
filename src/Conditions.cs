@@ -23,6 +23,7 @@ public static class Conditions {
   var profile=Profiles;profile=catalogue.RootElement.GetProperty("surfaceVisual");
   foreach(var key in new[]{"wet_darkening","wet_roughness","wet_specular"})material.SetShaderParameter(key,profile.GetProperty(key).GetSingle());
  }
+ static float EnvFloat(string key,float fallback)=>float.TryParse(System.Environment.GetEnvironmentVariable(key),System.Globalization.NumberStyles.Float,System.Globalization.CultureInfo.InvariantCulture,out float parsed)?parsed:fallback;
  public static void Apply(Godot.Environment env, DirectionalLight3D sun, ProceduralSkyMaterial sky) {
   RenderingServer.GlobalShaderParameterSet("mysim_surface_water",WetnessValue);
   int tod = Tod, wet = Wet;
@@ -31,6 +32,13 @@ public static class Conditions {
   var rotation=Lighting.GetProperty("rotation");Vector3 rot=new Vector3(rotation[0].GetSingle(),rotation[1].GetSingle(),rotation[2].GetSingle());
   float fogD = 0.00012f;
   sunE*=Value("sunScale");fogD=Value("fogDensity");
+  // Night-only, independently flag-gated candidates (default unset = exact current behaviour).
+  // Ambient lift keeps the profile's night colour (bluish, not white) and only raises its energy;
+  // exposure applies a measured multiplier to the profile's tonemap exposure. Data file untouched.
+  if(IsNight){
+   float ambientLift=EnvFloat("MYSIM_NIGHT_AMBIENT_LIFT",1f),exposureGain=EnvFloat("MYSIM_NIGHT_EXPOSURE",1f);
+   if(ambientLift!=1f||exposureGain!=1f){ambE*=ambientLift;expo*=exposureGain;GD.Print("NIGHT_LIFT ambientEnergy=",ambE," exposure=",expo," ambientLift=",ambientLift," exposureGain=",exposureGain);}
+  }
   if(wet>0){float blend=IsNight?.2f:.7f;top=top.Lerp(Tint("skyTint"),blend);hor=hor.Lerp(Tint("horizonTint"),blend);fog=fog.Lerp(Tint("horizonTint"),blend);}
   env.AmbientLightColor = amb; env.AmbientLightEnergy = ambE; env.FogLightColor = fog; env.FogDensity = fogD; env.TonemapExposure = expo;
   sun.RotationDegrees = rot; sun.LightColor = sunCol; sun.LightEnergy = sunE;
