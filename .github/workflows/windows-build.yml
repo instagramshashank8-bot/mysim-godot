@@ -31,6 +31,8 @@ jobs:
         run: dotnet build -v quiet
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
+      - name: Validate Python orchestration before asset downloads
+        run: python -m py_compile tools/cloud_game_audit.py tools/cloud_windows_persist.py tools/cloud_windows_smoke.py tools/cloud_windows_userpath.py tools/cloud_windows_render.py
       - name: Restore source assets
         env:
           GH_TOKEN: ${{ github.token }}

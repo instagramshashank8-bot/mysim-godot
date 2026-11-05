@@ -238,3 +238,83 @@ Measured (run <id>, <backend>, <date>):
 - separation observation (descriptive only): <e.g. "guard durations 3-9x shorter than panel on every paired cluster">
 Promoted bounds: <none yet | bound + source runs + signer>
 ```
+
+## 13. Two-instance LAN test (owner-run) — reading rules
+
+**Artifact:** both console transcripts of the scripted two-instance run (`agents/lan-two-instance-test.md` §1 commands; exit codes recorded). This is the LAN plan's phase-1/2 exit evidence — the FIRST live LAN verification; everything LAN stays CODE-PRESENT-UNVERIFIED until it passes.
+
+**Required lines (mechanical):**
+
+| Instance | Must contain | Must NOT contain |
+|---|---|---|
+| Host (A) | `RACE_READY`, `LAN_REMOTE_CAR model=<n> driver=<name>`, `LAN_HOST_ADOPTED cars=2`, `LAN_HOST_EXIT connected=True inputs=<n>`, n ≥ 1, exit 0 | `LAN session error`, `Connection lost`, `RACE_LOAD_FAILED` |
+| Client (B) | `LAN_RACE_READY track=<n> role=Client`, ≥1 `LAN_SYNC ... hostSpeed=` > 3, `PASS LAN_CLIENT sync observed:`, `PASS LAN_CLIENT exit: sync observed`, exit 0 | `LAN session error`, `Connection lost`, `Room connection error`, any `FAIL LAN_CLIENT` |
+
+**Verdict grammar:** `PASS` = every row above holds on the recorded consoles; `FAIL(<class>, <line/absence>, <expected>)` per the test doc's fingerprint table; `UNVERIFIED(<reason>)` for environment failures (firewall prompt, port blocked, wrong address — the run never tested the product).
+
+**Reading notes:**
+- `inputs=<n>` on the host counts the client's received INPUT sequence — the reverse-direction proof (client→host control channel); `inputs=0` with a connected session = the INPUT path broken, class S.
+- The `sync observed` marker fires when the HOST's car exceeds 3 m/s AS SEEN ON THE CLIENT — states flowing AND applied to the persistent scene objects; without it the visual similarity of two static grids would be worthless as evidence.
+- The `LAN_SYNC` cadence lines (2 s) are the timing evidence: `phase=GRID→RACE` transition must follow the host's START within ~a second of lines; a long gap = the START gating stuck (protocol, class S).
+- The disconnect leg (kill the client mid-race) is a SEPARATE run with its own expectation: the host keeps racing, the remote car continues under AI control; the host console must NOT show a crash — the graceful-degradation proof.
+- Single-player regression guard: the same build with no LAN envs must-show ZERO `LAN_*` lines in a normal run — the hard-off proof.
+- Environment failures (firewall prompts, port conflicts) are `UNVERIFIED(config)`, never product failures; re-run after the environment fix.
+
+## 14. Single-player regression net (the LAN/bridge work's blast-radius check)
+
+**Purpose:** the LAN/bridge work touched `Main.cs` (StartLanRace + the menu lambdas + the `_Ready` env block + the adoption hook + the catch-clear), `NativeRaceController` (the LAN fields + the `_Ready` block + the `_PhysicsProcess` tick/visual + `_ExitTree`), and the DV/userpath plumbing. Every battery run on a non-LAN path DOUBLES as the single-player regression check by these assertions. ALL of them are log-reading rules on runs the battery already produces — no new runs needed.
+
+**A1 — the master absence proof (every non-LAN run):** a run launched without `MYSIM_LAN_HOST`/`MYSIM_LAN_JOIN` must contain ZERO `LAN_*` lines (`LAN_REMOTE_CAR`, `LAN_HOST_ADOPTED`, `LAN_HOST_EXIT`, `LAN_RACE_READY`, `LAN_SYNC`, `LAN_CLIENT`, `LAN session error`). Any `LAN_*` line in a non-LAN run = **A1 FAIL — the stale-`PendingLanHost` injection or a gate leak: the run is INVALID as evidence, class S.** This is the one-line catch-clear guard's verification (the failed-load leak path: a LAN host load failure used to leave the static set for the NEXT race to inherit).
+
+**A2 — the DV-core signature unchanged:** every DV run (core/wall/start) keeps its exact report shape: `RACE_READY` + the per-profile PASS/FAIL lines + the report JSON with `userPath`/`damageEnabled`/`backend`/`runs[].metrics`/`assertions` unchanged; the new fields (`bodyPanelContact` per sample, `recoveryMetrics`/`contactArchetypes` on flagged profiles) are ADDITIVE only. A MISSING pre-existing field or a changed assertion semantic = regression, class S.
+
+**A3 — the traffic/rivals semantics unchanged:** `MYSIM_RIVALS=N` (N>0) without `MYSIM_NATIVE_TRAFFIC=1` must still throw the experimental-traffic error (the LAN block only zeroes rivals when a session is actually adopted — a non-LAN run's rivals path is untouched); with the flag, the traffic behaves as before (`opponents` evidence in the report).
+
+**A4 — the userpath chain holds:** the userpath leg (`MYSIM_USERPATH=1`) reports `userPath:true` and its chain-inclusive bands hold (1 Hz ≥ 0.9×lock, 2 Hz ≥ 0.65×lock, lock ≤ 0.30 s, release ≤ 0.30 s — CoreRunner-enforced on every push; the run-level metrics are the live proof). A collapsed authority = the routing chain regressed, class S.
+
+**A5 — the menu flows:** the FLOWCHECKS run (`MYSIM_FLOWCHECKS`) green — the menu→race→results→menu cycle is the single-player navigation proof; the LAN lambdas' edit in `ShowMenu` must not have moved the single-player buttons (the flowchecks exercise them).
+
+**A6 — the start-sequence unchanged:** the `race_start_sequence` profile (§9) still passes with its countdown band — the LAN start work did NOT touch the single-player start path (the LAN countdown arming lives in the session, not the Race boot).
+
+**A7 — the new-env inertness:** each new env is absent-inert by construction: `MYSIM_LAN_HOST`/`LAN_JOIN` open panels ONLY in the `_Ready` branch guarded on `MYSIM_TRACK` absence; `MYSIM_LAN_AUTOSTART` acts only inside a hosting panel; `MYSIM_LAN_QUIT_AFTER` acts only when a LAN session exists (and rejects out-of-range values loudly at `_Ready`). A CI/DV run setting none of them cannot reach any new code — A1 is its evidence.
+
+**A8 — the LAN-hosts-without-native guard:** LAN envs + a missing `MYSIM_NATIVE_GAMEPLAY=1` must fail LOUD (`LAN_HOST_REQUIRES_NATIVE`, the session dropped and disposed — no silent skip, no leak into later races). Seen without the message = the pre-guard build; treat as A1-class: the run invalid, re-run with the guard.
+
+**What a REGRESSED single-player run looks like (the summary the reader scans for):**
+- `LAN_*` lines where none belong (A1/A6) — the session leak or a gate regression.
+- A DV report missing pre-existing fields, or assertion semantics shifted (A2).
+- The traffic gate silently accepting rivals without the flag (A3).
+- `userPath:false` on a userpath dispatch, or the authority bands collapsed (A4).
+- The flowchecks failing on the untouched menu paths (A5).
+- A silent solo race where a LAN host was requested — `LAN_HOST_ADOPTED` absent with no error (A8, pre-guard builds).
+
+**Verdict integration:** these checks ride EVERY existing battery reading (§1–§5, §9): one glance at the log for the A1/A6 markers while applying the section's own rules. A1 failures invalidate the run as acceptance evidence REGARDLESS of the section's own outcome.
+
+## 15. The wet/night matrix (D0-first) — per-cell reading rules
+
+**BLOCKERS FIRST (verified against c677943's artifacts — the matrix is NOT executable until these land):**
+1. **B1 (fixed on my branch):** the wetnight case files' cases carried NO `drivingValidation` lists — `ParseCaseProfiles` throws on exactly that ("has no drivingValidation profiles") and the wetnight case_sets are wired into the `DRIVING_VALIDATION_MANIFEST` chain ONLY — every `depth=driving_validation case_set=wetnight_matrix_*` dispatch died at boot. My branch carries the corrected pair (the lists added, mirroring `native_driving_validation_core.json`/`_wet.json` exactly: car16 carries `edge_excursion`, car0 does not; the dry file keeps its no-weather-keys design; the wet file keeps weather 2 + compound 3 + gains the `requiresWetWeather` marker). MERGE THE PAIR before the first matrix dispatch.
+2. **B2 (tool fix needed — not my file):** `cloud_game_audit.py:114` asserts `all(weather>0)` for any manifest whose NAME contains "wet" — `"wetnight_matrix_dry"` contains "wet", so the DRY file dies at the tool's assert no matter its content (dry cases cannot carry weather>0). Proposed one-line fix: honour an explicit JSON marker — `if spec.get('requiresWetWeather', 'wet' in manifest.name and 'wetnight' not in manifest.name):` — backwards compatible (the old wet manifests keep the name-based assert; my wet file carries the marker; the dry file passes).
+3. **B3 (dispatch design — coordinator/verification):** the `driving_validation` depth runs shard `[0]` ONLY and the tool filters `case['track']%12==shard` — the matrix's TRACK-8 cases (8%12=8) SILENTLY NEVER RUN: the workflow goes green with half the matrix missing. Options: (a) extend the shard list for these dispatches (a yml change), (b) move the second track to one with `track%12<=5` (a data change — the verification agent's matrix-design call), (c) a shard-filter exemption for the wetnight manifests. Until one lands, only the track-0 half of every cell is real; a "green" matrix run proves NOTHING about track 8.
+
+**How the cells run (the dispatch shape):** `depth=driving_validation`; `case_set=wetnight_matrix_dry` serves D0/N0/N1/N2 (the same 4-case dry manifest; the cell identity comes from the yml env block: unset = D0, `TOD:3` = N0, +the light package = N1, +vehicle lights/anchored = N2); `case_set=wetnight_matrix_wet` serves W1/W2 (weather 2 + compound 3 come from the CASE data via the tool's env translation — the manifest level wins); W0 (optional) = the wet manifest with all cosmetic knobs off. The dispatch commands remain in `OWNER_MERGE_INSTRUCTIONS.md` (its matrix section is the operational source of truth; THIS section is the reading layer).
+
+**The D0-first gate:** D0 (dry day, every candidate knob off) must reach a verified terminal state BEFORE any N/W cell is READ. A failed or unfinished D0 → every other cell `UNVERIFIED(no-baseline)`: collect the artifacts (preserve failure records), issue no cell verdicts. D0's own reading = §1 (the DV-core bands, per case) + §14 (the regression net) + `frame-hashes.log` as the pixel baseline.
+
+**Per-cell reading table:**
+
+| Cell | Proves | DV read (physics) | Visual read | Fingerprints |
+|---|---|---|---|---|
+| D0 (dry day) | the baseline: the DV contract on both cars × the tracks in the manifest + the pixel baseline | §1's bands per case; `RACE_READY`; the §14 net | the reference frame set | any band breach = §1's class; `LAN_*` lines = §14 A1 |
+| N0 (TOD 3, knobs off) | the darkness baseline + THE PHYSICS INVARIANCE | the DV metrics ≈ D0's (same manifest): headline deltas within run noise; every band holds | dark is CORRECT (N1 exists because N0 is dark) — unreadable at N0 is not a failure | a band breach or a systematic metric shift = the lighting env leaking into physics (class S, physics+render joint) |
+| N1 (+light package) | readability restored WITHOUT touching physics | still ≈ D0 | body/near barriers/kerbs discernible; no hue inversion | physics drift = the leak (class S); still unreadable = the package insufficient (render owner) |
+| N2 (+vehicle lights, anchored) | vehicle lights + anchored scheme + pool budget intact | still ≈ D0 | `poolBudgetUntouched=true` MUST appear; the anchored scheme cross-checked in the audit JSON | missing/false `poolBudgetUntouched` = blocking (render); the fixture-view frames gap = the known N2 gap (use `night_fixture_audit` for the station frames until the port lands) — N2's visual verdict is PARTIAL until then; the DV side stays full |
+| W1 (wet day) | the wet physics contract under the wet grip model | the wet profiles' own bands (`braking_60_wet` et al.); the report's `water` > 0; the DIRECTION expectations (analyst checks, never gates): wet braking ≥ dry, wet accel duration ≥ dry | the wet-road shading responds; the DRY cells show ZERO road delta | `water`=0 in a wet run = the weather plumbing broken (class S); faster-wet-than-dry = investigate (AI-line variance caveat), not auto-fail |
+| W2 (wet night FULL — the money cell) | everything at once | the DV ≈ W1's (the night adds nothing physical) | ≥ N1 pool visibility (no black-hole); rain streaks ≥ 2 px at 10–40 m on ≥ 5 frames; THE FENCE WIRE STAYS VISIBLE (the turn-1 reject must not re-enter — BLOCKING) | a black-hole = blocking (render); the fence crushed = the turn-1 regression (blocking); physics drift vs W1 = class S |
+| W0 (optional clean wet) | the wet baseline without cosmetic candidates | the wet bands; the cleanest wet-physics reference | the no-candidate wet shading | as W1 |
+
+**Cross-cell invariants (the section's core):**
+1. **Physics invariance under lighting:** N0/N1/N2 ≈ D0 and W2 ≈ W1 (same-manifest pairs). Hard rule: every cell's assertions pass their own bands; analyst rule: the headline metric deltas stay within a few % of the pair's base — a systematic shift = the cosmetic env leaking into physics, class S, blocking the CELL not the matrix.
+2. **Direction expectations** (W vs D): wet slower/longer on braking/acceleration — analyst checks, never auto-gates (the AI-line variance caveat).
+3. **§14 rides every cell** (the regression net: zero `LAN_*` lines, the report shape, the env inertness).
+4. **Completion:** the matrix is DONE when every cell has a verified terminal state AND the cross-invariants hold AND (post-B3) both tracks' cells exist. The chart consumes per-cell verdicts, verified terminal states only; a partially-run matrix (e.g., track-8 missing) is recorded as PARTIAL, never as green.
