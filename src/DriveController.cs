@@ -9,6 +9,20 @@ public partial class DriveController : Node3D {
  int cameraCycleChecks;
  readonly SteeringInput steeringInput=new SteeringInput();
  public virtual void CycleCamera() { CamMode=(CamMode+1)%4; }
+ // Cockpit usability contract (the reviewer's standing reject: halo dominates the view, wheel/dash unreadable):
+ // the seat stays at the authored reference (the steeringWheel mount is (0/-0.35, 0.66, 0.5): the eye rides 0.22
+ // above and 0.45 behind it, just above the rim). The view pitches 9 deg down so the wheel/dash band sits mid-frame
+ // instead of under the eye line, and FOV drops 75 -> 68 so the halo pillar leaves the centre band and the
+ // instruments enlarge. These members are the single source of truth the product gate asserts.
+ public const float CockpitFov = 68f;
+ public static Vector3 CockpitSeat(bool openWheel) => new Vector3(openWheel ? 0f : -0.35f, 0.88f, 0.05f);
+ public static Basis CockpitPose(Basis car) {
+  var right = -car.X.Normalized(); var up = car.Y.Normalized(); var nose = -car.Z.Normalized();
+  var fwd = (nose * 0.9877f - up * 0.1564f).Normalized(); // 9 deg eye-line down toward the wheel/dash band
+  var camUp = right.Cross(fwd).Normalized();
+  return new Basis(right, camUp, -fwd);
+ }
+ public static Basis CockpitPose(Basis car, bool openWheel) => CockpitPose(car); // the class-dependent lateral offset lives in CockpitSeat; the 9-deg instrument pitch is class-independent
  public override void _Ready() {
   Race = new Race(TrackIndex, Laps, Conditions.WetnessValue); Player = Race.Add("PLAYER", true, (Compound)Mathf.Clamp(Settings.Get("starting_compound",1),0,3));Player.nextCompound=Player.tyres[0].compound; Player.carModel = CarIndex; Race.countdown = 0; Race.started = true; Player.Place(Race.track, float.Parse(System.Environment.GetEnvironmentVariable("MYSIM_STARTP") ?? "0.988", System.Globalization.CultureInfo.InvariantCulture), 0f); { int nr = System.Environment.GetEnvironmentVariable("MYSIM_RIVALS") != null ? int.Parse(System.Environment.GetEnvironmentVariable("MYSIM_RIVALS")) : (AutoDrive || AiTest ? 0 : Settings.Get("rivals", 5)); { var order = new System.Collections.Generic.List<int>(); for (int ci = 0; ci < CarCatalog.Count; ci++) if (ci != CarIndex && CarCatalog.RaceClass(ci) == CarCatalog.RaceClass(CarIndex)) order.Add(ci); float myS = MySimulator.Rebuild.RecoveredVehicleProfiles.Speed[CarIndex], myA = MySimulator.Rebuild.RecoveredVehicleProfiles.Acceleration[CarIndex]; order.Sort((x, y) => (Mathf.Abs(MySimulator.Rebuild.RecoveredVehicleProfiles.Speed[x] - myS) / 60f + Mathf.Abs(MySimulator.Rebuild.RecoveredVehicleProfiles.Acceleration[x] - myA)).CompareTo(Mathf.Abs(MySimulator.Rebuild.RecoveredVehicleProfiles.Speed[y] - myS) / 60f + Mathf.Abs(MySimulator.Rebuild.RecoveredVehicleProfiles.Acceleration[y] - myA))); RivalModels = order.ToArray(); } for (int ri = 0; ri < nr; ri++) { var rv = Race.Add("AI " + (ri + 1), false, Compound.Medium); rv.carModel = RivalModels[ri % RivalModels.Length]; rivals.Add(new Rival { V = rv, LastY = float.NaN }); } } CallDeferred(nameof(BindHud));
  }
@@ -123,12 +137,23 @@ void LoadWhineRamps() {
  }
  static float DeadZone(float v, float dz) { float a = Mathf.Abs(v); if (a <= dz) return 0; return Mathf.Sign(v) * (a - dz) / (1f - dz); }
  static Vector3 ToWorld(Vec p, float y) => new Vector3(p.x, y, p.z);
+ static string UvBounds(Vector2[] uv) { if (uv == null || uv.Length == 0) return "none"; float x0 = 9e9f, y0 = 9e9f, x1 = -9e9f, y1 = -9e9f; foreach (var v in uv) { x0 = Mathf.Min(x0, v.X); y0 = Mathf.Min(y0, v.Y); x1 = Mathf.Max(x1, v.X); y1 = Mathf.Max(y1, v.Y); } return "[" + x0.ToString("0.00") + ".." + x1.ToString("0.00") + ", " + y0.ToString("0.00") + ".." + y1.ToString("0.00") + "]"; }
  void CaptureShot(string fallback) {
   if (DisplayServer.GetName()=="headless") { GD.Print("SCREENSHOT_SKIPPED headless (logic check only)"); return; }
   string path=System.Environment.GetEnvironmentVariable("MYSIM_SHOT") ?? fallback;GD.Print("SCREENSHOT_BEGIN ",path);
   if (CamMode == 2 && Car != null && Cam != null) { // verifiable cockpit facts for the reference-evidence audit: authored seat pose, FOV, hidden wheels
-   var seatLocal = Car.GlobalTransform.AffineInverse() * Cam.GlobalPosition; float drift = (seatLocal - new Vector3(CarCatalog.RaceClass(CarIndex)==1?0:-0.35f, 0.88f, 0.05f)).Length(); bool wheelsHidden = true; if (WheelPivots != null) foreach (var wp in WheelPivots) wheelsHidden &= !wp.Visible;
+   var seatLocal = Car.GlobalTransform.AffineInverse() * Cam.GlobalPosition; float drift = (seatLocal - CockpitSeat(CarCatalog.RaceClass(CarIndex)==1)).Length(); bool wheelsHidden = true; if (WheelPivots != null) foreach (var wp in WheelPivots) wheelsHidden &= !wp.Visible;
    GD.Print("COCKPIT_VIEW mode=2 fov=", Cam.Fov, " seatLocal=", seatLocal, " seatOffsetFromAuthored=", drift.ToString("0.000"), " wheelsHidden=", wheelsHidden);
+   // INT-surface UV evidence for the cockpit-texture work (carbody's dependency): every visible LOD_A_INT_* mesh
+   // prints its UV0/UV2 bounds exactly like the CARVIEW UVAUDIT does, once per cockpit capture.
+   foreach (var node in Car.FindChildren("*", "MeshInstance3D", true, false)) {
+    var intMesh = (MeshInstance3D)node; var meshName = intMesh.Name.ToString().ToUpperInvariant();
+    if (!meshName.StartsWith("LOD_A_INT_") || !intMesh.IsVisibleInTree() || intMesh.Mesh == null) continue;
+    for (int surface = 0; surface < intMesh.Mesh.GetSurfaceCount(); surface++) {
+     var arrays = intMesh.Mesh.SurfaceGetArrays(surface);
+     GD.Print("COCKPIT_INT_UV ", intMesh.Name, " s", surface, " UV0=", UvBounds(arrays[(int)Mesh.ArrayType.TexUV] as Vector2[]), " UV1=", UvBounds(arrays[(int)Mesh.ArrayType.TexUV2] as Vector2[]));
+    }
+   }
   }
   if(System.Environment.GetEnvironmentVariable("MYSIM_CAMERA_FRAME_CHECK")=="1"){
    var size=GetViewport().GetVisibleRect().Size;Vector2 minimum=new Vector2(float.MaxValue,float.MaxValue),maximum=new Vector2(float.MinValue,float.MinValue);int points=0;
@@ -218,7 +243,7 @@ void LoadWhineRamps() {
    if (!camInit) { chaseOffset = target-Car.Position; camInit = true; }
    chaseOffset = chaseOffset.Lerp(target-Car.Position, 1f-Mathf.Exp(-6f*(float)delta));
    Cam.Position = ObstructCam(Car.Position + Vector3.Up * (hgt * 0.8f), Car.Position+chaseOffset); Cam.LookAt(Car.Position + fwd * look + Vector3.Up * 1.0f); Cam.Fov = Mathf.Lerp(Cam.Fov, 43f + Mathf.Clamp(speed / 80f, 0, 1) * 5f, 1f - Mathf.Exp(-3f * (float)delta));
-  } else if (CamMode == 2) { Cam.Position = Car.GlobalTransform * new Vector3(CarCatalog.RaceClass(CarIndex)==1?0:-0.35f, 0.88f, 0.05f); Cam.GlobalTransform = new Transform3D(Car.GlobalTransform.Basis.Rotated(Car.GlobalTransform.Basis.Y.Normalized(), Mathf.Pi), Cam.Position); Cam.Fov = 75f; camInit = false; }
+  } else if (CamMode == 2) { Cam.Position = Car.GlobalTransform * CockpitSeat(CarCatalog.RaceClass(CarIndex)==1); Cam.GlobalTransform = CockpitPose(Car.GlobalTransform.Basis, CarCatalog.RaceClass(CarIndex)==1); Cam.Fov = CockpitFov; camInit = false; }
   else { Cam.Position = Car.GlobalTransform * new Vector3(0, 0.62f, 1.9f); Cam.GlobalTransform = new Transform3D(Car.GlobalTransform.Basis.Rotated(Car.GlobalTransform.Basis.Y.Normalized(), Mathf.Pi), Cam.Position); Cam.Fov = 70f; camInit = false; }
   if(AutoDrive&&AiTest&&AutoSeconds>250&&t>=AutoSeconds&&!Player.finished){GD.PrintErr("FAIL full-race simulation deadline track=",TrackIndex," progress=",Player.progress," lap=",Player.completedLaps," wallHits=",WallHits," damage=",Player.damage);CleanExit.Request(this,1);return;}
   if (AiTest && Player.finished) { finT += (float)delta; if (finT > (rivals.Count > 0 ? 14f : 1.5f)) { GD.Print("FINISHED t=", t.ToString("0.0"), " laps=", Player.completedLaps, " time=", Player.finishTime.ToString("0.00"), " best=", Player.bestLap.ToString("0.00"), " wallHits=", WallHits, " damage=", Player.damage.ToString("0.000000000",System.Globalization.CultureInfo.InvariantCulture)); CaptureShot("finish.png"); CleanExit.Request(this); } }

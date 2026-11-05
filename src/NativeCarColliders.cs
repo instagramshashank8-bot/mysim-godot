@@ -8,7 +8,20 @@ namespace MySim {
 // They are encrypted with the build; no hull vertex data is written to public Git or diagnostics.
 public static class NativeCarColliders {
  const string Root="res://assets/generated_native_car_hulls/";
- static bool WheelTemplate(string name)=>System.Text.RegularExpressions.Regex.IsMatch(name,@"^LOD_A_(WHEELGUARD|TYRE|TIRE|WHEEL|CALIPER|BRAKE_CALIPER|BRAKE_DISC|DISC|ROTOR|HUB)(_|$)",System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+ static bool WheelTemplate(string name)=>System.Text.RegularExpressions.Regex.IsMatch(name,@"^LOD_A_(TYRE|TIRE|WHEEL|CALIPER|BRAKE_DISC|DISC|ROTOR|HUB)(_|$)",System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+ // Wheel-assembly fairing/caliper members: NEVER body-fixed hulls (their raw placement hangs them
+ // 0.14-0.20 m below the tyre support envelope - run 41848766195: clearance -0.2001, demanded preload
+ // 0.235 - and their wedge under the belly froze the car on source/120: 41834771421/41840755243
+ // bodyContacts=2 = the two misplaced guard blobs, tyreContacts=1, thr=1 spd=0). They return as
+ // hub-mounted collision members at a corrected pose: their raw transforms place LEFT parts mirrored
+ // at +X near the body origin while the hubs sit at +/-0.76..0.87 m, z ~ +/-2.0 (car-assembly turn-5:
+ // shells 1.2-1.6 m from their wheels). Source meshes/UVs are untouched; only the baked collision
+ // copy is translated to the hub (shape-vertex data preserved rigidly).
+ static int? HubForWheelAssemblyPart(string name){
+  if(!System.Text.RegularExpressions.Regex.IsMatch(name,@"WHEELGUARD|BRAKE_CALIPER",System.Text.RegularExpressions.RegexOptions.IgnoreCase))return null;
+  bool front=name.IndexOf("FRONT",StringComparison.OrdinalIgnoreCase)>=0,left=name.IndexOf("LEFT",StringComparison.OrdinalIgnoreCase)>=0;
+  return (front?0:2)+(left?0:1);
+ }
  static List<Vector3> Volume(List<Vector3> points){if(points.Count<3)return null;var origin=points[0];Vector3 axis=Vector3.Zero,cross=Vector3.Zero;foreach(var p in points)if((p-origin).LengthSquared()>axis.LengthSquared())axis=p-origin;if(axis.LengthSquared()<.000001f)return null;foreach(var p in points){var n=axis.Cross(p-origin);if(n.LengthSquared()>cross.LengthSquared())cross=n;}if(cross.LengthSquared()<.00000001f)return null;cross=cross.Normalized();foreach(var p in points)if(Mathf.Abs(cross.Dot(p-origin))>.001f)return points;
   // A rendered planar body panel still needs a physical skin; only the collision copy gains 4mm thickness.
   var thick=new List<Vector3>(points.Count*2);foreach(var p in points)thick.Add(p+cross*.002f);foreach(var p in points)thick.Add(p-cross*.002f);return thick;
@@ -20,7 +33,29 @@ public static class NativeCarColliders {
     // Bake the fitted assembly, not the pre-fit templates. Rotating/generated wheel
     // geometry is represented by tyre contacts and must never become chassis hulls.
     bool rotating=false,generatedWheel=false;foreach(var wheel in wheels){if(wheel.GetNode<Node3D>("Spin").IsAncestorOf(mesh))rotating=true;if(wheel.IsAncestorOf(mesh)&&!name.StartsWith("LOD_A_",StringComparison.OrdinalIgnoreCase))generatedWheel=true;}if(rotating||generatedWheel)continue;int role=name.IndexOf("_mm_",StringComparison.OrdinalIgnoreCase);string part=role<0?name:name.Substring(0,role);if(!groups.ContainsKey(part))groups[part]=new();if(mesh.HasMeta("mounted_hub_index")){int hub=mesh.GetMeta("mounted_hub_index").AsInt32();if(mountedHubs.ContainsKey(part)&&mountedHubs[part]!=hub)throw new Exception("Component material surfaces disagree on mounting hub");mountedHubs[part]=hub;}var transform=inverse*mesh.GlobalTransform;foreach(var point in mesh.Mesh.GetFaces())groups[part].Add(transform*point-Vector3.Up*.65f);
-   }nodes.Clear();var files=new List<string>();var partBounds=new List<object>();var partNames=new List<string>();var skipped=new List<string>();var padded=new List<string>();Aabb coverage=new();bool first=true;int index=0;
+   }nodes.Clear();
+   // Hub pose restore for the wheel-assembly fairing/caliper family: the raw transforms place these
+   // parts mirrored at +X near the body origin (~1.2-1.6 m from their hubs; car-assembly turn-5),
+   // hanging them 0.14-0.20 m below the tyre support envelope when baked body-fixed (run 41848766195
+   // measured clearance -0.2001, demanded preload 0.235 > 0.12 and blocked; the wedge under the belly
+   // froze the car on source/120: 41834771421/41840755243, bodyContacts=2 = the two guard blobs).
+   // The restore rigidly translates the baked collision copy to its hub: X/Z bbox centre -> hub
+   // centre, bbox bottom -> hub height (a guard wraps the wheel's upper half, a caliper clamps the
+   // upper disc). Source meshes/UVs untouched; hub-mounted parts are excluded from the stance datum
+   // by the ride gate, so the measured ~0.025 stance survives with the coverage restored.
+   var wheelAnchors=new Vector3[4];for(int wi=0;wi<4;wi++)wheelAnchors[wi]=wheels[wi].Position-Vector3.Up*.65f;
+   foreach(var group in groups){
+    int? hub=HubForWheelAssemblyPart(group.Key);if(hub==null)continue;
+    if(mountedHubs.TryGetValue(group.Key,out int metaHub)&&metaHub!=hub.Value){GD.Print("HUB_POSE_RESTORE car=",car," part=",group.Key," metadata hub ",metaHub," overrides name-derived ",hub.Value);hub=metaHub;}
+    else if(!mountedHubs.ContainsKey(group.Key))mountedHubs[group.Key]=hub.Value;
+    var points=group.Value;if(points.Count==0)continue;
+    Vector3 minimum=new Vector3(float.PositiveInfinity,float.PositiveInfinity,float.PositiveInfinity),maximum=new Vector3(float.NegativeInfinity,float.NegativeInfinity,float.NegativeInfinity);
+    foreach(var p in points){minimum=new Vector3(Mathf.Min(minimum.X,p.X),Mathf.Min(minimum.Y,p.Y),Mathf.Min(minimum.Z,p.Z));maximum=new Vector3(Mathf.Max(maximum.X,p.X),Mathf.Max(maximum.Y,p.Y),Mathf.Max(maximum.Z,p.Z));}
+    var anchor=wheelAnchors[hub.Value];
+    var shift=new Vector3(anchor.X-(minimum.X+maximum.X)*.5f,anchor.Y-minimum.Y,anchor.Z-(minimum.Z+maximum.Z)*.5f);
+    for(int pi=0;pi<points.Count;pi++)points[pi]+=shift;
+    GD.Print("HUB_POSE_RESTORE car=",car," part=",group.Key," hub=",hub.Value," shift=(",shift.X.ToString("0.000"),",",shift.Y.ToString("0.000"),",",shift.Z.ToString("0.000"),") sourceVertices=",points.Count);
+   }var files=new List<string>();var partBounds=new List<object>();var partNames=new List<string>();var skipped=new List<string>();var padded=new List<string>();Aabb coverage=new();bool first=true;int index=0;
    foreach(var group in groups){var volume=Volume(group.Value);if(volume==null){skipped.Add(group.Key);continue;}using var arrays=new Godot.Collections.Array();arrays.Resize((int)Mesh.ArrayType.Max);arrays[(int)Mesh.ArrayType.Vertex]=volume.ToArray();using var mesh=new ArrayMesh();mesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles,arrays);using var shape=mesh.CreateConvexShape(true,false);if(shape==null||shape.Points.Length<4)throw new Exception("Failed source convex body part: "+group.Key);if(!CoversSource(shape,group.Value,out float outside)){shape.Points=volume.ToArray();}if(!CoversSource(shape,group.Value,out outside)){var expanded=new List<Vector3>();foreach(var point in shape.Points)foreach(float x in new[]{-.005f,.005f})foreach(float y in new[]{-.005f,.005f})foreach(float z in new[]{-.005f,.005f})expanded.Add(point+new Vector3(x,y,z));shape.Points=expanded.ToArray();if(!CoversSource(shape,group.Value,out outside))throw new Exception("Convex hull does not contain intact source part: "+group.Key+" maximumOutside="+outside);padded.Add(group.Key);}string path=Root+"car-"+car.ToString("00")+"-part-"+(index++).ToString("000")+".res";if(ResourceSaver.Save(shape,path)!=Error.Ok)throw new Exception("Could not save native hull");files.Add(path);partNames.Add(group.Key);var partBox=new Aabb(shape.Points[0],Vector3.Zero);foreach(var vertex in shape.Points)partBox=partBox.Expand(vertex);partBounds.Add(new {part=group.Key,minimumY=partBox.Position.Y,maximumY=partBox.End.Y,minimum=new[]{partBox.Position.X,partBox.Position.Y,partBox.Position.Z},maximum=new[]{partBox.End.X,partBox.End.Y,partBox.End.Z},sourceVertices=group.Value.Count});foreach(var point in shape.Points){if(!point.IsFinite())throw new Exception("Nonfinite native hull");if(first){coverage=new Aabb(point,Vector3.Zero);first=false;}else coverage=coverage.Expand(point);}
    }
    if(files.Count==0||coverage.Size.Z<RecoveredGeometry.Wheelbase[car])throw new Exception("Source body hull coverage is incomplete");var wheelCentres=Array.ConvertAll(wheels,w=>new[]{w.Position.X,w.Position.Y-.65f,w.Position.Z});var wheelRadii=Array.ConvertAll(wheels,w=>w.GetMeta("radius").AsSingle());

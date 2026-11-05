@@ -56,7 +56,9 @@ public static class WallBuilder {
  // deferred on its first physics tick so meshes added later in the same frame (e.g. the drive surface)
  // are included. Attaching nothing when the flag is unset = default rendering unchanged.
  public static void AttachCollisionOverlay(Node3D layer){
-  if(System.Environment.GetEnvironmentVariable("MYSIM_COLLISION_OVERLAY")!="1")return;
+  // The workflow's track_scene_audit depth sets the bare name (COLLISION_OVERLAY) because the run() helper strips
+  // MYSIM_* from inherited environments; accept both spellings so the battery wiring activates the overlay.
+  if(System.Environment.GetEnvironmentVariable("MYSIM_COLLISION_OVERLAY")!="1"&&System.Environment.GetEnvironmentVariable("COLLISION_OVERLAY")!="1")return;
   layer.AddChild(new CollisionOverlay {Name="CollisionOverlay"});
  }
 }
@@ -102,6 +104,44 @@ public partial class CollisionOverlay : Node3D {
   }
   var material=new StandardMaterial3D{AlbedoColor=color,Transparency=BaseMaterial3D.TransparencyEnum.Alpha,ShadingMode=BaseMaterial3D.ShadingModeEnum.Unshaded,NoDepthTest=true,RenderPriority=10,CullMode=BaseMaterial3D.CullModeEnum.Disabled};
   return new MeshInstance3D{Mesh=mesh,MaterialOverride=material,CastShadow=GeometryInstance3D.ShadowCastingSetting.Off};
+ }
+ // Draws the route legality corridor edges as line pairs (matching the Circuit's width corridor) so the
+ // corridor-vs-visible-road mismatch is directly reviewable in the overlay render; ground Y sampled from the nearest
+ // drive-surface vertex per route point (the route polyline has no height data).
+ void DrawCorridor(Node root,int variant,Node3D layer){
+  var route=new MySimulator.Rebuild.Circuit(variant);
+  var verts=new System.Collections.Generic.List<Vector3>();
+  foreach(var node in root.FindChildren("*","CollisionShape3D",true,false)){
+   if(node.GetParent() is not StaticBody3D body||body.Name!="DriveSurface")continue;
+   if(node is CollisionShape3D cs&&cs.Shape is ConcavePolygonShape3D cv&&cv.Data!=null){
+    for(int i=0;i+2<cv.Data.Length;i+=3){var a=cv.Data[i];var b=cv.Data[i+1];var c=cv.Data[i+2];verts.Add(a);verts.Add(b);verts.Add(c);}
+   }
+   break;
+  }
+  if(verts.Count==0)return;
+  var half=route.width*0.5f;
+  var lineVerts=new System.Collections.Generic.List<Vector3>();
+  for(int i=0;i<route.points.Length;i++){
+   var a=route.points[i];var b=route.points[(i+1)%route.points.Length];
+   var dx=b.x-a.x;var dz=b.z-a.z;var len=(float)System.Math.Sqrt(dx*dx+dz*dz);if(len<0.001f)continue;
+   dx/=len;dz/=len;var nx=dz;var nz=-dx;
+   var ax=laneGroundY((float)a.x,(float)a.z,verts);var bx2=laneGroundY((float)b.x,(float)b.z,verts);
+   lineVerts.Add(new Vector3((float)a.x+nx*half,ax+0.06f,(float)a.z+nz*half));
+   lineVerts.Add(new Vector3((float)b.x+nx*half,bx2+0.06f,(float)b.z+nz*half));
+   lineVerts.Add(new Vector3((float)a.x-nx*half,ax+0.06f,(float)a.z-nz*half));
+   lineVerts.Add(new Vector3((float)b.x-nx*half,bx2+0.06f,(float)b.z-nz*half));
+  }
+  var arrays=new Godot.Collections.Array();arrays.Resize((int)Mesh.ArrayType.Max);arrays[(int)Mesh.ArrayType.Vertex]=lineVerts.ToArray();
+  var am=new ArrayMesh();am.AddSurfaceFromArrays(Mesh.PrimitiveType.Lines,arrays);
+  var mat=new StandardMaterial3D{AlbedoColor=new Color(0.3f,0.85f,0.95f,0.6f),Transparency=BaseMaterial3D.TransparencyEnum.Alpha,ShadingMode=BaseMaterial3D.ShadingModeEnum.Unshaded,NoDepthTest=true,RenderPriority=11,CullMode=BaseMaterial3D.CullModeEnum.Disabled};
+  var corridor=new MeshInstance3D{Mesh=am,MaterialOverride=mat,CastShadow=GeometryInstance3D.ShadowCastingSetting.Off,Name="RouteCorridorLines"};
+  corridor.Transform=layer is Node3D layerNode?layerNode.GlobalTransform.AffineInverse():Transform3D.Identity;
+  AddChild(corridor);
+ }
+ static float laneGroundY(float x,float z,System.Collections.Generic.List<Vector3> tris){
+  float best=float.MaxValue,y=0f;
+  for(int i=0;i<tris.Count;i++){var v=tris[i];float dx=v.X-x,dz=v.Z-z;float d=dx*dx+dz*dz;if(d<best){best=d;y=v.Y;}}
+  return y;
  }
  static MeshInstance3D FindCounterpart(Node start){
   Node node=start;
@@ -154,6 +194,19 @@ public partial class CollisionOverlay : Node3D {
    }
   }
   string auditPath=System.Environment.GetEnvironmentVariable("MYSIM_COLLISION_OVERLAY_AUDIT");
+  if(string.IsNullOrEmpty(auditPath)){
+   string sceneAudit=System.Environment.GetEnvironmentVariable("MYSIM_TRACK_SCENE_AUDIT");
+   if(!string.IsNullOrEmpty(sceneAudit))auditPath=sceneAudit+"-collision-overlay.json";
+  }
+  // Route-corridor overlay: resolve this layer's route variant from its name and draw the corridor edges.
+  int variant=-1;string resolvedAs=null;
+  if(layer!=null){
+   string ln=layer.Name.ToString();var names=MySimulator.Rebuild.SourceRoutes.Names;
+   for(int i=0;i<names.Length;i++)if(string.Equals(names[i],ln,System.StringComparison.OrdinalIgnoreCase)){variant=i;resolvedAs=names[i];break;}
+   if(variant<0)for(int i=0;i<names.Length;i++)if(names[i].IndexOf(ln,System.StringComparison.OrdinalIgnoreCase)>=0){variant=i;resolvedAs=names[i]+" (contains-match)";break;}
+  }
+  if(variant>=0&&layer is Node3D layerNode3){DrawCorridor(root,variant,layerNode3);GD.Print("COLLISION_OVERLAY corridor variant=",variant," resolvedAs=",resolvedAs," halfWidth=",new MySimulator.Rebuild.Circuit(variant).width*0.5f);}
+  else GD.Print("COLLISION_OVERLAY corridor NOT drawn: no route-name match for layer ",layer?.Name);
   if(!string.IsNullOrEmpty(auditPath)){var folder=System.IO.Path.GetDirectoryName(auditPath);if(!string.IsNullOrEmpty(folder))System.IO.Directory.CreateDirectory(folder);System.IO.File.WriteAllText(auditPath,System.Text.Json.JsonSerializer.Serialize(new{scanRoot=root?.GetPath().ToString(),colliders=rows.Count,drawn,unmatchedCount=unmatched.Count,trims,driveWidthDeltas=driveDeltas,unmatched,scope="Collision-overlay evidence: every static collider vs its visible counterpart. Offsets/oversizes are evidence for per-name trim review; nothing is removed except MYSIM_COLLIDER_TRIM named entries with supplied evidence; collision never blanket-disabled"}));}
   GD.Print("COLLISION_OVERLAY shapes=",rows.Count," drawn=",drawn," unmatched=",unmatched.Count," driveDeltas=",driveDeltas.Count," trims=",trims.Count);
  }

@@ -57,6 +57,8 @@ Gap analysis against the six-field standard (fields the tool cannot derive local
 
 car6 and track0 keep their turn-1 tables; their unmeasured fields are explicitly `pending-run-P5` (first `car_assembly_audit`-class run that includes car6, and a `track_scene_audit` run for track0, fill them via the §turn-1 tool's `--assembly` join).
 
+**Mask-row local fill (answers the turn-1 open item without a run):** reading `car_map.json` float sets directly — car16's ext/livery material (`449e4db7…`) carries `_UseMask=1.0`, so the bound `mask.png` **is active** on the body livery (roughness modulation via `mask.r`; base roughness default 0.5 since no `_Smoothness` float is set). Every other car16 material (misc `aed61c8b…`, badges `a903631e…`, sw `4734243d…`, cab `3f4b5473…`, chassis `17b01929…`, chassis-black `d0baab1b…`) has `_UseMask=0.0` — mask bound but inert there. Mask classifier note for any future mask work: data map, linear-light semantics, sRGB upscale policy must not be applied to it.
+
 ## 3. Task (c) — H2 (cull_disabled backface): **no code changes needed on my branch**
 
 The already-merged `TextTag` detector (`CarAssemblyAudit.cs`, fixed at `5bf41d7`, present at `39cdf33`) suffices for H2's measurement:

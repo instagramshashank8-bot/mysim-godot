@@ -1,0 +1,13 @@
+{
+  "cases": [
+    {
+      "car": 16,
+      "track": 0,
+      "weather": 0,
+      "compound": 1,
+      "gridStart": true,
+      "drivingValidation": ["race_start_sequence"]
+    }
+  ],
+  "scope": "Race-flow validation: the native grid start sequence (5 s countdown, lights-out release, race-clock start) exercised with a deliberate jump-start attempt (full throttle commanded through the grid). gridStart:true routes the run through the real start sequencing (the AI boot does not skip the countdown); works in both input modes, userpath is the stronger proof. No damage requirement; jump-start PENALTIES are out of scope (only the hold/hold-off mechanics and their timing are validated). Requires the driving_validation runner depth."
+}

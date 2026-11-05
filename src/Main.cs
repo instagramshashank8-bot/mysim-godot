@@ -42,6 +42,16 @@ public partial class Main : Node3D {
   if(System.Environment.GetEnvironmentVariable("MYSIM_CONTROLCHECKS")!=null){AddChild(new ControlsScenario());return;}
   var t = System.Environment.GetEnvironmentVariable("MYSIM_TRACK");
   if (t != null) StartRace(int.Parse(t), int.Parse(System.Environment.GetEnvironmentVariable("MYSIM_CAR") ?? "8"), int.Parse(System.Environment.GetEnvironmentVariable("MYSIM_LAPS") ?? "3")); else { ShowMenu(); var ms = System.Environment.GetEnvironmentVariable("MYSIM_MENUSHOT"); if (ms != null) MenuShot(ms); }
+  // Two-instance LAN test entry (the owner-run script): MYSIM_LAN_HOST opens the hosting
+  // panel (add MYSIM_LAN_AUTOSTART=1 for the unattended run), MYSIM_LAN_JOIN=<addr> opens
+  // and auto-joins. Never set in single-player or CI flows.
+  string lanHostEnv = System.Environment.GetEnvironmentVariable("MYSIM_LAN_HOST"), lanJoinEnv = System.Environment.GetEnvironmentVariable("MYSIM_LAN_JOIN");
+  if (t == null && (lanHostEnv != null || lanJoinEnv != null)) {
+   var lanPanel = new LanRoomPanel { Hosting = lanHostEnv != null };
+   if (lanJoinEnv != null) lanPanel.AutoJoinAddress = lanJoinEnv;
+   lanPanel.LaunchLan = StartLanRace;
+   AddChild(lanPanel);
+  }
  }
  async void MenuShot(string path) { for (int i = 0; i < 20; i++) await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame); GetViewport().GetTexture().GetImage().SavePng(path); GetTree().Quit(); }
  void Ui(string n) { var st = GD.Load<AudioStream>("res://assets/Resources/RecoveredGUI/Audio/" + n + ".wav"); if (st == null) return; var pl = new AudioStreamPlayer { Stream = st, VolumeDb = -6f }; AddChild(pl); pl.Finished += () => pl.QueueFree(); pl.Play(); }
@@ -137,7 +147,7 @@ public partial class Main : Node3D {
  void ShowMenu() {
   activeSeries=null;EndRace();ClearUi();menuStart=null;resultsShown=false;ui=new CanvasLayer();AddChild(ui);
   RaceSeries savedSeries=null;try{string saved=Settings.Get("series_resume","");if(!string.IsNullOrEmpty(saved))savedSeries=RaceSeries.Restore(saved);}catch(System.Exception e){GD.PrintErr("SERIES_RESTORE_FAILED ",e.Message);}
-  var modes=new ModeMenu {ResumeSeries=savedSeries!=null&&!savedSeries.Complete?()=>StartSeriesSession(savedSeries):null,QuickRace=ShowRaceSetup,Series=()=>{var setup=new SeriesSetupPanel();setup.StartSeries+=StartSeriesSession;AddChild(setup);},CreateRoom=()=>AddChild(new LanRoomPanel {Hosting=true}),JoinRoom=()=>AddChild(new LanRoomPanel {Hosting=false})};ui.AddChild(modes);
+  var modes=new ModeMenu {ResumeSeries=savedSeries!=null&&!savedSeries.Complete?()=>StartSeriesSession(savedSeries):null,QuickRace=ShowRaceSetup,Series=()=>{var setup=new SeriesSetupPanel();setup.StartSeries+=StartSeriesSession;AddChild(setup);},CreateRoom=()=>{var panel=new LanRoomPanel {Hosting=true};panel.LaunchLan=StartLanRace;AddChild(panel);},JoinRoom=()=>{var panel=new LanRoomPanel {Hosting=false};panel.LaunchLan=StartLanRace;AddChild(panel);}};ui.AddChild(modes);
  }
  void ShowRaceSetup() {
   EndRace(); ClearUi(); ui = new CanvasLayer(); AddChild(ui); resultsShown = false; menuAge = 0;
@@ -167,6 +177,51 @@ public partial class Main : Node3D {
   var space = GetWorld3D().DirectSpaceState; foreach (var p in new[] { new Vector3(-266.6f, 0, -266.1f), new Vector3(-247.1f, 0, -291.4f), new Vector3(-30f, 0, -460f) }) { var q = PhysicsRayQueryParameters3D.Create(new Vector3(p.X, 100, p.Z), new Vector3(p.X, -100, p.Z)); q.CollisionMask = 8; q.HitBackFaces = true; var r = space.IntersectRay(q); if (r.Count == 0) { GD.Print("ROADRAY none at ", p); continue; } var body = (Node)r["collider"]; var mi = GetNode<MeshInstance3D>(body.GetMeta("mesh").AsString()); string mats = ""; for (int s = 0; s < mi.Mesh.GetSurfaceCount(); s++) mats += (mi.Mesh.SurfaceGetMaterial(s)?.ResourceName ?? "null") + "|"; GD.Print("ROADRAY ", p, " hit y=", ((Vector3)r["position"]).Y.ToString("0.00"), " mesh=", mi.Name, " mats=", mats, " active=", mi.GetActiveMaterial(0) is StandardMaterial3D sm ? (sm.AlbedoTexture != null ? sm.AlbedoTexture.ResourcePath : "color") : "none"); }
  }
  void EndRace() { world?.QueueFree(); world = null; drive = null; }
+ // LAN client race view (the granted adapter scope): builds the track world for the
+ // session's track variant and runs the LanClientRunner (session tick -> SnapshotApplier
+ // -> persistent car views). Deliberately does NOT touch StartRace: the single-player
+ // path stays byte-identical; the track-loading block is duplicated here on purpose and
+ // unifies only when the LAN race flow merges with the single-player one. The host's
+ // in-race integration (remote-driven car in the simulated race) is the NEXT step - the
+ // host stays in its lobby, which keeps ticking and serving STATE.
+ async void StartLanRace(GameSession session) {
+  if (session == null || session.race == null) return;
+  if (session.role == SessionRole.Host) {
+   // Host: the FULL simulated race with the remote-driven car. Hand the session to the
+   // race controller via the static (consumed in its _Ready, so the remote car exists from
+   // construction); the hosting panel keeps ticking the session until the adoption lands
+   // (RaceAdopted), so the client's silence window never sees the loading gap.
+   int lanTrack = session.race.track.variant, lanLaps = session.race.targetLaps;
+   NativeRaceController.PendingLanHost = session;
+   StartRace(lanTrack, Settings.Get("car", 0), lanLaps);
+   return;
+  }
+  EndRace(); ClearUi();
+  ui = new CanvasLayer { Layer = 30 }; AddChild(ui);
+  ui.AddChild(new ColorRect { Color = new Color(.025f, .035f, .05f), AnchorRight = 1, AnchorBottom = 1 });
+  var loading = new Label { Text = "LOADING CIRCUIT (LAN)", Position = new Vector2(48, 300) }; loading.AddThemeFontSizeOverride("font_size", 32); ui.AddChild(loading);
+  await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame); await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+  try {
+   world = new Node3D { Name = "World" }; AddChild(world);
+   int trackIdx = session.race.track.variant;
+   var tl = Json.ParseString(FileAccess.GetFileAsString("res://assets/RealRacing/TrackList.json")).AsGodotDictionary()["tracks"].AsGodotArray()[trackIdx].AsGodotDictionary();
+   string mp = tl["map"].AsString(), lay = tl["layout"].AsString(), scn = tl["scene"].AsString();
+   var trackScene = await LoadSceneAsync("res://assets/RealRacing/Source/" + mp + "/" + scn); var track = trackScene.Instantiate<Node3D>(); trackScene.Dispose(); trackScene = null; track.Scale = new Vector3(100f, 100f, 100f); world.AddChild(track);
+   var layers = new System.Collections.Generic.List<Node3D> { track };
+   foreach (var vp in tl["variationPaths"].AsGodotArray()) { string rp = "res://" + vp.AsString().Replace("Assets/RealRacing/Source/", "assets/RealRacing/Source/"); if (EmptyVariations.Paths.Contains(rp) || !ResourceLoader.Exists(rp)) continue; var vps = await LoadSceneAsync(rp); if (vps == null) continue; var vn = vps.Instantiate<Node3D>(); vps.Dispose(); vps = null; vn.Scale = new Vector3(100f, 100f, 100f); world.AddChild(vn); layers.Add(vn); }
+   int baseVar = (int)tl["baseTrackIndex"]; foreach (var L in layers) { WindingFixer.Fix(L, out _); GroundFixer.Fix(L); WallBuilder.Build(L); UnityMaterialBinder.Apply(L, baseVar, out _); TrackMaterialBinder.Apply(L, "res://assets/" + mp + "/"); }
+   SkyDome.Add(world, mp);
+   string ds = "res://assets/Resources/" + mp + "_" + lay + ".txt"; world.AddChild(DriveSurfaceLoader.Load(FileAccess.FileExists(ds) ? ds : "res://assets/Resources/" + mp + "_processed.txt"));
+   var cam = new Camera3D { Fov = 46, Current = true, Far = 4000 }; world.AddChild(cam);
+   world.AddChild(new LanClientRunner { Session = session, World = world, Cam = cam, OnExit = ShowMenu });
+   ClearUi(); GD.Print("LAN_RACE_READY track=", trackIdx, " role=", session.role);
+  } catch (System.Exception e) {
+   GD.PrintErr("LAN_RACE_LOAD_FAILED ", e); session.Dispose();
+   EndRace(); ClearUi(); ui = new CanvasLayer(); AddChild(ui);
+   var errorLabel = new Label { Text = "Could not load the LAN race. See game log for details.", Position = new Vector2(48, 300) }; ui.AddChild(errorLabel);
+   var back = new Button { Text = "BACK TO MENU", Position = new Vector2(48, 360) }; back.Pressed += ShowMenu; ui.AddChild(back);
+  }
+ }
  bool loadingRace;
  async System.Threading.Tasks.Task<PackedScene> LoadSceneAsync(string path) {
   var error=ResourceLoader.LoadThreadedRequest(path,"PackedScene",true);
@@ -210,7 +265,10 @@ public partial class Main : Node3D {
   var carSize = CarLoader.MeasureSize(car); GD.Print("CARSIZE ", carIdx, " ", carSize.ToString("0.00")); drive = System.Environment.GetEnvironmentVariable("MYSIM_NATIVE_GAMEPLAY")=="1"?new NativeRaceController():new DriveController();drive.CarIndex=carIdx;drive.CarSize=carSize;drive.Car=car;drive.WheelPivots=wheelPivots;drive.TrackIndex=trackIdx;drive.Laps=laps;drive.Cam=cam;drive.AutoDrive=System.Environment.GetEnvironmentVariable("MYSIM_AUTODRIVE")!=null;drive.AiTest=System.Environment.GetEnvironmentVariable("MYSIM_AI")!=null;drive.AutoSeconds=float.Parse(System.Environment.GetEnvironmentVariable("MYSIM_SECONDS")??"8");
   var hud = new Hud(); drive.Hud = hud; world.AddChild(drive); if (System.Environment.GetEnvironmentVariable("MYSIM_INPUTCHECKS") != null) world.AddChild(new DrivingScenario { Drive=drive }); if (System.Environment.GetEnvironmentVariable("MYSIM_USERPATH") != null) world.AddChild(new UserPathScenario { Drive=drive }); world.AddChild(hud); world.AddChild(new TouchControls { Drive=drive });
   ClearUi();GD.Print("RACE_READY track=",trackIdx," car=",carIdx);
+  if(NativeRaceController.PendingLanHost!=null&&drive is NativeRaceController nativeHost){var lanHost=NativeRaceController.PendingLanHost;NativeRaceController.PendingLanHost=null;nativeHost.LanSession=lanHost;lanHost.AdoptRace(nativeHost.Race);GD.Print("LAN_HOST_ADOPTED cars=",nativeHost.Race.cars.Count);}
+  else if(NativeRaceController.PendingLanHost!=null){GD.PrintErr("LAN_HOST_REQUIRES_NATIVE: the LAN host integration runs only under MYSIM_NATIVE_GAMEPLAY=1; dropping the LAN session");NativeRaceController.PendingLanHost.Dispose();NativeRaceController.PendingLanHost=null;}
   } catch(System.Exception e) {
+   NativeRaceController.PendingLanHost=null; // a failed load must not leak a pending LAN session into the next race
    GD.PrintErr("RACE_LOAD_FAILED ",e);if(System.Environment.GetEnvironmentVariable("MYSIM_AI")!=null||System.Environment.GetEnvironmentVariable("MYSIM_FIXTURE_LENS_EXIT")!=null){CleanExit.Request(this,1);return;}EndRace();ClearUi();ui=new CanvasLayer();AddChild(ui);
    var errorLabel=new Label { Text="Could not load this race. See game log for details.",Position=new Vector2(48,300) };ui.AddChild(errorLabel);
    var back=new Button { Text="BACK TO MENU",Position=new Vector2(48,360) };back.Pressed+=ShowMenu;ui.AddChild(back);

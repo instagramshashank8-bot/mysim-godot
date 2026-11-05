@@ -8,11 +8,18 @@ public partial class NativeRaceController : DriveController {
  NativeSuspensionVehicle body;readonly SteeringInput steering=new();readonly PedalController pedalsNative=new();readonly Vector3[] homes=new Vector3[4];SurfaceWeather weather;float elapsed,travel,spawnHeading,maximumYaw;int ruleResets,telemetryTick;readonly System.Collections.Generic.List<object> telemetry=new();int mode,shown=-1;bool pauseWas=true,cameraWas,pitWas,parked,ending;Vector3 spawn,pausedVelocity,pausedAngular;bool pausedBody,padSeen,padStartBlocked;
  Vector3 previousPose;bool havePreviousPose;float actualPoseDistance,resultWait;
  NativeTraffic traffic;public NativeTraffic Traffic=>traffic;public NativeSuspensionVehicle Chassis=>body;public int CameraMode=>mode;NativeGameplayChecks gameplayChecks;NativePitChecks pitChecks;
+ // LAN host mode (the adopted LAN plan): PendingLanHost is set by the host app just before
+ // the race scene is built; _Ready consumes it (adds the remote-driven car, drops AI
+ // traffic), and the host app's post-creation hook hands the session over via AdoptRace.
+ // Null in every non-LAN flow: single-player and the CI/DV paths are unaffected.
+ public static GameSession PendingLanHost;
+ public GameSession LanSession;Node3D remoteVisual;int remoteVisualModel=-1;float lanQuitAfter;double lanQuitTimer;
  MySimulator.Rebuild.DrivingValidation.Runner validation;string validationReportPath=System.Environment.GetEnvironmentVariable("MYSIM_DRIVING_VALIDATION_REPORT");int validationResets;int dvTraceTick;bool gridHoldTraceSeen;
+ int invalidRows;float maxAbsLateral,firstInvalidTime=-1,firstInvalidProgress=-1,firstInvalidLateral;
  public override void CycleCamera(){mode=(mode+1)%4;}
  public override void _Ready(){
   int rivals=int.Parse(System.Environment.GetEnvironmentVariable("MYSIM_RIVALS")??Settings.Get("rivals",5).ToString());if(rivals!=0&&System.Environment.GetEnvironmentVariable("MYSIM_NATIVE_TRAFFIC")!="1")throw new InvalidOperationException("Native opponents require explicit experimental traffic flag until full contact/race validation");
-  NativePhysicsClock.Configure();if(System.Environment.GetEnvironmentVariable("MYSIM_DEFER_NATIVE_RENDER")=="1")GetViewport().Disable3D=true;Race=new Race(TrackIndex,Laps,Conditions.WetnessValue);Player=Race.Add("PLAYER",true,(Compound)Mathf.Clamp(int.Parse(System.Environment.GetEnvironmentVariable("MYSIM_STARTING_COMPOUND")??Settings.Get("starting_compound",1).ToString(),System.Globalization.CultureInfo.InvariantCulture),0,3));Player.carModel=CarIndex;if(System.Environment.GetEnvironmentVariable("MYSIM_START_FUEL") is string initialFuel)Player.fuel=float.Parse(initialFuel,System.Globalization.CultureInfo.InvariantCulture);if(!float.IsFinite(Player.fuel)||Player.fuel<0)throw new ArgumentOutOfRangeException("MYSIM_START_FUEL");Player.human=!AiTest;if(System.Environment.GetEnvironmentVariable("MYSIM_ERS_AUTO")=="0")Player.ersAuto=false;Player.externalPhysics=true;Player.nativeTyreSteering=true;Player.traction=Settings.Get("tc",true);Player.abs=Settings.Get("abs",true);if(System.Environment.GetEnvironmentVariable("MYSIM_ASSISTS")=="0"){Player.traction=false;Player.abs=false;GD.Print("ASSISTS_OFF traction and brake-stability assists disabled for physics acceptance");}validationReportPath=System.Environment.GetEnvironmentVariable("MYSIM_DRIVING_VALIDATION_REPORT");Player.Place(Race.track,.988f,0);Player.externalResetRequested=false;if(AiTest&&System.Environment.GetEnvironmentVariable("MYSIM_GRID_START")!="1"){Race.countdown=0;Race.started=true;}weather=Conditions.BeginWeather();traffic=new NativeTraffic(this,rivals);
+  NativePhysicsClock.Configure();if(System.Environment.GetEnvironmentVariable("MYSIM_DEFER_NATIVE_RENDER")=="1")GetViewport().Disable3D=true;Race=new Race(TrackIndex,Laps,Conditions.WetnessValue);Player=Race.Add("PLAYER",true,(Compound)Mathf.Clamp(int.Parse(System.Environment.GetEnvironmentVariable("MYSIM_STARTING_COMPOUND")??Settings.Get("starting_compound",1).ToString(),System.Globalization.CultureInfo.InvariantCulture),0,3));Player.carModel=CarIndex;if(System.Environment.GetEnvironmentVariable("MYSIM_START_FUEL") is string initialFuel)Player.fuel=float.Parse(initialFuel,System.Globalization.CultureInfo.InvariantCulture);if(!float.IsFinite(Player.fuel)||Player.fuel<0)throw new ArgumentOutOfRangeException("MYSIM_START_FUEL");Player.human=!AiTest;if(System.Environment.GetEnvironmentVariable("MYSIM_ERS_AUTO")=="0")Player.ersAuto=false;Player.externalPhysics=true;Player.nativeTyreSteering=true;Player.traction=Settings.Get("tc",true);Player.abs=Settings.Get("abs",true);if(System.Environment.GetEnvironmentVariable("MYSIM_ASSISTS")=="0"){Player.traction=false;Player.abs=false;GD.Print("ASSISTS_OFF traction and brake-stability assists disabled for physics acceptance");}validationReportPath=System.Environment.GetEnvironmentVariable("MYSIM_DRIVING_VALIDATION_REPORT");Player.Place(Race.track,.988f,0);Player.externalResetRequested=false;if(AiTest&&System.Environment.GetEnvironmentVariable("MYSIM_GRID_START")!="1"){Race.countdown=0;Race.started=true;}weather=Conditions.BeginWeather();if(PendingLanHost!=null){LanSession=PendingLanHost;PendingLanHost=null;rivals=0;var remote=Race.Add(string.IsNullOrEmpty(LanSession.PeerName)?"REMOTE":LanSession.PeerName,true,Compound.Medium);remote.carModel=Mathf.Clamp(LanSession.PeerModel,0,CarCatalog.Count-1);remote.human=true;GD.Print("LAN_REMOTE_CAR model=",remote.carModel," driver=",remote.driver);if(System.Environment.GetEnvironmentVariable("MYSIM_LAN_QUIT_AFTER") is string lanQuit&&float.TryParse(lanQuit,System.Globalization.NumberStyles.Float,System.Globalization.CultureInfo.InvariantCulture,out lanQuitAfter)&&(lanQuitAfter<=0||lanQuitAfter>600))throw new ArgumentOutOfRangeException("MYSIM_LAN_QUIT_AFTER","0-600 s allowed");}traffic=new NativeTraffic(this,rivals);
   if(System.Environment.GetEnvironmentVariable("MYSIM_NATIVE_GAMEPLAY_CHECKS")=="1"){gameplayChecks=new NativeGameplayChecks {Drive=this};AddChild(gameplayChecks);}
   if(System.Environment.GetEnvironmentVariable("MYSIM_NATIVE_PIT_CHECKS")=="1"){pitChecks=new NativePitChecks();pitChecks.Request(Player);}
   if(Hud!=null){Hud.Race=Race;Hud.Player=Player;}if(Conditions.Raining)Conditions.AddRain(Cam);
@@ -29,6 +36,9 @@ public partial class NativeRaceController : DriveController {
   bool pause=startButton||Input.IsKeyPressed(Key.Escape)||Input.IsKeyPressed(Key.Tab);if(pause&&!pauseWas)Race.paused=!Race.paused;pauseWas=pause;Hud.Paused=Race.paused;
   traffic.Pause(Race.paused);if(Race.paused){if(!pausedBody){pausedVelocity=body.LinearVelocity;pausedAngular=body.AngularVelocity;body.Freeze=true;pausedBody=true;}UpdateAudio(-1);return;}if(pausedBody){body.Freeze=parked;body.LinearVelocity=pausedVelocity;body.AngularVelocity=pausedAngular;pausedBody=false;}
   elapsed+=(float)delta;Conditions.Advance(weather,(float)delta);Race.wetness=weather.Water;RenderingServer.GlobalShaderParameterSet("mysim_surface_water",Race.wetness);body.Water=Race.wetness;body.TractionControl=Player.traction;body.BrakeStabilityAssist=Player.abs;
+  // LAN host: tick the session BEFORE the race advances so a just-received remote input drives this tick's Car. Network traffic flows at the session's own cadence.
+  if(LanSession!=null){try{LanSession.Tick((float)delta);}catch(Exception e){GD.PushWarning("LAN session tick error: ",e.Message);}
+   if(lanQuitAfter>0){lanQuitTimer+=(float)delta;if(lanQuitTimer>=lanQuitAfter){GD.Print("LAN_HOST_EXIT connected=",LanSession.connected," inputs=",LanSession.lastInputSequence," elapsed=",elapsed.ToString("0.0",System.Globalization.CultureInfo.InvariantCulture));CleanExit.Request(this,LanSession.lastInputSequence>0?0:1);return;}}}
   float throttle=ControlBindings.Held(0)?1:0,brake=ControlBindings.Held(1)?1:0,requested=(ControlBindings.Held(3)?1:0)-(ControlBindings.Held(2)?1:0);bool analog=false;var pads=Input.GetConnectedJoypads();if(pads.Count>0){int id=pads[0];float axis=Input.GetJoyAxis(id,JoyAxis.LeftX);if(Mathf.Abs(axis)>.08f){requested=Mathf.Sign(axis)*Mathf.Pow((Mathf.Abs(axis)-.08f)/.92f,1.35f);analog=true;}throttle=Mathf.Max(throttle,Mathf.Clamp(Input.GetJoyAxis(id,JoyAxis.TriggerRight),0,1));brake=Mathf.Max(brake,Mathf.Clamp(Input.GetJoyAxis(id,JoyAxis.TriggerLeft),0,1));}
   if(TouchControls.Active){if(Mathf.Abs(TouchControls.Steer)>.01f)requested=TouchControls.Steer;throttle=Mathf.Max(throttle,TouchControls.Throttle);brake=Mathf.Max(brake,TouchControls.Brake);}if(!DisplayServer.WindowIsFocused()&&DisplayServer.GetName()!="headless")throttle=brake=requested=0;
   if(AutoDrive&&!AiTest){throttle=elapsed>=3&&elapsed<7?.3f:0;brake=elapsed>=7?1:0;requested=0;}
@@ -37,14 +47,36 @@ public partial class NativeRaceController : DriveController {
   if(Player.human&&!Player.pitActive&&!Player.finished&&!Player.retired)Player.input=pedalsNative.Update(throttle,brake,SteeringInput.ToSimulation(steering.Step(requested,(float)delta,analog)),ControlBindings.Held(4),body.LinearVelocity.Dot(body.GlobalBasis.Z),(float)delta,!AutoDrive);
   bool pit=ControlBindings.Held(5)||(pads.Count>0&&Input.IsJoyButtonPressed(pads[0],JoyButton.A));if(pit&&!pitWas)Hud.TogglePitStrategy();pitWas=pit;
   Race.Advance((float)delta);Player.totalDistance=actualPoseDistance;traffic.Apply((float)delta);if(Player.externalResetRequested&&!PlaceBody("race-rule-reset"))throw new Exception("Native race reset lacks drive surface");
+  // LAN host: the remote-driven car's persistent visual (logic-simulated like the AI cars;
+  // one node per session, rebuilt only if the model changed - never per packet).
+  if(LanSession!=null&&Race.cars.Count>1){var remote=Race.cars[1];if(remoteVisual==null||remoteVisualModel!=remote.carModel){if(remoteVisual!=null)remoteVisual.QueueFree();remoteVisual=CarLoader.Load(CarCatalog.Folders[remote.carModel]);CarLoader.ApplyExact(remoteVisual,remote.carModel);remoteVisualModel=remote.carModel;AddChild(remoteVisual);}remoteVisual.Position=new Vector3(remote.position.x,remote.hasBodyPose?remote.bodyHeight:0,remote.position.z);if(remote.hasBodyPose){var rq=new Quaternion(remote.bodyQx,remote.bodyQy,remote.bodyQz,remote.bodyQw);if(rq.LengthSquared()>0.8f&&rq.LengthSquared()<1.2f)remoteVisual.Transform=new Transform3D(new Basis(rq),remoteVisual.Position);else remoteVisual.Rotation=new Vector3(0,remote.heading,0);}else remoteVisual.Rotation=new Vector3(0,remote.heading,0);}
+  // Lap-validity evidence (strict-lap semantics unchanged): the inactive bestLap on a completed lap
+  // must be explainable from the report itself - the flag is set by ANY off-corridor sample and only
+  // clears at a line crossing, so the per-tick trace below names where and how far the lap went out.
+  if(Player.lapInvalid){invalidRows++;if(firstInvalidTime<0){firstInvalidTime=elapsed;firstInvalidProgress=Player.progress;firstInvalidLateral=Player.lateral;}}
+  maxAbsLateral=Mathf.Max(maxAbsLateral,Mathf.Abs(Player.lateral));
   if(Player.servicing&&!parked){if(!PlaceBody("pit-box-alignment"))throw new Exception("Pit box has no physical surface");body.SeedRollingVelocity(Vector3.Zero);body.AngularVelocity=Vector3.Zero;body.Freeze=true;parked=true;}else if(!Player.servicing&&parked){body.Freeze=false;parked=false;TyreAppearance.Apply(WheelPivots,Player.tyres[0].compound);}
   if(validation==null&&System.Environment.GetEnvironmentVariable("MYSIM_DRIVING_VALIDATION")=="1")validation=CreateValidationRunner();
   if(validation!=null){
    if(!validation.Completed&&(Player.finished||Player.retired||elapsed>=AutoSeconds))validation.Abort("session ended before all validation profiles completed");
    validation.Advance(BuildValidationSample(),(float)delta);
-   if(validation.NeedsReset){if(!PlaceBody("validation-reset"))throw new Exception("Driving validation reset lacks drive surface");validationResets++;validation.ConfirmReset();}
+   if(validation.NeedsReset){if(!PlaceBody("validation-reset"))throw new Exception("Driving validation reset lacks drive surface");validationResets++;steering.Reset();pedalsNative.Reset();validation.ConfirmReset();}
    if(validation.Completed){FinishValidation();return;}
-   if(!Player.servicing&&!Player.finished&&!Player.retired)Player.input=ValidationInput(validation.Current);
+   if(!Player.servicing&&!Player.finished&&!Player.retired){
+    var command=validation.Current;
+    bool userPath=System.Environment.GetEnvironmentVariable("MYSIM_USERPATH")=="1";
+    if(userPath){
+     // The userpath leg drives the SAME human chain (keyboard smoothing + directional flip +
+     // pedal latch) instead of injecting DriverInput directly: filter/lock/latch behaviour is
+     // measured through the real input plumbing. Profile reverse phases map to the brake pedal,
+     // which is the reverse pedal once the brake-to-reverse latch engages (human device semantics).
+     float commandThrottle=(float)command.Throttle,commandBrake=(float)command.Brake;
+     if(command.Reverse){commandThrottle=0;commandBrake=1;}
+     Player.input=pedalsNative.Update(commandThrottle,commandBrake,SteeringInput.ToSimulation(steering.Step((float)command.Steer,(float)delta,false)),ControlBindings.Held(4),body.LinearVelocity.Dot(body.GlobalBasis.Z),(float)delta,true);
+    }else{
+     Player.input=ValidationInput(command);
+    }
+   }
    if(dvTraceTick++%120==0){MySimulator.Rebuild.DrivingValidation.Run stage=null;foreach(var r in validation.Runs){if(!r.Completed){stage=r;break;}}
     GD.Print("DV_TRACE t=",elapsed.ToString("0.0")," started=",Race.started," gridHold=",body.GridHold," spd=",Player.speed.ToString("0.00")," thr=",Player.input.throttle.ToString("0.00")," brk=",Player.input.brake.ToString("0.00")," stage=",(stage!=null?stage.Profile.Id:"done")," clock=",validation.Clock.ToString("0.0"));gridHoldTraceSeen=gridHoldTraceSeen||body.GridHold;}
   }
@@ -75,6 +107,7 @@ public partial class NativeRaceController : DriveController {
    if(!map.TryGetValue(id,out var profile))throw new InvalidOperationException("Driving validation profile "+id+" is missing from native_driving_validation_profiles.json");
    if(profile.RequireRotationalTyres&&!body.RotationalTyres)throw new InvalidOperationException("Driving validation profile "+id+" requires rotational tyres; dispatch with rotational_tyres=true");
    if(profile.RequireDamage&&!body.DamageEnabled)throw new InvalidOperationException("Driving validation profile "+id+" requires the native damage system; dispatch with native_damage=true");
+   if(profile.RequireGridStart&&System.Environment.GetEnvironmentVariable("MYSIM_GRID_START")!="1")throw new InvalidOperationException("Driving validation profile "+id+" requires the grid start; dispatch with MYSIM_GRID_START=1 so the countdown is not skipped");
    runs.Add(new MySimulator.Rebuild.DrivingValidation.Run(profile,references));
   }
   if(runs.Count==0)throw new InvalidOperationException("Driving validation case selected no profiles");
@@ -83,7 +116,8 @@ public partial class NativeRaceController : DriveController {
  System.Collections.Generic.Dictionary<string,double> ValidationReferences()=>new System.Collections.Generic.Dictionary<string,double>{
   ["brakeStop60Metres"]=RecoveredVehicleProfiles.Brakes[CarIndex]*.3048,
   ["accel0To60Seconds"]=RecoveredVehicleProfiles.Acceleration[CarIndex],
-  ["steerActuatorRate"]=3.2};
+  ["steerActuatorRate"]=3.2,
+  ["vehicleMass"]=RecoveredVehicleProfiles.Mass[CarIndex]};
  string ReadProjectText(string path){
   if(System.IO.File.Exists(path))return System.IO.File.ReadAllText(path);
   var normalised=path.Replace('\\','/');if(!normalised.StartsWith("res://",StringComparison.Ordinal))normalised="res://"+normalised;
@@ -94,6 +128,8 @@ public partial class NativeRaceController : DriveController {
   float longitudinal=body.LinearVelocity.Dot(forward);
   int mask=0;for(int i=0;i<4;i++)if(body.Grounded[i])mask|=1<<i;
   bool nonSurfaceContact=false;foreach(var surface in body.ContactSurfaces)if(surface!=null&&surface.IndexOf("DriveSurface",StringComparison.OrdinalIgnoreCase)<0){nonSurfaceContact=true;break;}
+  bool wheelBandContact=false;foreach(var part in body.ContactParts)if(part!=null&&part.IndexOf("WHEELGUARD",StringComparison.OrdinalIgnoreCase)>=0||part!=null&&part.IndexOf("CALIPER",StringComparison.OrdinalIgnoreCase)>=0){wheelBandContact=true;break;}
+  bool bodyPanelContact=false;foreach(var part in body.ContactParts)if(part!=null&&part.IndexOf("DriveSurface",StringComparison.OrdinalIgnoreCase)<0&&part.IndexOf("WHEELGUARD",StringComparison.OrdinalIgnoreCase)<0&&part.IndexOf("CALIPER",StringComparison.OrdinalIgnoreCase)<0){bodyPanelContact=true;break;}
   var command=validation.Current;
   return new MySimulator.Rebuild.DrivingValidation.Sample{
    speed=body.LinearVelocity.Length(),longitudinalSpeed=longitudinal,lateralSpeed=body.LinearVelocity.Dot(right),
@@ -101,8 +137,9 @@ public partial class NativeRaceController : DriveController {
    wheelAngle=body.WheelAngle,wheelAngleTarget=MySimulator.Rebuild.Dynamics.SteeringTarget((float)command.Steer,longitudinal),
    steerCommand=command.Steer,throttle=command.Throttle,brake=command.Brake,
    x=body.GlobalPosition.X,z=body.GlobalPosition.Z,trackLateral=Player.lateral,progress=Player.progress,water=body.Water,
-   onDrivingSurface=Player.onDrivingSurface,nonSurfaceContact=nonSurfaceContact,groundedMask=mask,chassisContacts=body.ChassisContacts,
+   onDrivingSurface=Player.onDrivingSurface,nonSurfaceContact=nonSurfaceContact,wheelBandContact=wheelBandContact,bodyPanelContact=bodyPanelContact,groundedMask=mask,chassisContacts=body.ChassisContacts,
    impactEvents=body.Impacts.Events,maxDeltaV=body.Impacts.MaximumDeltaV,
+   raceStarted=Race.started,raceClock=Race.clock,countdown=Race.countdown,
    loads=ToDoubles(body.Loads),springLengths=ToDoubles(body.SpringLength),
    longitudinalSlip=ToDoubles(body.LongitudinalSlip),lateralSlipAngle=ToDoubles(body.LateralSlipAngle)};
  }
@@ -116,15 +153,33 @@ public partial class NativeRaceController : DriveController {
    var metrics=new System.Collections.Generic.Dictionary<string,object>();
    foreach(var phase in run.Profile.Phases)
     foreach(var name in MySimulator.Rebuild.DrivingValidation.KnownMetrics){
-     if(name=="meanYawRateAbsMin")continue;
+     if(name=="meanYawRateAbsMin"||System.Array.IndexOf(MySimulator.Rebuild.DrivingValidation.RecoveryMetricNames,name)>=0||System.Array.IndexOf(MySimulator.Rebuild.DrivingValidation.ContactArchetypeMetricNames,name)>=0)continue;
      var value=MySimulator.Rebuild.DrivingValidation.ComputeMetric(name,phase.Id,run.Timeline,run.Profile,validation.References);
      if(value.HasValue)metrics[phase.Id+"."+name]=value.Value;
     }
    var assertions=new System.Collections.Generic.List<object>();
    foreach(var r in run.Results)assertions.Add(new{id=r.Id,metric=r.Metric,op=r.Op,passed=r.Passed,actual=r.Actual,expected=r.Expected});
    var samples=new System.Collections.Generic.List<object>();
-   foreach(var s in run.Timeline)samples.Add(new{s.t,s.speed,s.longitudinalSpeed,s.lateralSpeed,s.heading,s.yawRate,s.upY,s.wheelAngle,s.wheelAngleTarget,s.steerCommand,s.throttle,s.brake,s.x,s.z,s.trackLateral,s.progress,s.water,onDrivingSurface=s.onDrivingSurface?1:0,s.groundedMask,s.chassisContacts,s.impactEvents,s.maxDeltaV,s.loads,s.springLengths,s.longitudinalSlip,s.lateralSlipAngle});
-   runList.Add(new{profile=run.Profile.Id,title=run.Profile.Title,ok=run.Passed&&run.AbortReason==null,completed=run.Completed,abortReason=run.AbortReason,firstFailure=run.FirstFailure,metrics,assertions,sampleCount=run.Timeline.Count,samplesTruncated=run.Timeline.Count>=run.Profile.MaxSamples,samples});
+   foreach(var s in run.Timeline)samples.Add(new{s.t,s.speed,s.longitudinalSpeed,s.lateralSpeed,s.heading,s.yawRate,s.upY,s.wheelAngle,s.wheelAngleTarget,s.steerCommand,s.throttle,s.brake,s.x,s.z,s.trackLateral,s.progress,s.water,onDrivingSurface=s.onDrivingSurface?1:0,nonSurfaceContact=s.nonSurfaceContact?1:0,wheelBandContact=s.wheelBandContact?1:0,bodyPanelContact=s.bodyPanelContact?1:0,s.groundedMask,s.chassisContacts,s.impactEvents,s.maxDeltaV,s.loads,s.springLengths,s.longitudinalSlip,s.lateralSlipAngle});
+   var runEntry=new System.Collections.Generic.Dictionary<string,object>{{"profile",run.Profile.Id},{"title",run.Profile.Title},{"ok",run.Passed&&run.AbortReason==null},{"completed",run.Completed},{"abortReason",run.AbortReason},{"firstFailure",run.FirstFailure},{"metrics",metrics},{"assertions",assertions},{"sampleCount",run.Timeline.Count},{"samplesTruncated",run.Timeline.Count>=run.Profile.MaxSamples},{"samples",samples}};
+   if(run.Profile.Recovery!=null){
+    var windows=MySimulator.Rebuild.DrivingValidation.RecoveryWindows(run.Timeline,run.Profile.Recovery);
+    var recoveryMetrics=new System.Collections.Generic.Dictionary<string,object>();
+    foreach(var name in MySimulator.Rebuild.DrivingValidation.RecoveryMetricNames){
+     var value=MySimulator.Rebuild.DrivingValidation.ComputeMetric(name,"all",run.Timeline,run.Profile,validation.References);
+     if(value.HasValue)recoveryMetrics[name]=value.Value;}
+    var windowList=new System.Collections.Generic.List<object>();
+    foreach(var w in windows)windowList.Add(new{w.startT,w.endT,w.startSpeed,w.Recovered,w.motionTime,w.pathLength,w.maxReverseSpeed,w.offTrackFraction,w.throttleFraction,w.brakeFraction,w.steerPeakAbs});
+    runEntry["recoveryMetrics"]=recoveryMetrics;runEntry["recoveryWindows"]=windowList;
+   }
+   if(run.Profile.RecordContactArchetypes){
+    var archetypeMetrics=new System.Collections.Generic.Dictionary<string,object>();
+    foreach(var name in MySimulator.Rebuild.DrivingValidation.ContactArchetypeMetricNames){
+     var value=MySimulator.Rebuild.DrivingValidation.ComputeMetric(name,"all",run.Timeline,run.Profile,validation.References);
+     if(value.HasValue)archetypeMetrics[name]=value.Value;}
+    runEntry["contactArchetypes"]=archetypeMetrics;
+   }
+   runList.Add(runEntry);
   }
   var report=new System.Collections.Generic.Dictionary<string,object>{
    ["ok"]=validation.Completed&&validation.AllPassed,
@@ -133,6 +188,7 @@ public partial class NativeRaceController : DriveController {
    ["recordFps"]=System.Environment.GetEnvironmentVariable("MYSIM_NATIVE_RECORD_FPS")??"unrecorded",
    ["rotationalTyres"]=body.RotationalTyres,
    ["assistsOff"]=System.Environment.GetEnvironmentVariable("MYSIM_ASSISTS")=="0",
+   ["userPath"]=System.Environment.GetEnvironmentVariable("MYSIM_USERPATH")=="1",
    ["damageEnabled"]=body.DamageEnabled,
    ["backend"]=System.Environment.GetEnvironmentVariable("MYSIM_PHYSICS_BACKEND")??"authoritative record is physics-backend-experiment.json of the same run",
    ["weatherProfile"]=Conditions.Wet,["water"]=body.Water,["compound"]=(int)Player.tyres[0].compound,
@@ -148,7 +204,8 @@ public partial class NativeRaceController : DriveController {
   CleanExit.Request(this,ok?0:1);
  }
  async void FinishProbeCapture(bool ok){try{string shot=System.Environment.GetEnvironmentVariable("MYSIM_SHOT");if(shot!=null){body.Freeze=true;GetViewport().Disable3D=false;await ToSignal(GetTree(),SceneTree.SignalName.ProcessFrame);await ToSignal(GetTree(),SceneTree.SignalName.ProcessFrame);using var capture=GetViewport().GetTexture().GetImage();var error=capture.SavePng(shot);if(error!=Error.Ok)throw new Exception("Integrated native capture failed: "+error);GD.Print("PASS actual integrated native scene capture");}CleanExit.Request(this,ok?0:1);}catch(Exception e){GD.PushError(e.ToString());CleanExit.Request(this,1);}}
- async void FinishAi(bool ok){try{ending=true;body.Controls=new DriverInput(0,1,0);await ToSignal(GetTree(),SceneTree.SignalName.ProcessFrame);await ToSignal(GetTree(),SceneTree.SignalName.ProcessFrame);if(System.Environment.GetEnvironmentVariable("MYSIM_NATIVE_RESULT_CAPTURE") is string imagePath){await ToSignal(RenderingServer.Singleton,RenderingServer.SignalName.FramePostDraw);using var image=GetViewport().GetTexture().GetImage();if(image.SavePng(imagePath)!=Error.Ok)throw new Exception("Native results image save failed");}bool resultVisible=GetTree().CurrentScene is Main game&&game.ResultsVisible;ok&=(pitChecks==null||pitChecks.Completed)&&resultVisible&&actualPoseDistance>=Race.track.length*.95f&&(!body.DamageEnabled||body.Impacts.Events==0&&Player.damage==0)&&traffic.AdvancedWithoutRescue&&(gameplayChecks==null||gameplayChecks.Completed);string report=System.Environment.GetEnvironmentVariable("MYSIM_NATIVE_GAMEPLAY_REPORT");if(report!=null){using var reportStream=System.IO.File.Create(report);System.Text.Json.JsonSerializer.Serialize(reportStream,new {ok,continuousCcd=body.ContinuousCd,car=CarIndex,track=TrackIndex,damage=Player.damage,damageEnabled=body.DamageEnabled,weatherProfile=Conditions.Wet,water=body.Water,tyreCompound=(int)Player.tyres[0].compound,impactEvents=body.Impacts.Events,impactEvidence=body.Impacts.Evidence,verticalRoadPlanning=body.RoadPlanning.Evidence,actualPoseDistance,rotationalTyres=body.RotationalTyres,finished=Player.finished,laps=Player.completedLaps,bestLap=Player.bestLap,time=elapsed,ruleResets,distance=Player.totalDistance,requiredDistance=Race.track.length*.95f,resultVisible,pitRoute=Array.ConvertAll(Race.track.PitRoute,p=>new[]{p.x,p.z}),pitServiceIndex=Race.track.PitServiceIndex,routeWidth=Race.track.width,route=Array.ConvertAll(Race.track.points,p=>new[]{p.x,p.z}),bodyY=body.GlobalPosition.Y,tyreContacts=body.Contacts,contactParts=body.ContactParts,contactSurfaces=body.ContactSurfaces,springLengths=body.SpringLength,telemetry,pit=pitChecks?.Evidence,opponents=traffic.Evidence,opponentResets=traffic.RuleResets,checksCompleted=gameplayChecks?.Completed,scope="Native force-driven legal player lap and results UI; opponents must advance physically without rescue when enabled; all-layout/contact/art acceptance separate"},new System.Text.Json.JsonSerializerOptions {WriteIndented=true});}GD.Print(ok?"PASS native force-driven valid lap and results UI":"FAIL native force-driven lap or results UI");CleanExit.Request(this,ok?0:1);}catch(Exception error){GD.PushError("Native race finalization failed: "+error);CleanExit.Request(this,1);}}
+ public override void _ExitTree(){LanSession?.Dispose();LanSession=null;}
+ async void FinishAi(bool ok){try{ending=true;body.Controls=new DriverInput(0,1,0);await ToSignal(GetTree(),SceneTree.SignalName.ProcessFrame);await ToSignal(GetTree(),SceneTree.SignalName.ProcessFrame);if(System.Environment.GetEnvironmentVariable("MYSIM_NATIVE_RESULT_CAPTURE") is string imagePath){await ToSignal(RenderingServer.Singleton,RenderingServer.SignalName.FramePostDraw);using var image=GetViewport().GetTexture().GetImage();if(image.SavePng(imagePath)!=Error.Ok)throw new Exception("Native results image save failed");}bool resultVisible=GetTree().CurrentScene is Main game&&game.ResultsVisible;ok&=(pitChecks==null||pitChecks.Completed)&&resultVisible&&actualPoseDistance>=Race.track.length*.95f&&(!body.DamageEnabled||body.Impacts.Events==0&&Player.damage==0)&&traffic.AdvancedWithoutRescue&&(gameplayChecks==null||gameplayChecks.Completed);string report=System.Environment.GetEnvironmentVariable("MYSIM_NATIVE_GAMEPLAY_REPORT");if(report!=null){using var reportStream=System.IO.File.Create(report);System.Text.Json.JsonSerializer.Serialize(reportStream,new {ok,continuousCcd=body.ContinuousCd,car=CarIndex,track=TrackIndex,damage=Player.damage,damageEnabled=body.DamageEnabled,weatherProfile=Conditions.Wet,water=body.Water,tyreCompound=(int)Player.tyres[0].compound,impactEvents=body.Impacts.Events,impactEvidence=body.Impacts.Evidence,verticalRoadPlanning=body.RoadPlanning.Evidence,actualPoseDistance,rotationalTyres=body.RotationalTyres,finished=Player.finished,laps=Player.completedLaps,bestLap=Player.bestLap,time=elapsed,ruleResets,distance=Player.totalDistance,requiredDistance=Race.track.length*.95f,resultVisible,pitRoute=Array.ConvertAll(Race.track.PitRoute,p=>new[]{p.x,p.z}),pitServiceIndex=Race.track.PitServiceIndex,routeWidth=Race.track.width,route=Array.ConvertAll(Race.track.points,p=>new[]{p.x,p.z}),bodyY=body.GlobalPosition.Y,tyreContacts=body.Contacts,contactParts=body.ContactParts,contactSurfaces=body.ContactSurfaces,springLengths=body.SpringLength,telemetry,pit=pitChecks?.Evidence,opponents=traffic.Evidence,opponentResets=traffic.RuleResets,checksCompleted=gameplayChecks?.Completed,scope="Native force-driven legal player lap and results UI; opponents must advance physically without rescue when enabled; all-layout/contact/art acceptance separate",lapValidity=new{strictBestLapRecorded=Player.bestLap>0,invalidRows,maxAbsLateral,routeHalfWidth=Race.track.width*.5f,firstInvalidTime,firstInvalidProgress,firstInvalidLateral,explanation="bestLap stays 0 when any sample set lapInvalid before the line crossing; the telemetry rows carry the per-tick trace - a zero invalidRows with bestLap 0 would indicate a timing defect instead",timingNote="finished=true means the lap DID complete through the ordered gate-4 line crossing (RegisterProgress), so bestLap=0 here means validity, not timing"}},new System.Text.Json.JsonSerializerOptions {WriteIndented=true});}GD.Print(ok?"PASS native force-driven valid lap and results UI":"FAIL native force-driven lap or results UI");CleanExit.Request(this,ok?0:1);}catch(Exception error){GD.PushError("Native race finalization failed: "+error);CleanExit.Request(this,1);}}
  void UpdateView(){if(shown!=mode){shown=mode;CarViewVisibility.Apply(Car,WheelPivots,CarIndex,mode==2);}CarViewVisibility.SetWheels(WheelPivots,CarIndex,mode==2);
   var forward=body.GlobalBasis.Z;var target=Car.GlobalPosition+Vector3.Up*.8f;if(mode<2){var want=target-forward*(mode==0?7:11)+Vector3.Up*(mode==0?2:3.8f);using var query=PhysicsRayQueryParameters3D.Create(target,want,2);query.HitBackFaces=true;var hit=GetWorld3D().DirectSpaceState.IntersectRay(query);if(hit.Count>0){want=target+(want-target).Normalized()*Mathf.Max(0,target.DistanceTo((Vector3)hit["position"])-.35f);hit.Clear();}Cam.GlobalPosition=want;Cam.LookAt(target+forward*3);Cam.Fov=48;}
   else{Cam.GlobalPosition=Car.GlobalTransform*new Vector3(mode==2&&CarCatalog.RaceClass(CarIndex)!=1?-.35f:0,mode==2?.88f:.62f,mode==2?.05f:1.9f);Cam.LookAt(Cam.GlobalPosition+forward*10);Cam.Fov=mode==2?75:70;}

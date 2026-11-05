@@ -1,0 +1,12 @@
+{
+  "cases": [
+    {
+      "car": 16,
+      "track": 0,
+      "weather": 0,
+      "compound": 1,
+      "drivingValidation": ["wall_contact_low", "wall_contact_high", "wall_contact_graze", "impact_wall_recovery"]
+    }
+  ],
+  "scope": "Force-driven wall/contact validation on track0: scripted approach + aim phases produce REAL drive-force barrier contacts (not AI-line passes); the profiles measure DeltaV, the per-tick velocity-jump force estimate, the impulse identity bound (impulse/mass is a DeltaV bounded by the approach speed plus rebound margin), contact dwell, damage state and drive-away recovery - with the restored hub-mounted wheelguard/caliper collision covering the wheel band. Dispatch with DRIVING_VALIDATION_IMPACT=1 (the manifest ends with impact_wall_recovery), native_damage=true, rotational tyres, assists off, jolt first then the source pair for the backend comparison. Notebook: contact geometry is not prescribed; a sub-threshold graze times the aim phase out and fails honestly for the next iteration."
+}

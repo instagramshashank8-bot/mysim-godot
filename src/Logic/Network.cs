@@ -59,7 +59,7 @@ namespace MySimulator.Rebuild
     }
     public static class Wire
     {
-        public const string Version="MSR5";
+        public const string Version="MSR6";
         static readonly CultureInfo C=CultureInfo.InvariantCulture;
         public static string F(float f){return f.ToString("0.###",C);}
         public static float Float(string s){float f;if(!float.TryParse(s,NumberStyles.Float,C,out f)||!MathUtil.Finite(f))throw new FormatException("Invalid number");return f;}
@@ -102,9 +102,15 @@ namespace MySimulator.Rebuild
         public IGameChannel channel;
         public Race race;
         public bool connected;
-        public string status="Offline",peer,peerNonce="",name="Driver",sessionToken="",nonce=Guid.NewGuid().ToString("N");
-        public int localModel,localId,sequence,lastSequence=-1,inputSequence,lastInputSequence=-1;
+        public string status="Offline",peer,PeerName="",peerNonce="",name="Driver",sessionToken="",nonce=Guid.NewGuid().ToString("N");
+        public int localModel,localId,sequence,lastSequence=-1,inputSequence,lastInputSequence=-1,PeerModel;
         public float silence,sendTimer,joinTimer,inputSilence;bool remoteResetHeld;
+        // The adopted LAN plan's explicit start handoff: the host sends START|token when the
+        // room launches; the client gates its race-scene entry on receiving its exact token.
+        public bool startRequested,startReceived;
+        // Set by AdoptRace: the host's live simulated race replaced the lobby race; the
+        // hosting UI stops ticking the session at this point (the drive controller took over).
+        public bool RaceAdopted;
         public readonly Dictionary<string,string> rooms=new Dictionary<string,string>();
         public DriverInput localInput;
         public bool pitRequest,resetRequest;
@@ -116,6 +122,26 @@ namespace MySimulator.Rebuild
         }
         public void Join(IGameChannel transport,string address,string driver)
         {channel=transport;role=SessionRole.Client;peer=address;name=driver;localId=1;status="Connecting";joinTimer=2;silence=0;}
+        // Host-side race start (the adopted LAN plan's explicit START): arms the real 5 s
+        // countdown (the lobby holds countdown at 9999 so the race-start semantics stay the
+        // single-player ones) and tells the client to enter its race scene. The client gates
+        // its transition on receiving START with its exact session token.
+        public void StartRace()
+        {
+            if(role!=SessionRole.Host||!connected)throw new InvalidOperationException("StartRace requires a connected host session");
+            if(race.started)throw new InvalidOperationException("Race already started");
+            race.countdown=5f;startRequested=true;channel.Send("START|"+sessionToken,peer);
+        }
+        // Host-side adoption of the live race: after the race scene is built, the session
+        // snapshots THE SIMULATED race (the lobby race object is discarded) and the INPUT
+        // handler's cars[1] writes land on the live remote-driven car. The remote car must
+        // already exist in the live race (carAdded by the race scene from PeerName/PeerModel).
+        public void AdoptRace(Race liveRace)
+        {
+            if(role!=SessionRole.Host)throw new InvalidOperationException("Only the host adopts the live race");
+            if(liveRace==null||liveRace.cars.Count<2)throw new ArgumentException("The live race must carry the remote-driven car");
+            race=liveRace;RaceAdopted=true;
+        }
         public void Tick(float dt)
         {
             if(channel==null)return;silence+=dt;sendTimer+=dt;joinTimer+=dt;inputSilence+=dt;
@@ -150,12 +176,13 @@ namespace MySimulator.Rebuild
             {
                 if(race.started||connected&&sender!=peer){channel.Send("BUSY|Race already started",sender);return;}
                 if(p[2].Length!=32)return;
-                int model=Wire.Int(p[4]);string peerName=Wire.Unname(p[3]);if(model<0||model>=CarCatalog.Count||race.cars.Count<2)return;if(peerNonce!=p[2]){lastInputSequence=-1;remoteResetHeld=false;sessionToken=Guid.NewGuid().ToString("N");peerNonce=p[2];}race.cars[1].carModel=model;peer=sender;connected=true;silence=0;inputSilence=0;race.cars[1].human=true;race.cars[1].driver=peerName;status="Second driver connected";
+                int model=Wire.Int(p[4]);string peerName=Wire.Unname(p[3]);if(model<0||model>=CarCatalog.Count||race.cars.Count<2)return;if(peerNonce!=p[2]){lastInputSequence=-1;remoteResetHeld=false;sessionToken=Guid.NewGuid().ToString("N");peerNonce=p[2];}race.cars[1].carModel=model;PeerName=peerName;PeerModel=model;peer=sender;connected=true;silence=0;inputSilence=0;race.cars[1].human=true;race.cars[1].driver=peerName;status="Second driver connected";
                 channel.Send("ACCEPT|"+Wire.Version+"|"+p[2]+"|"+sessionToken,peer);channel.Send(Wire.Snapshot(race,++sequence),peer);return;
             }
             if(sender!=peer)return;
             if(p[0]=="ACCEPT"&&role==SessionRole.Client&&p.Length==4&&p[1]==Wire.Version&&p[2]==nonce&&p[3].Length==32){sessionToken=p[3];connected=true;silence=0;status="Connected — waiting for host";return;}
             if(p[0]=="BUSY"){status="Host race already started";return;}
+            if(p[0]=="START"&&role==SessionRole.Client&&connected&&p.Length==2&&p[1]==sessionToken){startReceived=true;silence=0;status="Race starting";return;}
             if(p[0]=="INPUT"&&role==SessionRole.Host&&connected&&p.Length==10&&p[1]==sessionToken)
             {
                 int seq=Wire.Int(p[2]);if(seq<=lastInputSequence)return;

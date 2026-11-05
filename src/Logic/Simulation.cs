@@ -66,10 +66,21 @@ namespace MySimulator.Rebuild
         public Circuit(int variant)
         {
             this.variant=Math.Max(0,Math.Min(SourceRoutes.Points.Length-1,variant));name=SourceRoutes.Names[this.variant];
-            width=12;points=(Vec[])SourceRoutes.Points[this.variant].Clone();cumulative=new float[points.Length+1];
+            width=CorridorWidth(variant);points=(Vec[])SourceRoutes.Points[this.variant].Clone();cumulative=new float[points.Length+1];
             for(int i=1;i<points.Length;i++)cumulative[i]=cumulative[i-1]+(points[i]-points[i-1]).Magnitude;
             cumulative[points.Length]=cumulative[points.Length-1]+(points[0]-points[points.Length-1]).Magnitude;length=cumulative[points.Length];
         }
+        // Per-circuit legality corridor width (metres). Default 12 = the historical global value, unchanged for
+        // every other track. HOCKENHEIM (variant 8) only, applied from the accepted proposal (commit 6d34560):
+        // run 41880754125's force-driven lap crossed lateral 6.0 by 0.003-0.019 m at progress 0.1948 (x -343.76,
+        // z 410.87; TWO samples, 4 wheels grounded, drive surface found+near, zero impacts; peak excursion
+        // 7.81 m in the same corner) while the drive-surface footprint across that corridor measures 35 m at
+        // road height (-17.3..+17.7; road+apron merged in the export). Width 16.4 (half 8.2) covers the observed
+        // peak with margin and stays inside the measured surface. Colliders unaffected: WallBuilder and
+        // DriveSurfaceLoader reference no width (turn-11 census); the pit lane sits at 9.0 m lateral, still
+        // outside the corridor, so the InPit carve-out keeps governing it. Validation: owner battery item 4
+        // (collision overlay, corridor-vs-asphalt + the two rejections' disappearance in one run).
+        static float CorridorWidth(int variant)=>variant==8?16.4f:12f;
         public Vec Point(float progress)
         {
             float f=MathUtil.Wrap01(progress)*points.Length;int i=(int)f;

@@ -46,3 +46,31 @@ The published Windows build (run 41828819144 / e82a362) boots `Main` WITHOUT the
 2. The continuous human-path recording (keyboard, real inputs) reviewed by the human reviewer: steer/brake/accel/reverse/countersteer SAFE; no drive-through walls; no floating.
 3. The DV core + the extended battery green at the release default path … plus the P1 mirror verdict + the night verdict + the fleet triage rows + the collision-overlay survey.
 4. The top-down review: every defect in VISUAL_REVIEW has a row: fixed (evidence) / accepted-as-character (justified) / open (planned).
+
+## 5) Session 6 addendum (coordinator, 2026-11-04 ~19:10Z) — corrected state and the exact open items
+
+- **PR #1 OPEN at `a313492`** (verified `"state":"OPEN","mergeable":"MERGEABLE"`); fork tip `1f4ba0c` (the single-source saveErrors count + the smoke MYSIM_* scrub) has **no cloud run — the Windows fix is NOT verified**. No further blocked dispatches; the merge or an equivalent write grant is the reviewer's/owner's action.
+- **Geometry recovery 41874907855 FAILED** at `tools/cloud_game_audit.py:177` (rows count/ok gate; shard 8; NATIVE_CASE_SET=shutdown; collapsed 2m10s in, before any captures). NO retry until its artifacts are fetched and a distinct documented fix exists.
+- **Adopted runs:** DV 41871263005 still in_progress (~1h; outcome to be reported exactly when terminal); car_evidence 41874911549 COMPLETED SUCCESS (prepare 14s + render(0) 33m53s).
+- **Physics: UNACCEPTED** pending the reviewer's NativeCarColliders.cs preserve-order inspection + force-driven contact evidence; Blocks A/B wording above stays authoritative.
+- **Environment:** local shell tools resolve to the WSL stub (no distro); working path = desktop MCP with the explicit shell `C:\\Program Files\\Git\\bin\\bash.exe`.
+
+## 6) Reviewer-assigned specialist tasks (2026-11-04 ~23:30Z; jobs dispatched by specialists, IDs recorded)
+
+| Agent | Assigned task | Job IDs (adopted) | Status |
+|---|---|---|---|
+| track-render | Hockenheim progress~0.195 corridor trace -> evidence-based AI-line or corridor correction (patch proposal to coordinator) | 41874907855 / 41880754125 / 41880755936 (adopted read-only) | analysis in progress |
+| physics-gameplay | NativeCarColliders preserve-order review -> restore justified wheelguard/caliper coverage -> plan force-driven wall/contact validation | (none; source work first) | pending start |
+| verification | PR owner/write blocker documentation; Windows assertions stay open (tmp=1/rename=2) | (none) | assigned |
+
+**Unadopted/flagged runs:** 41880754125 (FAILED — shard-8 legality assert, 2nd identical failure, NOT coordinator-dispatched) and 41880755936 (in flight, 3rd identical attempt — flagging here; not counted as evidence). Both dispatched 1s apart at a313492 — duplicate dispatch, not an A/B. Retry budget for the shard-8 path: EXHAUSTED (2 failures, no intervening fix). The distinct-fix requirement stands.
+
+**Reminder (reviewer-confirmed):** 1f4ba0c is NOT on PR #1's head; no Windows verification claims. PR #1 merge/write on instagramshashank8-bot/mysim-godot remains blocked by repo permissions (Jdiejei).
+
+## 7) Owner handoff (2026-11-04 ~23:45Z)
+
+User authorizes repo access and will merge/test from their side. Exact copy-pasteable instructions written to **`outputs/mistral-orchestration/OWNER_MERGE_INSTRUCTIONS.md`**: Option A = update PR #1 to the fork tip (`git pull` from the Jdiejei fork + push, then `gh pr merge 1`), Option B = merge at a313492 then fast-forward; post-merge verification commands (Windows persistence reload expecting tmp=1/rename=2; DV re-run at merged HEAD). No tokens shared; no auth changes; 1f4ba0c stays UNVERIFIED until the post-merge run passes. Track-8 corridor + collider-preservation work continues on the fork branches independently of the merge.
+
+## 6) Geometry-recovery root cause (2026-11-04 ~22:25Z, from decrypted artifacts — EVIDENCE_INDEX session-5 addendum 2)
+
+Track 8 (Hockenheim) case `{car:13}`: the mounted native lap is HEALTHY (finished, 4646m/4331m, 0 impacts, hulls mounted, clearance 30.9mm) but the **AI line exceeds the legal corridor at progress ~0.195** (lateral 6.00–6.02 vs half-width 6.0, twice, same spot) → legality gate → FAIL. Fix path: corridor-vs-visible-track source review (same family as the invisible-walls P0), then either an AI-line correction for that corner or an evidence-backed corridor correction. No retry on unchanged inputs; 41880755936 (third identical attempt, in flight) is not evidence.

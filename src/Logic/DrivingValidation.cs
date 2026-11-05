@@ -9,7 +9,7 @@ namespace MySimulator.Rebuild {
 // commands, and performs the mechanical reset between profiles.
 public static class DrivingValidation {
     public const string ProfilesResourceDefault = "res://data/native_driving_validation_profiles.json";
-    public static readonly string[] KnownReferences = { "brakeStop60Metres", "accel0To60Seconds", "steerActuatorRate" };
+    public static readonly string[] KnownReferences = { "brakeStop60Metres", "accel0To60Seconds", "steerActuatorRate", "vehicleMass" };
     public static readonly string[] KnownMetrics = {
         "pathLength","duration","startSpeed","endSpeed","endLongitudinalSpeed","speedRiseTime","speedDropTime",
         "trackLateralAbsMax","lateralDriftAbs","headingDriftAbs","longitudinalAccelMin","longitudinalAccelMax",
@@ -17,7 +17,27 @@ public static class DrivingValidation {
         "slipAnglePeakAbs","longitudinalSlipPeakAbs","wheelAnglePeakAbs","wheelAngleTargetPeakAbs",
         "steerResponseTime","steerTrackingRatio","steerSettleTime","steerSettleRatio","groundedFraction","chassisContactSamples",
         "nonSurfaceContactSamples","offTrackFraction","impactEventsDelta","maxDeltaVRise","positionJumpMax","suspensionCompressionMin",
-        "suspensionExtensionMax","uprightMinCosine"
+        "suspensionExtensionMax","uprightMinCosine","impactTickPeakDeltaV","impactContactSeconds","impactImpulseEstimate","impactPeakForceEstimate",
+        "wheelBandContactSamples","maxSpeed","throttleHoldSeconds","raceStartedFraction",
+        "recoveryWindowCount","recoveryRecoveredFraction","recoveryMotionTimeMax","recoveryMotionTimeMean",
+        "recoveryPathLengthMax","recoveryOffTrackFractionMax","recoveryThrottleFractionMean",
+        "recoveryBrakeFractionMean","recoverySteerPeakAbsMax",
+        "bodyPanelContactSamples","mixedContactSamples","wheelBandContactSeconds","bodyPanelContactSeconds",
+        "wheelBandTickPeakDeltaV","bodyPanelTickPeakDeltaV"
+    };
+    // The recovery family, listed separately so the host emits it once per run (not per phase):
+    // the windows span phases, so phase-keyed values would be misleading duplicates.
+    public static readonly string[] RecoveryMetricNames = {
+        "recoveryWindowCount","recoveryRecoveredFraction","recoveryMotionTimeMax","recoveryMotionTimeMean",
+        "recoveryPathLengthMax","recoveryOffTrackFractionMax","recoveryThrottleFractionMean",
+        "recoveryBrakeFractionMean","recoverySteerPeakAbsMax"
+    };
+    // The contact-archetype family (guard band vs body panel vs mixed): emitted once per run
+    // when the profile sets setup.recordContactArchetypes; phase-scoped values stay available
+    // to assertions through ComputeMetric.
+    public static readonly string[] ContactArchetypeMetricNames = {
+        "bodyPanelContactSamples","mixedContactSamples","wheelBandContactSeconds","bodyPanelContactSeconds",
+        "wheelBandTickPeakDeltaV","bodyPanelTickPeakDeltaV"
     };
     public static readonly string[] KnownOps = { "between", "betweenReference", "lt", "lte", "gt", "gte" };
 
@@ -30,6 +50,16 @@ public static class DrivingValidation {
         public bool onDrivingSurface;
         // True when any solver contact this tick is NOT the drive surface (wall/barrier hit).
         public bool nonSurfaceContact;
+        // True when a contact part this tick belongs to the hub-mounted wheel-assembly band
+        // (wheelguard/caliper): the arch-position proof for the restored collision members.
+        public bool wheelBandContact;
+        // True when a contact part this tick is a non-drive body panel (neither the drive
+        // surface nor the wheel-assembly band): the second archetype of the guard-vs-panel
+        // force characterization. A tick touching BOTH bands is mixed (both flags set) and
+        // contributes to both archetypes' signatures; mixedContactSamples measures it.
+        public bool bodyPanelContact;
+        // Race-start sequence state (the grid/start validation).
+        public bool raceStarted;public double raceClock,countdown;
         public int groundedMask, chassisContacts, impactEvents;
         public double maxDeltaV;
         public double[] loads, springLengths, longitudinalSlip, lateralSlipAngle;
@@ -43,7 +73,9 @@ public static class DrivingValidation {
 
     public sealed class Profile {
         public string Id, Title, Purpose;
-        public bool RequireRotationalTyres, RequireDamage;
+        public bool RequireRotationalTyres, RequireDamage, RequireGridStart;
+        public bool RecordContactArchetypes;
+        public RecoverySpec Recovery;
         public double MaxDurationSeconds = 60, AbortLateralAbs = 25, AbortPositionJump = 2.5;
         public int SampleEveryTicks = 1, MaxSamples = 12000;
         public List<Phase> Phases = new List<Phase>();
@@ -57,8 +89,8 @@ public static class DrivingValidation {
         public double? ForSeconds, MinSeconds, MaxSeconds;
         public double? UntilSpeedAtLeast, UntilSpeedBelow;
         public int? UntilChassisContactsAtLeast, UntilImpactEventsAtLeast;
-        public bool UntilNonSurfaceContact, UntilOffTrackObserved;
-        public bool Terminates => ForSeconds.HasValue || UntilSpeedAtLeast.HasValue || UntilSpeedBelow.HasValue || UntilChassisContactsAtLeast.HasValue || UntilImpactEventsAtLeast.HasValue || UntilNonSurfaceContact || UntilOffTrackObserved;
+        public bool UntilNonSurfaceContact, UntilOffTrackObserved, UntilRaceStarted;
+        public bool Terminates => ForSeconds.HasValue || UntilSpeedAtLeast.HasValue || UntilSpeedBelow.HasValue || UntilChassisContactsAtLeast.HasValue || UntilImpactEventsAtLeast.HasValue || UntilNonSurfaceContact || UntilOffTrackObserved || UntilRaceStarted;
     }
 
     public sealed class Assertion {
@@ -71,6 +103,69 @@ public static class DrivingValidation {
         public string Id, Metric, Op, Expected;
         public bool Passed;
         public double? Actual;
+    }
+
+    // Post-impact recovery-window forensics (the wall judgement sheet's R-window), flag-gated
+    // by setup.recordRecovery: every rise of the cumulative impact counter opens a window that
+    // records what the car then did under its own drive - the motion recovery time, the path
+    // covered, the inputs applied and the surface state - until motion holds again or the
+    // window's cap expires. Derived purely from recorded samples; a profile without the flag
+    // produces null recovery metrics, which fail any assertion on them (never a silent zero).
+    public sealed class RecoverySpec {
+        public bool Enabled;
+        public double MotionSpeed = 1.0, HoldSeconds = 1.0, MaxSeconds = 20;
+    }
+
+    public sealed class RecoveryWindow {
+        public double startT, endT, startSpeed;
+        public bool Recovered;
+        public double? motionTime;
+        public double pathLength, maxReverseSpeed, offTrackFraction, throttleFraction, brakeFraction, steerPeakAbs;
+    }
+
+    // Motion is the speed MAGNITUDE at or above MotionSpeed held for HoldSeconds: a deliberate
+    // reverse-out counts as recovered motion (maxReverseSpeed records it); whether the car
+    // drives away FORWARD stays the recover-phase assertions' job. The close time is the
+    // moment the sustained interval completes (interpolated between samples; sample rate is
+    // the physics rate or finer). MaxSeconds bounds only UNRESOLVED windows: an achieved
+    // recovery always records its true motionTime even beyond the cap.
+    public static List<RecoveryWindow> RecoveryWindows(List<Sample> s, RecoverySpec spec) {
+        var windows = new List<RecoveryWindow>();
+        if (s == null || s.Count < 2 || spec == null || !spec.Enabled) return windows;
+        for (int i = 1; i < s.Count; i++) {
+            if (s[i].impactEvents <= s[i - 1].impactEvents) continue;
+            var w = new RecoveryWindow { startT = s[i].t, startSpeed = s[i].speed, endT = s[i].t };
+            double path = 0, reverse = 0, steerPeak = 0; int off = 0, thr = 0, brk = 0, n = 0;
+            int closeIndex = -1; double closeT = 0, runStart = 0; bool running = false;
+            for (int j = i; j < s.Count; j++) {
+                n++;
+                if (j > i) path += Math.Sqrt((s[j].x - s[j - 1].x) * (s[j].x - s[j - 1].x) + (s[j].z - s[j - 1].z) * (s[j].z - s[j - 1].z));
+                if (!s[j].onDrivingSurface) off++;
+                if (s[j].throttle > 0.5) thr++;
+                if (s[j].brake > 0.5) brk++;
+                if (-s[j].longitudinalSpeed > reverse) reverse = -s[j].longitudinalSpeed;
+                if (Math.Abs(s[j].steerCommand) > steerPeak) steerPeak = Math.Abs(s[j].steerCommand);
+                if (j > i && s[j].speed >= spec.MotionSpeed) {
+                    if (!running || s[j - 1].speed < spec.MotionSpeed) runStart = s[j].t;
+                    running = true;
+                    if (s[j].t - runStart >= spec.HoldSeconds) { closeIndex = j; closeT = runStart + spec.HoldSeconds; break; }
+                } else running = false;
+                if (spec.MaxSeconds > 0 && j > i && s[j].t - s[i].t >= spec.MaxSeconds) break;
+            }
+            w.pathLength = path; w.maxReverseSpeed = reverse; w.steerPeakAbs = steerPeak;
+            w.offTrackFraction = n > 0 ? (double)off / n : 0;
+            w.throttleFraction = n > 0 ? (double)thr / n : 0;
+            w.brakeFraction = n > 0 ? (double)brk / n : 0;
+            if (closeIndex >= 0) { w.Recovered = true; w.endT = closeT; w.motionTime = closeT - s[i].t; }
+            else w.endT = s[i + n - 1].t;
+            windows.Add(w);
+        }
+        return windows;
+    }
+
+    static List<RecoveryWindow> RecoveryWindowsOf(Profile profile, List<Sample> all) {
+        if (profile == null || profile.Recovery == null || !profile.Recovery.Enabled || all == null || all.Count < 2) return null;
+        return RecoveryWindows(all, profile.Recovery);
     }
 
     static double Num(System.Text.Json.JsonElement e, string key, double fallback) {
@@ -86,6 +181,20 @@ public static class DrivingValidation {
         if (e.TryGetProperty("requires", out var req)) {
             p.RequireRotationalTyres = req.TryGetProperty("rotationalTyres", out var rt) && rt.ValueKind == System.Text.Json.JsonValueKind.True;
             p.RequireDamage = req.TryGetProperty("damageEnabled", out var de) && de.ValueKind == System.Text.Json.JsonValueKind.True;
+        }
+        if (e.TryGetProperty("setup", out var setup)) {
+            p.RequireGridStart = setup.TryGetProperty("requiresGridStart", out var gs) && gs.ValueKind == System.Text.Json.JsonValueKind.True;
+            p.RecordContactArchetypes = setup.TryGetProperty("recordContactArchetypes", out var rca) && rca.ValueKind == System.Text.Json.JsonValueKind.True;
+            if (setup.TryGetProperty("recordRecovery", out var rr)) {
+                p.Recovery = new RecoverySpec { Enabled = true };
+                if (rr.ValueKind == System.Text.Json.JsonValueKind.Object) {
+                    p.Recovery.MotionSpeed = Num(rr, "motionSpeed", p.Recovery.MotionSpeed);
+                    p.Recovery.HoldSeconds = Num(rr, "holdSeconds", p.Recovery.HoldSeconds);
+                    p.Recovery.MaxSeconds = Num(rr, "maxSeconds", p.Recovery.MaxSeconds);
+                }
+                if (p.Recovery.MotionSpeed <= 0 || p.Recovery.HoldSeconds < 0 || p.Recovery.MaxSeconds <= 0)
+                    throw new Exception("Driving validation profile " + p.Id + " has out-of-range recovery recording settings");
+            }
         }
         if (e.TryGetProperty("abort", out var abort)) {
             p.MaxDurationSeconds = Num(abort, "maxDurationSeconds", p.MaxDurationSeconds);
@@ -113,6 +222,7 @@ public static class DrivingValidation {
                 if (until.TryGetProperty("impactEventsAtLeast", out var iea) && iea.ValueKind == System.Text.Json.JsonValueKind.Number) ph.UntilImpactEventsAtLeast = (int)iea.GetDouble();
                 if (until.TryGetProperty("nonSurfaceContact", out var nsc)) ph.UntilNonSurfaceContact = nsc.ValueKind == System.Text.Json.JsonValueKind.True;
                 if (until.TryGetProperty("offTrackObserved", out var oto)) ph.UntilOffTrackObserved = oto.ValueKind == System.Text.Json.JsonValueKind.True;
+                if (until.TryGetProperty("raceStarted", out var rs)) ph.UntilRaceStarted = rs.ValueKind == System.Text.Json.JsonValueKind.True;
             }
             if (!ph.Terminates) throw new Exception("Driving validation profile " + p.Id + " phase " + ph.Id + " has no forSeconds or until termination");
             if (ph.MinSeconds.HasValue && ph.ForSeconds.HasValue && ph.MinSeconds.Value > ph.ForSeconds.Value)
@@ -285,8 +395,58 @@ public static class DrivingValidation {
             case "groundedFraction": { if (s.Count == 0) return null; int n = 0; foreach (var v in s) if (v.groundedMask == 15) n++; return (double)n / s.Count; }
             case "chassisContactSamples": { if (s.Count == 0) return null; int n = 0; foreach (var v in s) if (v.chassisContacts > 0) n++; return (double)n; }
             case "nonSurfaceContactSamples": { if (s.Count == 0) return null; int n = 0; foreach (var v in s) if (v.nonSurfaceContact) n++; return (double)n; }
+            case "wheelBandContactSamples": { if (s.Count == 0) return null; int n = 0; foreach (var v in s) if (v.wheelBandContact) n++; return (double)n; }
+            case "maxSpeed": { if (s.Count == 0) return null; double m = 0; foreach (var v in s) m = Math.Max(m, v.speed); return m; }
+            case "throttleHoldSeconds": { if (s.Count == 0) return null; double sum = 0; for (int i = 0; i < s.Count; i++) if (s[i].throttle > 0.5) { if (i == 0) { if (s.Count > 1 && s[1].t > s[0].t) sum += s[1].t - s[0].t; } else sum += s[i].t - s[i - 1].t; } return sum; }
+            case "raceStartedFraction": { if (s.Count == 0) return null; int n = 0; foreach (var v in s) if (v.raceStarted) n++; return (double)n / s.Count; }
             case "offTrackFraction": { if (s.Count == 0) return null; int n = 0; foreach (var v in s) if (!v.onDrivingSurface) n++; return (double)n / s.Count; }
             case "impactEventsDelta": return s.Count == 0 ? (double?)null : (double)(s[s.Count - 1].impactEvents - s[0].impactEvents);
+            case "impactTickPeakDeltaV": {
+                // Per-tick velocity jump measured inside the contact window (either sample touching a
+                // non-drive surface): the raw material for the force estimate, from recorded samples.
+                double? best = null;
+                for (int i = 1; i < s.Count; i++) {
+                    if (!s[i].nonSurfaceContact && !s[i - 1].nonSurfaceContact) continue;
+                    var dt = s[i].t - s[i - 1].t; if (dt <= 0) continue;
+                    var dl = s[i].longitudinalSpeed - s[i - 1].longitudinalSpeed;
+                    var da = s[i].lateralSpeed - s[i - 1].lateralSpeed;
+                    var dv = Math.Sqrt(dl * dl + da * da);
+                    if (double.IsFinite(dv)) best = Math.Max(best ?? 0, dv);
+                }
+                return best;
+            }
+            case "impactContactSeconds": {
+                if (s.Count == 0) return null;
+                double sum = 0;
+                for (int i = 0; i < s.Count; i++) {
+                    if (!s[i].nonSurfaceContact) continue;
+                    if (i == 0) { if (s.Count > 1 && s[1].t > s[0].t) sum += s[1].t - s[0].t; }
+                    else sum += s[i].t - s[i - 1].t;
+                }
+                return sum;
+            }
+            case "impactImpulseEstimate": {
+                var rise = ComputeMetric("maxDeltaVRise", phaseId, s, profile, references);
+                if (rise == null) return null;
+                if (references == null || !references.TryGetValue("vehicleMass", out var massA)) throw new Exception("Metric impactImpulseEstimate needs the vehicleMass reference");
+                return massA * rise.Value;
+            }
+            case "impactPeakForceEstimate": {
+                // vehicleMass * (per-tick velocity jump) / dt at that jump: an estimate derived from
+                // recorded samples at sample rate; the true contact force profile is not observed.
+                var jump = ComputeMetric("impactTickPeakDeltaV", phaseId, s, profile, references);
+                if (jump == null) return null;
+                if (references == null || !references.TryGetValue("vehicleMass", out var massB)) throw new Exception("Metric impactPeakForceEstimate needs the vehicleMass reference");
+                for (int i = 1; i < s.Count; i++) {
+                    if (!s[i].nonSurfaceContact && !s[i - 1].nonSurfaceContact) continue;
+                    var dt = s[i].t - s[i - 1].t; if (dt <= 0) continue;
+                    var dl = s[i].longitudinalSpeed - s[i - 1].longitudinalSpeed;
+                    var da = s[i].lateralSpeed - s[i - 1].lateralSpeed;
+                    var dv = Math.Sqrt(dl * dl + da * da);
+                    if (double.IsFinite(dv) && dv.Equals(jump.Value)) return massB * dv / dt;
+                }
+                return null;
+            }
             case "maxDeltaVRise": { if (s.Count == 0) return null; double m = 0; foreach (var v in s) m = Math.Max(m, v.maxDeltaV); return m - s[0].maxDeltaV; }
             case "positionJumpMax": { double m = 0; for (int i = 1; i < s.Count; i++) m = Math.Max(m, Math.Sqrt((s[i].x - s[i - 1].x) * (s[i].x - s[i - 1].x) + (s[i].z - s[i - 1].z) * (s[i].z - s[i - 1].z))); return m; }
             case "suspensionCompressionMin": {
@@ -305,6 +465,83 @@ public static class DrivingValidation {
             case "uprightMinCosine": { if (s.Count == 0) return null; double m = 1; foreach (var v in s) m = Math.Min(m, v.upY); return m; }
             case "speedRiseTime": { if (s.Count == 0) return null; var start = s[0].speed; foreach (var v in s) if (v.speed >= start + .5) return v.t - s[0].t; return null; }
             case "speedDropTime": { if (s.Count == 0) return null; var start = s[0].speed; foreach (var v in s) if (v.speed <= start - .5) return v.t - s[0].t; return null; }
+            // Recovery-window metrics always read the FULL stream regardless of the declared
+            // scope: windows span phases (the impact lands in one phase, the drive-away lives
+            // in later ones), so a phase-filtered slice would undercount. Declare them :all.
+            case "recoveryWindowCount": { var w = RecoveryWindowsOf(profile, all); return w == null ? null : (double?)w.Count; }
+            case "recoveryRecoveredFraction": {
+                var w = RecoveryWindowsOf(profile, all); if (w == null || w.Count == 0) return null;
+                int r = 0; foreach (var x in w) if (x.Recovered) r++; return (double)r / w.Count;
+            }
+            case "recoveryMotionTimeMax":
+            case "recoveryMotionTimeMean": {
+                var w = RecoveryWindowsOf(profile, all);
+                double max = 0, sum = 0; int n = 0;
+                if (w != null) foreach (var x in w) if (x.motionTime.HasValue) { var v = x.motionTime.Value; if (n == 0 || v > max) max = v; sum += v; n++; }
+                if (n == 0) return null;
+                return name == "recoveryMotionTimeMax" ? max : sum / n;
+            }
+            case "recoveryPathLengthMax": {
+                var w = RecoveryWindowsOf(profile, all); if (w == null || w.Count == 0) return null;
+                double m = 0; foreach (var x in w) m = Math.Max(m, x.pathLength); return m;
+            }
+            case "recoveryOffTrackFractionMax": {
+                var w = RecoveryWindowsOf(profile, all); if (w == null || w.Count == 0) return null;
+                double m = 0; foreach (var x in w) m = Math.Max(m, x.offTrackFraction); return m;
+            }
+            case "recoveryThrottleFractionMean":
+            case "recoveryBrakeFractionMean": {
+                var w = RecoveryWindowsOf(profile, all); if (w == null || w.Count == 0) return null;
+                double sum = 0; foreach (var x in w) sum += name == "recoveryThrottleFractionMean" ? x.throttleFraction : x.brakeFraction;
+                return sum / w.Count;
+            }
+            case "recoverySteerPeakAbsMax": {
+                var w = RecoveryWindowsOf(profile, all); if (w == null || w.Count == 0) return null;
+                double m = 0; foreach (var x in w) m = Math.Max(m, x.steerPeakAbs); return m;
+            }
+            // Contact-archetype family (guard band vs body panel): null unless the profile sets
+            // setup.recordContactArchetypes (fail-closed, never a silent zero). A tick touching
+            // BOTH the wheel band and a body panel is mixed and feeds both signatures; the
+            // mixedContactSamples count makes that ambiguity measurable instead of hidden.
+            case "bodyPanelContactSamples": {
+                if (profile == null || !profile.RecordContactArchetypes) return null;
+                int n = 0; foreach (var v in s) if (v.bodyPanelContact) n++; return (double)n;
+            }
+            case "mixedContactSamples": {
+                if (profile == null || !profile.RecordContactArchetypes) return null;
+                int n = 0; foreach (var v in s) if (v.wheelBandContact && v.bodyPanelContact) n++; return (double)n;
+            }
+            case "wheelBandContactSeconds":
+            case "bodyPanelContactSeconds": {
+                if (profile == null || !profile.RecordContactArchetypes) return null;
+                if (s.Count == 0) return null;
+                bool wantBand = name == "wheelBandContactSeconds";
+                double sum = 0;
+                for (int i = 0; i < s.Count; i++) {
+                    bool hit = wantBand ? s[i].wheelBandContact : s[i].bodyPanelContact;
+                    if (!hit) continue;
+                    if (i == 0) { if (s.Count > 1 && s[1].t > s[0].t) sum += s[1].t - s[0].t; }
+                    else sum += s[i].t - s[i - 1].t;
+                }
+                return sum;
+            }
+            case "wheelBandTickPeakDeltaV":
+            case "bodyPanelTickPeakDeltaV": {
+                if (profile == null || !profile.RecordContactArchetypes) return null;
+                double? best = null;
+                for (int i = 1; i < s.Count; i++) {
+                    bool hit = name == "wheelBandTickPeakDeltaV"
+                        ? (s[i].wheelBandContact || s[i - 1].wheelBandContact)
+                        : (s[i].bodyPanelContact || s[i - 1].bodyPanelContact);
+                    if (!hit) continue;
+                    var dt = s[i].t - s[i - 1].t; if (dt <= 0) continue;
+                    var dl = s[i].longitudinalSpeed - s[i - 1].longitudinalSpeed;
+                    var da = s[i].lateralSpeed - s[i - 1].lateralSpeed;
+                    var dv = Math.Sqrt(dl * dl + da * da);
+                    if (double.IsFinite(dv)) best = Math.Max(best ?? 0, dv);
+                }
+                return best;
+            }
             default: throw new Exception("Driving validation metric " + name + " is not implemented (fail closed)");
         }
     }
@@ -381,6 +618,7 @@ public static class DrivingValidation {
             if (!done && phase.UntilSpeedBelow.HasValue && minOk && s.speed < phase.UntilSpeedBelow.Value) done = true;
             if (!done && phase.UntilChassisContactsAtLeast.HasValue && minOk && s.chassisContacts >= phase.UntilChassisContactsAtLeast.Value) done = true;
             if (!done && phase.UntilNonSurfaceContact && minOk && s.nonSurfaceContact) done = true;
+            if (!done && phase.UntilRaceStarted && minOk && s.raceStarted) done = true;
             if (!done && phase.UntilImpactEventsAtLeast.HasValue && minOk && hasBaseline && s.impactEvents - impactBaseline >= phase.UntilImpactEventsAtLeast.Value) done = true;
             if (!done && phase.UntilOffTrackObserved && minOk && !s.onDrivingSurface) done = true;
             if (!done && phase.MaxSeconds.HasValue && inPhase > phase.MaxSeconds.Value) { Abort("phase " + phase.Id + " exceeded maxSeconds without reaching its condition"); return; }

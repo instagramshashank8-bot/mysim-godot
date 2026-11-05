@@ -37,3 +37,5 @@ Existing Mistral Code bridge is http://127.0.0.1:52590 (port may change on app r
 User requests visible supervisor prompts in Mistral app: use existing POST/api/session/prompt with ACP prompt ARRAY [{type:'text',text:'[ChatGPT reviewer] ...'}]. Server emits turn_start to app; app renders its prompt in conversation. No hidden session/no fake delivery. Save same text with timestamp/outcome in SUPERVISOR_MESSAGES.md. Disk-only review notes are not delivered messages. Let active turns finish before sending.
 
 Bidirectional review: inspect REVIEWER_INBOX.md OPEN questions each supervision cycle, answer with evidence and timestamp, then send decisions via existing labelled same-session prompt when idle. Preserve question history; no instant-response claims.
+
+USER role update: 15-minute supervision. Codex is project manager/reviewer only; Mistral/GLM implements all game code/assets/workflows. No mouse/keyboard automation. Scale supported specialists within actual capacity/quota, exclusive ownership/sequential integration; no paid-service/limit bypass. Target Nov5eveningDubai remains target, not completion promise. Automation updated, no duplicate.

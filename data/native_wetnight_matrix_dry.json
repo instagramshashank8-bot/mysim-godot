@@ -1,0 +1,62 @@
+{
+ "cases": [
+  {
+   "car": 16,
+   "track": 0,
+   "drivingValidation": [
+    "input_direction",
+    "acceleration_0_60",
+    "braking_60_0",
+    "steering_rate_step",
+    "straight_stability",
+    "edge_excursion"
+   ]
+  },
+  {
+   "car": 0,
+   "track": 0,
+   "drivingValidation": [
+    "input_direction",
+    "acceleration_0_60",
+    "braking_60_0",
+    "steering_rate_step",
+    "straight_stability"
+   ]
+  },
+  {
+   "car": 16,
+   "track": 8,
+   "drivingValidation": [
+    "input_direction",
+    "acceleration_0_60",
+    "braking_60_0",
+    "steering_rate_step",
+    "straight_stability",
+    "edge_excursion"
+   ]
+  },
+  {
+   "car": 0,
+   "track": 8,
+   "drivingValidation": [
+    "input_direction",
+    "acceleration_0_60",
+    "braking_60_0",
+    "steering_rate_step",
+    "straight_stability"
+   ]
+  }
+ ],
+ "scope": "Wet/night matrix D0/N cells (the dry file): 2 cars x 2 tracks, the DEFAULT dry lighting (no weather keys by design - the tool treats missing weather as the 0-default and wet-named manifests still require weather>0). Serves D0 (dry day, all knobs off), N0 (TOD 3 base), N1 (+light package), N2 (+vehicle lights/anchored) - the cell identity comes from the dispatch env, not this file. FIX vs the integration's c677943 copy: the drivingValidation lists added per case - ParseCaseProfiles requires them and the wetnight case_sets are wired into the DRIVING_VALIDATION_MANIFEST chain only, so the uncorrected files kill every matrix dispatch at boot. Profile lists mirror native_driving_validation_core.json exactly (car16 carries edge_excursion, car0 does not - the established asymmetry).",
+ "controlledVariables": {
+  "track": [
+   0,
+   8
+  ],
+  "laps": 1,
+  "rivals": 0,
+  "weather": "default (0/dry)",
+  "compound": "default (1)"
+ },
+ "requiresWetWeather": false
+}

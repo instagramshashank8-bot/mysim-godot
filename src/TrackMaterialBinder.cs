@@ -39,18 +39,34 @@ public static class TrackMaterialBinder {
   RoadVariationPass(track);
   GrassBalancePass(track);
   TreeBreakupPass(track);
+  ForestTonePass(track);
   WallBuilder.AttachCollisionOverlay(track);
  }
- // One controlled road-variation candidate: env-gated (MYSIM_ROAD_VARIATION=1), reversible, addressed only to
- // ground ShaderMaterials whose texture is gnd_asphalt_* (the shader's own asphalt class; track0 binds exactly
- // gnd_asphalt_01 and gnd_asphalt_noskids_01 here). Turns up the shader's existing procedural detail/macro layers
- // (nearly invisible at authored amps 0.10/0.07) so the road stops reading as flat/uniform. No texture swap (the
- // available albedo variants would seam at road joints), tiling period unchanged (world-anchored sampling has no
- // offset uniform; true anti-tiling needs an owner/cloud shader or texture change). Appearance only. Default
- // rendering unchanged when the variable is unset.
+ // Road MATERIAL definition candidates: env-gated profile selector (MYSIM_ROAD_MATERIAL=<name>), reversible,
+ // addressed only to the ground ShaderMaterials whose texture is gnd_asphalt_* (the shader's own asphalt class).
+ // WHAT THE ROAD MATERIAL IS (source): the visible road = the track layers' gnd_/road meshes bound to a
+ // ShaderMaterial (UnityMaterialBinder's GroundShader for mapped tracks; this file's twin for the rest):
+ // ALBEDO = the asphalt texture world-projected * tint + procedural fbm variation; ROUGHNESS constant 1.0 dry;
+ // SPECULAR constant 0.04; no normal-map sampling (flat vertex normals). The separate DriveSurface = the
+ // INVISIBLE collision mesh (layer 1). The profiles tune the shader's EXISTING uniforms only (spatial definition);
+ // roughness/specular stay shader-code constants (an owner-side two-line expose is the follow-up), no texture
+ // swap, no tiling change. Defaults untouched when unset; MYSIM_ROAD_VARIATION=1 maps to "definition".
+ static (float detailScale,float detailAmp,float macroScale,float macroAmp,Vector3 macroTint)? RoadProfile(string name){
+  switch(name){
+   case "base":return (90f,0.10f,0.18f,0.07f,new Vector3(0.96f,0.96f,0.98f));
+   case "definition":return (110f,0.16f,0.26f,0.11f,new Vector3(0.95f,0.97f,1.00f));
+   case "worn":return (55f,0.10f,0.40f,0.14f,new Vector3(0.97f,0.98f,1.00f));
+   default:return null;
+  }
+ }
  static void RoadVariationPass(Node3D track){
-  if(System.Environment.GetEnvironmentVariable("MYSIM_ROAD_VARIATION")!="1")return;
-  if(System.Environment.GetEnvironmentVariable("MYSIM_AUTHORED_GROUND")=="1"){GD.Print("ROAD_VARIATION skipped: MYSIM_AUTHORED_GROUND owns ground variation");return;}
+  string profileName=System.Environment.GetEnvironmentVariable("MYSIM_ROAD_MATERIAL");
+  if(string.IsNullOrEmpty(profileName)&&System.Environment.GetEnvironmentVariable("MYSIM_ROAD_VARIATION")=="1")profileName="definition";
+  if(string.IsNullOrEmpty(profileName))return;
+  var profile=RoadProfile(profileName);
+  if(profile==null){GD.Print("ROAD_MATERIAL unknown profile: ",profileName," (base|definition|worn)");return;}
+  var pf=profile.Value;
+  if(System.Environment.GetEnvironmentVariable("MYSIM_AUTHORED_GROUND")=="1"){GD.Print("ROAD_MATERIAL skipped: MYSIM_AUTHORED_GROUND owns ground variation");return;}
   var seen=new HashSet<Material>();var records=new List<object>();
   foreach(var node in track.FindChildren("*","MeshInstance3D",true,false)){
    var mesh=(MeshInstance3D)node;if(mesh.Mesh==null)continue;
@@ -60,21 +76,22 @@ public static class TrackMaterialBinder {
     var tex=sm.GetShaderParameter("tex").AsGodotObject() as Texture2D;if(tex==null)continue;
     string name=System.IO.Path.GetFileName(tex.ResourcePath).ToLowerInvariant();
     if(!name.StartsWith("gnd_asphalt",System.StringComparison.Ordinal))continue;
-    sm.SetShaderParameter("detail_amp",0.16f);
-    sm.SetShaderParameter("macro_amp",0.11f);
-    sm.SetShaderParameter("macro_scale",0.26f);
-    sm.SetShaderParameter("macro_tint",new Vector3(0.95f,0.97f,1.00f));
-    records.Add(new{renderer=mesh.GetPath().ToString(),surface=s,texture=tex.ResourcePath,detailAmpTo=0.16f,macroAmpTo=0.11f,macroScaleTo=0.26f,macroTintTo="0.95,0.97,1.00"});
+    sm.SetShaderParameter("detail_scale",pf.detailScale);
+    sm.SetShaderParameter("detail_amp",pf.detailAmp);
+    sm.SetShaderParameter("macro_scale",pf.macroScale);
+    sm.SetShaderParameter("macro_amp",pf.macroAmp);
+    sm.SetShaderParameter("macro_tint",pf.macroTint);
+    records.Add(new{renderer=mesh.GetPath().ToString(),surface=s,texture=tex.ResourcePath,profile=profileName,detailScale=pf.detailScale,detailAmp=pf.detailAmp,macroScale=pf.macroScale,macroAmp=pf.macroAmp,macroTint=pf.macroTint.ToString()});
    }
   }
-  GD.Print("ROAD_VARIATION materials=",records.Count," scope=gnd_asphalt* ground ShaderMaterials only; appearances only; road/fairness untouched");
-  if(System.Environment.GetEnvironmentVariable("MYSIM_BINDING_AUDIT") is string dir&&records.Count>0){System.IO.Directory.CreateDirectory(dir);string safeName=System.Text.RegularExpressions.Regex.Replace(track.Name.ToString(),"[^A-Za-z0-9_-]","_");System.IO.File.WriteAllText(System.IO.Path.Combine(dir,"road-variation-"+safeName+".json"),System.Text.Json.JsonSerializer.Serialize(new{layer=track.Name.ToString(),materials=records,scope="One variation candidate bundle on gnd_asphalt ground materials; env-gated; no texture swap, no tiling change, no physics meaning; not a promoted fix"},new System.Text.Json.JsonSerializerOptions{WriteIndented=true}));}
+  GD.Print("ROAD_MATERIAL profile=",profileName," materials=",records.Count," scope=gnd_asphalt* ground ShaderMaterials only; appearance only");
+  if(System.Environment.GetEnvironmentVariable("MYSIM_BINDING_AUDIT") is string dir&&records.Count>0){System.IO.Directory.CreateDirectory(dir);string safeName=System.Text.RegularExpressions.Regex.Replace(track.Name.ToString(),"[^A-Za-z0-9_-]","_");System.IO.File.WriteAllText(System.IO.Path.Combine(dir,"road-material-"+safeName+".json"),System.Text.Json.JsonSerializer.Serialize(new{layer=track.Name.ToString(),profile=profileName,materials=records,scope="Road material profile candidate on gnd_asphalt ground materials; env-gated; uniforms only; no texture swap/tiling/roughness/spec change; not a promoted fix"},new System.Text.Json.JsonSerializerOptions{WriteIndented=true}));}
  }
  // One controlled tree-line breakup candidate: env-gated (MYSIM_TREE_BREAKUP=1), reversible, addressed only to the
  // continuous backdrop wall the reviewer flagged: org_brandshatch_treeline_00..24, 25 separate backdrop strip nodes
  // sharing ONE source texture (org_brandshatch_tree_line_1.png is the only treeline texture on disk, so per-instance
  // texture variant swap is NOT supported by source data). Applies deterministic per-segment variation derived from
- // the node name (yaw within +/-1.5 degrees, height scale 0.94..1.06) with the world-space bottom of each strip kept
+ // the node name (height scale 0.94..1.06 only; yaw removed - see note in body) with the world-space bottom of each strip kept
  // planted by compensating the position for the local AABB bottom. Transforms only: no mesh/texture/material change;
  // deterministic across runs; default rendering unchanged when the variable is unset.
  static void TreeBreakupPass(Node3D track){
@@ -85,18 +102,48 @@ public static class TrackMaterialBinder {
    string nm=mesh.Name.ToString();
    if(!nm.StartsWith("org_brandshatch_treeline_",System.StringComparison.Ordinal))continue;
    uint h=Fnv1a(nm);
-   float yawDeg=(((h%1000u)/1000f)-0.5f)*3.0f;
+   // Height-scale variation only. Yaw was removed after the run-41843204651 audit showed these FBX nodes carry
+   // identity transforms with all geometry baked into vertices far from the node origin (worldOrigin=(0,0,0),
+   // strips 80-470 m long): a yaw would sweep each strip around the WORLD origin at multi-km radius, not around
+   // its own centre. Scale about the origin keeps the strip base planted (the strip base sits at the local y=0
+   // terrain datum; the AABB-bottom compensation below is the exact form of that guarantee for any origin).
    float scaleY=0.94f+(((h/1000u)%1000u)/1000f)*0.12f;
    var aabb=mesh.GetAabb();float bottomLocal=aabb.GetCenter().Y-aabb.Size.Y*0.5f;
    var pos=mesh.Position;
    mesh.Scale=new Vector3(mesh.Scale.X,scaleY,mesh.Scale.Z);
    mesh.Position=new Vector3(pos.X,pos.Y-(scaleY-1f)*bottomLocal,pos.Z);
-   mesh.RotateY(Mathf.DegToRad(yawDeg));
    varied++;
-   records.Add(new{renderer=mesh.GetPath().ToString(),yawDegRounded=System.Math.Round(yawDeg,2),scaleY,bottomPin="position compensated by aabb bottom; assumes near-identity basis (upright strip)"});
+   records.Add(new{renderer=mesh.GetPath().ToString(),scaleY,bottomPin="position compensated by aabb bottom; scale-only (yaw removed: vertex-baked geometry pivots at the node origin)"});
   }
-  GD.Print("TREE_BREAKUP segments=",varied," scope=org_brandshatch_treeline_* nodes only; deterministic; textures/meshes untouched");
-  if(System.Environment.GetEnvironmentVariable("MYSIM_BINDING_AUDIT") is string dir&&records.Count>0){System.IO.Directory.CreateDirectory(dir);string safeName=System.Text.RegularExpressions.Regex.Replace(track.Name.ToString(),"[^A-Za-z0-9_-]","_");System.IO.File.WriteAllText(System.IO.Path.Combine(dir,"tree-breakup-"+safeName+".json"),System.Text.Json.JsonSerializer.Serialize(new{layer=track.Name.ToString(),segments=records,scope="One breakup candidate: deterministic per-segment yaw/scaleY on treeline strip nodes; variant swap unsupported (single shared source texture); not a promoted fix"},new System.Text.Json.JsonSerializerOptions{WriteIndented=true}));}
+  GD.Print("TREE_BREAKUP segments=",varied," scope=org_brandshatch_treeline_* nodes only; deterministic scale-only; textures/meshes untouched");
+  if(System.Environment.GetEnvironmentVariable("MYSIM_BINDING_AUDIT") is string dir&&records.Count>0){System.IO.Directory.CreateDirectory(dir);string safeName=System.Text.RegularExpressions.Regex.Replace(track.Name.ToString(),"[^A-Za-z0-9_-]","_");System.IO.File.WriteAllText(System.IO.Path.Combine(dir,"tree-breakup-"+safeName+".json"),System.Text.Json.JsonSerializer.Serialize(new{layer=track.Name.ToString(),segments=records,scope="One breakup candidate: deterministic per-segment scaleY on treeline strip nodes (yaw removed after the vertex-baked-geometry finding); variant swap unsupported (single shared source texture); not a promoted fix"},new System.Text.Json.JsonSerializerOptions{WriteIndented=true}));}
+ }
+ // One controlled forest-tone candidate: env-gated (MYSIM_FOREST_TONE=<multiplier>, e.g. 1.35), reversible,
+ // addressed only to the vegetation-backdrop materials the reviewer flagged (org_brandshatch_tree_line_* strips
+ // and org_tree_*/org_shrub_*/org_bush_* instances). The measured source textures are intrinsically dark —
+ // treeline RGB (51,53,45), pine billboard solid (37,43,26) — so the backdrop reads as a dark wall against the
+ // bright sky. AlbedoColor multiplies AlbedoTexture in StandardMaterial3D, so a per-material lift raises the
+ // displayed colour without touching any texture file. Default unset = untouched. Single knob; logged + audited.
+ static void ForestTonePass(Node3D track){
+  string toneText=System.Environment.GetEnvironmentVariable("MYSIM_FOREST_TONE");
+  if(string.IsNullOrEmpty(toneText))return;
+  if(!float.TryParse(toneText,System.Globalization.NumberStyles.Float,System.Globalization.CultureInfo.InvariantCulture,out float tone)||tone<=0f||tone>3f)return;
+  var seen=new HashSet<Material>();var records=new List<object>();
+  foreach(var node in track.FindChildren("*","MeshInstance3D",true,false)){
+   var mesh=(MeshInstance3D)node;if(mesh.Mesh==null)continue;
+   for(int s=0;s<mesh.Mesh.GetSurfaceCount();s++){
+    if(mesh.GetSurfaceOverrideMaterial(s) is not StandardMaterial3D mat||mat.AlbedoTexture==null)continue;
+    if(!seen.Add(mat))continue;
+    string texName=System.IO.Path.GetFileName(mat.AlbedoTexture.ResourcePath);
+    bool backdrop=texName.StartsWith("org_brandshatch_tree_line",System.StringComparison.Ordinal)||texName.StartsWith("org_tree_",System.StringComparison.Ordinal)||texName.StartsWith("org_shrub_",System.StringComparison.Ordinal)||texName.StartsWith("org_bush_",System.StringComparison.Ordinal);
+    if(!backdrop)continue;
+    Color c=mat.AlbedoColor;
+    mat.AlbedoColor=new Color(Mathf.Min(1f,c.R*tone),Mathf.Min(1f,c.G*tone),Mathf.Min(1f,c.B*tone),c.A);
+    records.Add(new{renderer=mesh.GetPath().ToString(),surface=s,texture=mat.AlbedoTexture.ResourcePath,albedoFrom=new[]{c.R,c.G,c.B},tone});
+   }
+  }
+  GD.Print("FOREST_TONE materials=",records.Count," tone=",tone," scope=vegetation-backdrop materials only; textures/geometry untouched");
+  if(System.Environment.GetEnvironmentVariable("MYSIM_BINDING_AUDIT") is string dir&&records.Count>0){System.IO.Directory.CreateDirectory(dir);string safeName=System.Text.RegularExpressions.Regex.Replace(track.Name.ToString(),"[^A-Za-z0-9_-]","_");System.IO.File.WriteAllText(System.IO.Path.Combine(dir,"forest-tone-"+safeName+".json"),System.Text.Json.JsonSerializer.Serialize(new{layer=track.Name.ToString(),tone,materials=records,scope="One tone-lift candidate on vegetation-backdrop materials; env-gated per-material; no texture/geometry change; not a promoted fix"},new System.Text.Json.JsonSerializerOptions{WriteIndented=true}));}
  }
  static uint Fnv1a(string s){uint h=2166136261u;foreach(char c in s){h^=c;h*=16777619u;}return h;}
  // One controlled grass colour-balance candidate: env-gated (MYSIM_GRASS_BALANCE=1), reversible, addressed only to

@@ -17,5 +17,7 @@ public sealed class SteeringInput {
   if(Math.Sign(requested)!=Math.Sign(Command)&&Math.Abs(requested)>.01f)rate=5f;
   Command+=MathUtil.Clamp(requested-Command,-rate*dt,rate*dt);return Command;
  }
+ // Profile-boundary reset: a validation rig must not inherit the previous scenario's command state.
+ public void Reset()=>Command=0;
 }
 }

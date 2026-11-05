@@ -12,7 +12,7 @@ public static class DriveSurfaceLoader {
    if (l[0] == 'v' && l[1] == ' ') { var p = l.Substring(2).Trim().Split(' ', System.StringSplitOptions.RemoveEmptyEntries); verts.Add(new Vector3(P(p[0]), P(p[1]), -P(p[2]))); }
    else if (l[0] == 'f' && l[1] == ' ') { var p = l.Substring(2).Trim().Split(' ', System.StringSplitOptions.RemoveEmptyEntries); tris.Add(verts[int.Parse(p[0]) - 1]); tris.Add(verts[int.Parse(p[1]) - 1]); tris.Add(verts[int.Parse(p[2]) - 1]); }
   }
-  var shape = new ConcavePolygonShape3D { BackfaceCollision = true }; shape.Data = NativeSpinDiagonalExperiment.ApplyCandidate(MeasuredInterlagosSeam.Apply(tris.ToArray(),resPath),resPath);
+  var shape = new ConcavePolygonShape3D { BackfaceCollision = true }; shape.Data = NativeSpinDiagonalExperiment.ApplyCandidate(MeasuredInterlagosSeam.Apply(TrackSeamWelds.Apply(tris.ToArray(),resPath),resPath),resPath);
   var body = new StaticBody3D { Name = "DriveSurface", CollisionLayer = layer }; body.AddChild(new CollisionShape3D { Shape = shape });
   if(System.Environment.GetEnvironmentVariable("MYSIM_COPLANAR_ROAD_CANDIDATE")=="1"){
    if(layer!=1)throw new System.InvalidOperationException("Coplanar road candidate only applies to actual drive-surface layer1");

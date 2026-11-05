@@ -5,8 +5,8 @@ Set-Location $root
 $env:GH_TOKEN=(gh auth token -u instagramshashank8-bot).Trim()
 $repo='instagramshashank8-bot/mysim-godot'
 $queue = @(
-  @{ ref='mistral/p1-badge-baseline'; depth='car_evidence';      inputs=@{cars='16'};  tag='P1-LEG-A badges-candidates-removed' },
-  @{ ref='39cdf33';                  depth='car_evidence';      inputs=@{cars='16'};  tag='P1-LEG-B badges-candidates-active (same code lineage)' },
+  @{ ref='mistral/p1-badge-baseline-rebase'; depth='car_evidence';      inputs=@{cars='16'};  tag='P1-LEG-A badges-candidates-removed' },
+  @{ ref='codex/repair-20261029';                  depth='car_evidence';      inputs=@{cars='16'};  tag='P1-LEG-B badges-candidates-active (same code lineage)' },
   @{ ref='codex/repair-20261029';    depth='native_geometry_recovery'; inputs=@{cars='16';physics_backend='jolt';physics_hz='240';rotational_tyres='true'}; tag='RIDE-A baseline (clean-lap config jolt/240/rotational)' },
   @{ ref='codex/repair-20261029';    depth='native_geometry_recovery'; inputs=@{cars='16';physics_backend='jolt';physics_hz='240';rotational_tyres='true'}; tag='RIDE-B ride-height candidate'; extra=@{native_ride_height='true'} }
 )

@@ -1,0 +1,41 @@
+{
+  "requiresWetWeather": true,
+  "cases": [
+    {
+      "car": 16,
+      "track": 0,
+      "weather": 2,
+      "compound": 3,
+      "drivingValidation": ["braking_60_wet", "steering_rate_step", "edge_excursion"]
+    },
+    {
+      "car": 0,
+      "track": 0,
+      "weather": 2,
+      "compound": 3,
+      "drivingValidation": ["braking_60_wet", "steering_rate_step"]
+    },
+    {
+      "car": 16,
+      "track": 8,
+      "weather": 2,
+      "compound": 3,
+      "drivingValidation": ["braking_60_wet", "steering_rate_step", "edge_excursion"]
+    },
+    {
+      "car": 0,
+      "track": 8,
+      "weather": 2,
+      "compound": 3,
+      "drivingValidation": ["braking_60_wet", "steering_rate_step"]
+    }
+  ],
+  "scope": "Wet/night matrix W cells (the wet file): 2 cars x 2 tracks, weather 2 (rain, initialWater 0.55, rain continues) + compound 3 (Wet). Serves W1 (wet day + the rain/reflect candidates), W2 (wet night FULL package - the money cell), W0 (optional clean wet baseline). FIX vs the integration's c677943 copy: the drivingValidation lists added per case - ParseCaseProfiles requires them and the uncorrected files kill every matrix dispatch at boot. Profile lists mirror native_driving_validation_wet.json exactly (car16 carries edge_excursion, car0 does not); weather/compound preserved as the integration defines them (the wet assert: wet-named manifests require weather>0).",
+  "controlledVariables": {
+    "track": [0, 8],
+    "laps": 1,
+    "rivals": 0,
+    "weather": 2,
+    "compound": 3
+  }
+}

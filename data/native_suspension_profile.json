@@ -44,6 +44,23 @@
       "car0_note": "post-exclusion static stance 0.0497 m is already inside the 30-50 mm class, so the gate applies no preload (the clearance value is a floor/minimum, not an exact stance)",
       "both_below_ceiling": true
     },
-    "verificationChain": "DV core after the bake change must free the frozen car (DV_TRACE: thr=1 with spd rising; 4-wheel support; the 41834771421/41840755243 signature bodyContacts=2 tyreContacts=1 gone) AND the nine-target battery must hold its bands; then the RIDE-A/RIDE-B pair per the turn-5/6 rubric"
+    "verificationChain": "DV core after the bake change must free the frozen car (DV_TRACE: thr=1 with spd rising; 4-wheel support; the 41834771421/41840755243 signature bodyContacts=2 tyreContacts=1 gone) AND the nine-target battery must hold its bands; then the RIDE-A/RIDE-B pair per the turn-5/6 rubric",
+    "anchorCorrection_a2": {
+      "status": "PREPARED, NOT DISPATCHED, NOT ADOPTED - geometry-first path authorized by the Q1 update (a2); the data block is inert to the current code until the coordinator applies the proposed NativeSuspensionVehicle.cs diff (see agents/physics-gameplay-geometry-ab.md)",
+      "mechanism": "decouple the mount anchor offset from (restLength - staticSag): static floor height above road = radius + RestLength + preload - StaticSag - (wheelCentreY + anchorOffset) + floorY = radius + preload - anchorOffset - (wheelCentreY - floorY); at the tied default anchorOffset=+0.11 the guard datum sits at -0.2004+preload (impossible); lowering the anchor raises the whole body relative to the road without touching the spring state",
+      "anchorOffset": -0.05,
+      "anchorOffset_status": "EXPERIMENTAL - anchor 5cm below the hub centre (inside the wheel), consumed only in ride-height mode",
+      "requiredGateMathUpdate": true,
+      "expectedPreload": 0.0751,
+      "note": "needs the ride gate to compute the anchor-aware stance (stance0 = sourceClearance + (restMinusSagDefault - anchorOffset)); without it the gate still demands 0.235 and blocks",
+      "preloadBound": "maximumPreload stays 0.12 exactly as before - the bound is NOT raised; expected 0.0751 is inside it",
+      "wheelEnvelopeCheck": "ray reach = radius+restLength+preload+0.15 = 0.705m from a lower anchor - comfortably reaches the road at the static and loaded states; no droop limiter invented",
+      "visualRisk": "body rises ~0.16m; visual wheel pivots sink by the preload (~7.5cm) inside the arches - requires the car-assembly wheel-fit/stance review before any adoption (part of the Group-1/2 gate)",
+      "legs": {
+        "A": "already-measured evidence, no re-run: clean lap 41799538756 (chassis-graze contact lap, floor datum -0.20), DV freezes 41834771421/41840755243 (wedge, thr=1 spd=0 tyreContacts=1), gate block 41848766195 (clearance -0.2001, demanded preload 0.235)",
+        "B": "ONE dispatch: DV core at jolt/240/rotational with MYSIM_NATIVE_RIDE_HEIGHT=1 + the corrected anchor/gate math; readout per the turn-5/6 Group-1/2 rubrics on the same gates as the 7116def pack"
+      },
+      "defaultAdoption": "NONE - both legs stay configuration-labelled; A is the fielded default until the full adoption gate (numeric + visual + coordinator flip) passes"
+    }
   }
 }

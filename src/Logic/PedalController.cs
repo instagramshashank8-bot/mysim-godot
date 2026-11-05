@@ -13,5 +13,7 @@ namespace MySimulator.Rebuild {
    if(reversing) return new DriverInput(0,throttle>.05f?throttle:brake,steer){handbrake=handbrake,reverse=throttle<.05f && brake>.1f};
    return new DriverInput(throttle,brake,steer){handbrake=handbrake};
   }
+  // Profile-boundary reset: the brake-to-reverse latch must not leak into the next validation scenario.
+  public void Reset(){reverseHold=0;reversing=false;}
  }
 }

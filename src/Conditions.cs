@@ -19,9 +19,19 @@ public static class Conditions {
  public static int Tod => Mathf.Clamp(System.Environment.GetEnvironmentVariable("MYSIM_TOD") != null ? int.Parse(System.Environment.GetEnvironmentVariable("MYSIM_TOD")) : Settings.Get("tod", 0), 0, LightingProfiles.GetArrayLength()-1);
  public static int Wet => Mathf.Clamp(System.Environment.GetEnvironmentVariable("MYSIM_WET") != null ? int.Parse(System.Environment.GetEnvironmentVariable("MYSIM_WET")) : Settings.Get("wet", 0), 0, Profiles.GetArrayLength()-1);
  public static float WetnessValue => Value("initialWater");
+ static int wetReflectLogged;
  public static void ConfigureWetGround(ShaderMaterial material){
   var profile=Profiles;profile=catalogue.RootElement.GetProperty("surfaceVisual");
-  foreach(var key in new[]{"wet_darkening","wet_roughness","wet_specular"})material.SetShaderParameter(key,profile.GetProperty(key).GetSingle());
+  // One controlled wet-visibility candidate: MYSIM_WET_REFLECT=<m> scales the WET specular mix-end only
+  // (a stronger reflection on the wet road); the dry end (0.04) and the darkening/roughness stay authored,
+  // so a DRY render is unaffected by construction (the mix weight is zero at water=0). Default unset = exact.
+  float reflect=EnvFloat("MYSIM_WET_REFLECT",1f);
+  foreach(var key in new[]{"wet_darkening","wet_roughness","wet_specular"}){
+   float value=profile.GetProperty(key).GetSingle();
+   if(key=="wet_specular")value*=reflect;
+   material.SetShaderParameter(key,value);
+  }
+  if(reflect!=1f&&wetReflectLogged++==0)GD.Print("WET_REFLECT m=",reflect," wet_specular→",(profile.GetProperty("wet_specular").GetSingle()*reflect).ToString("0.000"));
  }
  static float EnvFloat(string key,float fallback)=>float.TryParse(System.Environment.GetEnvironmentVariable(key),System.Globalization.NumberStyles.Float,System.Globalization.CultureInfo.InvariantCulture,out float parsed)?parsed:fallback;
  public static void Apply(Godot.Environment env, DirectionalLight3D sun, ProceduralSkyMaterial sky) {

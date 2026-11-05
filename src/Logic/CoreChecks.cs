@@ -168,6 +168,59 @@ namespace MySimulator.Verification
             }
             Check(matrixCellCount>=6,"Wet comparison matrix lost coverage");
             Check(!matrixCells.Contains("16/0/2/1")&&!matrixCells.Contains("0/0/2/1"),"Completed wet-slick cells must stay outside the executable case list");
+            {
+                var wallManifest=System.Text.Json.JsonDocument.Parse(System.IO.File.ReadAllText("data/native_driving_validation_wall.json")).RootElement;
+                var wallSeen=new HashSet<string>();string lastWall=null;
+                foreach(var c in wallManifest.GetProperty("cases").EnumerateArray()){
+                    int caseCar=c.GetProperty("car").GetInt32(),caseTrack=c.GetProperty("track").GetInt32();
+                    Check(wallSeen.Add(caseCar+"/"+caseTrack),"Wall manifest repeats a car/track case");
+                    foreach(var idW in c.GetProperty("drivingValidation").EnumerateArray()){var nm=idW.GetString();Check(validationProfileIds.Contains(nm),"Wall manifest references unknown profile "+nm);lastWall=nm;}
+                }
+                Check(lastWall=="impact_wall_recovery","Wall manifest must end with impact_wall_recovery (the DV impact-flag contract: DRIVING_VALIDATION_IMPACT must match the manifest)");
+            }
+            {
+                // The wet/night matrix pair (the D0/N/W cells): the manifests must carry
+                // explicit drivingValidation lists (ParseCaseProfiles fails closed without
+                // them - the c677943 pair killed every matrix dispatch at boot), the dry
+                // file stays on the dry default, and the wet file pins its weather contract
+                // (requiresWetWeather: the tool's name-based wet assert cannot express the
+                // wetnight_dry file's intent - "wetnight" contains "wet").
+                var dryNight=System.Text.Json.JsonDocument.Parse(System.IO.File.ReadAllText("data/native_wetnight_matrix_dry.json")).RootElement;
+                var wetNight=System.Text.Json.JsonDocument.Parse(System.IO.File.ReadAllText("data/native_wetnight_matrix_wet.json")).RootElement;
+                foreach(var c in dryNight.GetProperty("cases").EnumerateArray()){
+                    Check(c.TryGetProperty("drivingValidation",out var dvD)&&dvD.GetArrayLength()>0,"The wetnight DRY manifest lost its drivingValidation lists");
+                    Check(!c.TryGetProperty("weather",out var wD)||wD.GetInt32()==0,"The wetnight DRY manifest must stay on the dry default");
+                    foreach(var id in dvD.EnumerateArray())Check(validationProfileIds.Contains(id.GetString()),"The wetnight DRY manifest references unknown profile "+id.GetString());
+                }
+                Check(wetNight.TryGetProperty("requiresWetWeather",out var rww)&&rww.GetBoolean(),"The wetnight WET manifest must pin requiresWetWeather");
+                foreach(var c in wetNight.GetProperty("cases").EnumerateArray()){
+                    Check(c.GetProperty("weather").GetInt32()==2&&c.GetProperty("compound").GetInt32()==3,"The wetnight WET manifest must keep weather 2 + compound 3");
+                    Check(c.TryGetProperty("drivingValidation",out var dvW)&&dvW.GetArrayLength()>0,"The wetnight WET manifest lost its drivingValidation lists");
+                    foreach(var id in dvW.EnumerateArray())Check(validationProfileIds.Contains(id.GetString()),"The wetnight WET manifest references unknown profile "+id.GetString());
+                }
+            }
+            {
+                var forceProfile=new DrivingValidation.Profile{Id="force"};
+                var fs=new List<DrivingValidation.Sample>();
+                const float sdt=1f/240f;
+                fs.Add(new DrivingValidation.Sample{phaseId="aim",t=0,longitudinalSpeed=10,lateralSpeed=0,nonSurfaceContact=false,loads=new double[4],springLengths=new double[4],longitudinalSlip=new double[4],lateralSlipAngle=new double[4]});
+                fs.Add(new DrivingValidation.Sample{phaseId="aim",t=sdt,longitudinalSpeed=7,lateralSpeed=1.5,nonSurfaceContact=true,loads=new double[4],springLengths=new double[4],longitudinalSlip=new double[4],lateralSlipAngle=new double[4]});
+                fs.Add(new DrivingValidation.Sample{phaseId="aim",t=2*sdt,longitudinalSpeed=6.5,lateralSpeed=1.2,nonSurfaceContact=true,loads=new double[4],springLengths=new double[4],longitudinalSlip=new double[4],lateralSlipAngle=new double[4]});
+                var forceRefs=new Dictionary<string,double>{{"vehicleMass",690}};
+                var jump=DrivingValidation.ComputeMetric("impactTickPeakDeltaV","aim",fs,forceProfile,forceRefs);
+                Check(jump.HasValue&&Math.Abs(jump.Value-Math.Sqrt(9+2.25))<0.01,"Per-tick velocity-jump metric is wrong on synthetic wall-contact data");
+                var force=DrivingValidation.ComputeMetric("impactPeakForceEstimate","aim",fs,forceProfile,forceRefs);
+                Check(force.HasValue&&Math.Abs(force.Value-690*Math.Sqrt(11.25)/sdt)<1.0,"Force estimate is wrong on synthetic wall-contact data");
+                var dwell=DrivingValidation.ComputeMetric("impactContactSeconds","aim",fs,forceProfile,forceRefs);
+                Check(dwell.HasValue&&Math.Abs(dwell.Value-2*sdt)<0.001,"Contact dwell is wrong on synthetic wall-contact data");
+                bool noRef=false;try{DrivingValidation.ComputeMetric("impactImpulseEstimate","aim",fs,forceProfile,new Dictionary<string,double>());}catch(Exception){noRef=true;}
+                Check(noRef,"Impact impulse estimate must fail closed without the vehicleMass reference");
+                var fsBand=new List<DrivingValidation.Sample>();
+                fsBand.Add(new DrivingValidation.Sample{phaseId="aim",t=0,speed=10,nonSurfaceContact=false,wheelBandContact=false,loads=new double[4],springLengths=new double[4],longitudinalSlip=new double[4],lateralSlipAngle=new double[4]});
+                fsBand.Add(new DrivingValidation.Sample{phaseId="aim",t=sdt,speed=10,nonSurfaceContact=true,wheelBandContact=true,loads=new double[4],springLengths=new double[4],longitudinalSlip=new double[4],lateralSlipAngle=new double[4]});
+                var band=DrivingValidation.ComputeMetric("wheelBandContactSamples","all",fsBand,forceProfile,forceRefs);
+                Check(band.HasValue&&band.Value==1,"Wheel-band contact samples must count only the band rows on synthetic data");
+            }
             var handlingTargets=System.Text.Json.JsonDocument.Parse(System.IO.File.ReadAllText("data/native_handling_targets.json")).RootElement;
             int handlingTargetCount=0;
             foreach(var t in handlingTargets.GetProperty("targets").EnumerateArray()){
@@ -239,8 +292,151 @@ namespace MySimulator.Verification
                 }
             }
             log.Add("PASS steering-feel guards: correction authority, lock reach time, release decay and symmetry (turn-8 measured bands)");
-            log.Add("PASS driving validation scaffolding: profiles, manifests, matrix, targets, metric maths and fail-closed parsing");
+            // Userpath chain state hygiene: profile-boundary resets must clear the smoothing/latch state
+            // and the human reverse-pedal semantics (brake = the reverse pedal once latched) must engage.
+            {
+                var r1=new SteeringInput();r1.Step(1,1f/60,false);r1.Reset();Check(Math.Abs(r1.Command)<1e-6,"SteeringInput.Reset left a residual command");
+                var p1=new PedalController();DriverInput d1=new DriverInput();bool latched=false;
+                for(int i=0;i<40;i++){d1=p1.Update(0,1,0,false,0,1f/120,true);if(d1.reverse)latched=true;}
+                Check(latched,"Brake-to-reverse latch never engaged holding the brake from standstill");
+                p1.Reset();var d2=p1.Update(0,0,0,false,0,1f/120,true);
+                Check(!d2.reverse&&p1.Reversing==false,"PedalController.Reset left the reverse latch armed");
+            }
+            // R-window recovery forensics: windows open on impact-counter rises and close when
+            // motion (speed magnitude) holds at MotionSpeed for HoldSeconds; a profile without
+            // the recordRecovery flag reports null metrics (fail-closed, never a passing zero).
+            {
+                var recSpec=new DrivingValidation.RecoverySpec{Enabled=true,MotionSpeed=1,HoldSeconds=0.5,MaxSeconds=10};
+                var recProfile=new DrivingValidation.Profile{Id="rec",Recovery=recSpec};
+                var rs=new List<DrivingValidation.Sample>();const float rdt=1f/240f;
+                // t=0: 5 m/s; impact rise at t=rdt (speed 2); stalled at 0.2 until t=0.5; then a
+                // reverse-out (speed 2.5, longitudinal -2.5) which holds past the 0.5 s hold.
+                for(int i=0;i<1200;i++){double t=i*rdt;double sp=t<rdt?5:t<2*rdt?2:(t<0.5?0.2:2.5);
+                    rs.Add(new DrivingValidation.Sample{t=t,speed=sp,longitudinalSpeed=t<0.5?sp:-sp,x=t<0.5?0:(t-0.5)*2.5,z=0,heading=0,upY=1,groundedMask=15,impactEvents=i==0?0:1,onDrivingSurface=i>=2,throttle=t>=0.5?1:0,phaseId="recover_fwd",loads=new double[4],springLengths=new double[4],longitudinalSlip=new double[4],lateralSlipAngle=new double[4]});}
+                var windows=DrivingValidation.RecoveryWindows(rs,recSpec);
+                Check(windows.Count==1,"Recovery windows did not open exactly on the impact rise (got "+windows.Count+")");
+                Check(windows[0].Recovered&&windows[0].motionTime.HasValue&&Math.Abs(windows[0].motionTime.Value-(1.0-rdt))<2*rdt,"Recovery motion time is wrong (got "+(windows[0].motionTime?.ToString(CultureInfo.InvariantCulture)??"null")+")");
+                Check(windows[0].maxReverseSpeed>1.5,"Recovery window missed the reverse-out phase");
+                Check(windows[0].pathLength>1.0,"Recovery path length not measured");
+                Check(windows[0].throttleFraction>0.4&&windows[0].throttleFraction<0.6&&windows[0].offTrackFraction<0.5,"Recovery input/surface fractions not recorded honestly");
+                var maxMotion=DrivingValidation.ComputeMetric("recoveryMotionTimeMax","all",rs,recProfile,null);
+                Check(maxMotion.HasValue&&Math.Abs(maxMotion.Value-(1.0-rdt))<2*rdt,"recoveryMotionTimeMax metric maths wrong against the same synthetic window");
+                var stuckSpec=new DrivingValidation.RecoverySpec{Enabled=true,MotionSpeed=1,HoldSeconds=0.5,MaxSeconds=2};
+                var stuck=new List<DrivingValidation.Sample>();
+                for(int i=0;i<720;i++){double t=i*rdt;stuck.Add(new DrivingValidation.Sample{t=t,speed=0.2,impactEvents=i==0?0:1,onDrivingSurface=true,throttle=1,phaseId="recover_fwd",loads=new double[4],springLengths=new double[4],longitudinalSlip=new double[4],lateralSlipAngle=new double[4]});}
+                var stuckWindows=DrivingValidation.RecoveryWindows(stuck,stuckSpec);
+                Check(stuckWindows.Count==1&&!stuckWindows[0].Recovered&&stuckWindows[0].motionTime==null,"A stalled recovery must record an unresolved window (Recovered=false, motionTime null)");
+                Check(Math.Abs(stuckWindows[0].endT-stuckWindows[0].startT-2)<2*rdt,"Unresolved recovery window not capped at maxSeconds");
+                var offProfile=new DrivingValidation.Profile{Id="off"};
+                Check(!DrivingValidation.ComputeMetric("recoveryWindowCount","all",rs,offProfile,null).HasValue,"Recovery metrics must be null without the recordRecovery flag (a silent zero could pass an assertion)");
+                var clean=new List<DrivingValidation.Sample>();for(int i=0;i<240;i++)clean.Add(new DrivingValidation.Sample{t=i*rdt,speed=3,onDrivingSurface=true,phaseId="recover_fwd",loads=new double[4],springLengths=new double[4],longitudinalSlip=new double[4],lateralSlipAngle=new double[4]});
+                var noImpact=DrivingValidation.ComputeMetric("recoveryWindowCount","all",clean,recProfile,null);
+                Check(noImpact.HasValue&&noImpact.Value==0,"A flag-enabled profile with no impacts must report an observed zero window count");
+            }
+            // Contact-archetype force signatures: a guard-band contact (hub-mounted wheelguard/
+            // caliper) and a body-panel contact must be classifiable per tick with per-archetype
+            // per-tick velocity jumps; mixed ticks (both bands) feed both signatures and are
+            // counted; a profile without the flag reports null (fail-closed, never zero).
+            {
+                var archProfile=new DrivingValidation.Profile{Id="arch",RecordContactArchetypes=true};
+                var arche=new List<DrivingValidation.Sample>();const float adt=1f/240f;
+                arche.Add(new DrivingValidation.Sample{t=0,speed=8,longitudinalSpeed=8,lateralSpeed=0,phaseId="aim",loads=new double[4],springLengths=new double[4],longitudinalSlip=new double[4],lateralSlipAngle=new double[4]});
+                arche.Add(new DrivingValidation.Sample{t=adt,speed=5,longitudinalSpeed=4.6,lateralSpeed=-1.9,nonSurfaceContact=true,wheelBandContact=true,phaseId="aim",loads=new double[4],springLengths=new double[4],longitudinalSlip=new double[4],lateralSlipAngle=new double[4]});
+                arche.Add(new DrivingValidation.Sample{t=2*adt,speed=4.9,longitudinalSpeed=4.6,lateralSpeed=-1.85,nonSurfaceContact=true,wheelBandContact=true,phaseId="aim",loads=new double[4],springLengths=new double[4],longitudinalSlip=new double[4],lateralSlipAngle=new double[4]});
+                arche.Add(new DrivingValidation.Sample{t=3*adt,speed=4.8,longitudinalSpeed=4.6,lateralSpeed=-1.2,nonSurfaceContact=true,bodyPanelContact=true,phaseId="aim",loads=new double[4],springLengths=new double[4],longitudinalSlip=new double[4],lateralSlipAngle=new double[4]});
+                arche.Add(new DrivingValidation.Sample{t=4*adt,speed=4.7,longitudinalSpeed=4.6,lateralSpeed=-1.1,nonSurfaceContact=true,bodyPanelContact=true,phaseId="aim",loads=new double[4],springLengths=new double[4],longitudinalSlip=new double[4],lateralSlipAngle=new double[4]});
+                arche.Add(new DrivingValidation.Sample{t=5*adt,speed=4.6,longitudinalSpeed=4.5,lateralSpeed=-0.9,nonSurfaceContact=true,wheelBandContact=true,bodyPanelContact=true,phaseId="aim",loads=new double[4],springLengths=new double[4],longitudinalSlip=new double[4],lateralSlipAngle=new double[4]});
+                var guardJump=DrivingValidation.ComputeMetric("wheelBandTickPeakDeltaV","all",arche,archProfile,null);
+                Check(guardJump.HasValue&&Math.Abs(guardJump.Value-System.Math.Sqrt(3.4*3.4+1.9*1.9))<0.01,"Guard-band per-tick velocity jump is wrong on synthetic contact data");
+                var panelJump=DrivingValidation.ComputeMetric("bodyPanelTickPeakDeltaV","all",arche,archProfile,null);
+                Check(panelJump.HasValue&&Math.Abs(panelJump.Value-0.65)<0.01,"Body-panel per-tick velocity jump is wrong on synthetic contact data");
+                var panelSamples=DrivingValidation.ComputeMetric("bodyPanelContactSamples","all",arche,archProfile,null);
+                Check(panelSamples.HasValue&&panelSamples.Value==3,"Body-panel contact sample count is wrong (mixed tick must count toward the panel too)");
+                var mixed=DrivingValidation.ComputeMetric("mixedContactSamples","all",arche,archProfile,null);
+                Check(mixed.HasValue&&mixed.Value==1,"Mixed guard+panel contact ticks not counted");
+                var bandSeconds=DrivingValidation.ComputeMetric("wheelBandContactSeconds","all",arche,archProfile,null);
+                Check(bandSeconds.HasValue&&Math.Abs(bandSeconds.Value-3*adt)<1e-6,"Guard-band contact seconds computed wrongly");
+                var offArch=new DrivingValidation.Profile{Id="archoff"};
+                Check(!DrivingValidation.ComputeMetric("wheelBandTickPeakDeltaV","all",arche,offArch,null).HasValue&&!DrivingValidation.ComputeMetric("bodyPanelContactSamples","all",arche,offArch,null).HasValue,"Archetype metrics must be null without the recordContactArchetypes flag (a silent zero could pass an assertion)");
+            }
+            // LAN phase-2: the explicit START handshake (the adopted default) - the host sends
+            // START carrying its session token and arms the real 5 s countdown; the client
+            // gates its race entry on ITS exact token; wrong-token and pre-handshake STARTs
+            // are ignored; a stale-protocol HELLO is refused (the version gate stays strict).
+            {
+                var channel=new TestChannel();
+                var hostRace=new Race(0,3,0);hostRace.Add("HOST",true,Compound.Medium);hostRace.Add("GUEST",false,Compound.Medium);
+                var host=new GameSession(hostRace);host.Host(channel,"HOST");
+                host.Process("HELLO|"+Wire.Version+"|"+new string('a',32)+"|"+Wire.Name("GUEST")+"|1","1.2.3.4:9");
+                Check(host.connected,"LAN host did not accept a valid HELLO");
+                host.Process("HELLO|MSR5|"+new string('a',32)+"|"+Wire.Name("GUEST")+"|1","1.2.3.5:9");
+                Check(!host.connected||host.peer=="1.2.3.4:9","A stale-protocol HELLO must be refused");
+                host.StartRace();
+                Check(channel.Sent.Contains("START|"+host.sessionToken),"Host did not send START carrying its session token");
+                Check(host.race.countdown==5f&&host.startRequested,"Host start did not arm the 5 s countdown (the lobby's 9999 hold must end)");
+                Check(!host.startReceived,"The host must not set the client-side startReceived flag");
+                var client=new GameSession(new Race(0,3,0));client.Join(new TestChannel(),"1.2.3.4:9","GUEST");
+                client.Process("START|"+client.sessionToken,"1.2.3.4:9");
+                Check(!client.startReceived,"START before the handshake completed must be ignored");
+                client.Process("ACCEPT|"+Wire.Version+"|"+client.nonce+"|"+new string('b',32),"1.2.3.4:9");
+                Check(client.connected,"Client did not accept the host token");
+                client.Process("START|wrongtoken","1.2.3.4:9");
+                Check(!client.startReceived,"A START with a wrong token must be ignored");
+                client.Process("START|"+client.sessionToken,"1.2.3.4:9");
+                Check(client.startReceived,"Client did not gate its race entry on the START token");
+                // Host-side adoption: the session re-points at the LIVE simulated race (the
+                // remote car already added by the race scene from PeerName/PeerModel); the
+                // client role can never adopt; a race without the remote car is rejected.
+                Check(host.PeerName=="GUEST"&&host.PeerModel==1,"The host did not retain the peer's identity from HELLO");
+                var liveRace=new Race(0,3,0);liveRace.Add("HOST",true,Compound.Medium);liveRace.Add("GUEST",true,Compound.Medium);
+                host.AdoptRace(liveRace);
+                Check(host.RaceAdopted&&host.race==liveRace,"AdoptRace did not re-point the session at the live race");
+                bool clientRejected=false;try{client.AdoptRace(liveRace);}catch(InvalidOperationException){clientRejected=true;}
+                Check(clientRejected,"A client session must never adopt a race");
+                bool thinRejected=false;try{host.AdoptRace(new Race(0,3,0));}catch(ArgumentException){thinRejected=true;}
+                if(!thinRejected){host.AdoptRace(liveRace);}
+                Check(thinRejected,"A live race without the remote-driven car must be rejected");
+            }
+            // LAN phase-2: the client pipeline end to end (Snapshot -> ReadSnapshot ->
+            // SnapshotApplier) with the persistence rule: one view per car id, updated in
+            // place, never recreated per packet; new ids append exactly one view.
+            {
+                var views=new Dictionary<int,TestCarView>();int raceStates=0;
+                var applier=new SnapshotApplier(new TestRaceView(id=>{var v=new TestCarView();views[id]=v;return v;},()=>raceStates++));
+                var hostRace=new Race(0,3,0);hostRace.Add("HOST",true,Compound.Medium);hostRace.Add("GUEST",false,Compound.Medium);
+                hostRace.cars[0].position=new Vec(10,20);
+                applier.Apply(Wire.ReadSnapshot(Wire.Snapshot(hostRace,1).Split('|'),out _));
+                applier.Apply(Wire.ReadSnapshot(Wire.Snapshot(hostRace,2).Split('|'),out _));
+                Check(views.Count==2&&raceStates==2,"SnapshotApplier must create exactly one view per car and apply race state per snapshot");
+                Check(views[0].PoseApplications==2&&views[1].PoseApplications==2,"Existing car views must update in place, never be recreated per packet");
+                hostRace.Add("THIRD",false,Compound.Medium);
+                applier.Apply(Wire.ReadSnapshot(Wire.Snapshot(hostRace,3).Split('|'),out _));
+                Check(views.Count==3&&views[0].PoseApplications==3,"A new car id appends exactly one view; existing views keep updating");
+                Check(applier.AppliedSnapshots==3&&applier.CarViews==3,"SnapshotApplier counters drifted");
+                Check(applier.ViewFor(1)!=null&&applier.ViewFor(99)==null,"ViewFor must return the persistent view for a known id and null for an unknown one");
+            }
+            log.Add("PASS driving validation scaffolding: profiles, manifests, matrix, targets, metric maths, recovery windows and fail-closed parsing");
             log.Add("PASS "+count+" assertions");return string.Join("\n",log.ToArray());
+        }
+        // Test doubles for the LAN phase-2 checks: a recording channel, a counting car view
+        // and a counting race view (no Godot types - the real adapters live in the host app).
+        sealed class TestChannel:IGameChannel{
+            public List<string> Sent=new List<string>();public string Status{get;set;}="test";
+            public bool Receive(out string message,out string sender){message=null;sender=null;return false;}
+            public void Send(string message,string address){Sent.Add(message);}
+            public void Dispose(){}
+        }
+        sealed class TestCarView:ICarView{
+            public int PoseApplications,StateApplications;
+            public void EnsureCreated(int carModel,string driver){}
+            public void ApplyPose(float x,float z,float heading,bool hasBodyPose,float bodyHeight,float bodyQx,float bodyQy,float bodyQz,float bodyQw){PoseApplications++;}
+            public void ApplyState(float damage,float fuel,float speed,int completedLaps,bool finished,float finishTime,bool pitActive,bool servicing,float serviceRemaining){StateApplications++;}
+        }
+        sealed class TestRaceView:IRaceView{
+            readonly Func<int,ICarView> factory;readonly Action onRaceState;
+            public TestRaceView(Func<int,ICarView> factory,Action onRaceState){this.factory=factory;this.onRaceState=onRaceState;}
+            public ICarView CreateCarView(int id)=>factory(id);
+            public void ApplyRaceState(float clock,float countdown,bool started,int trackVariant,int targetLaps,float wetness)=>onRaceState();
         }
 #if CLI_TEST
         public static void Main(){try{Console.WriteLine(Run());}catch(Exception e){Console.WriteLine("FAIL "+e);Environment.Exit(1);}}

@@ -44,7 +44,22 @@ public partial class ProductControlsScenario : Node {
    Check(hud.DeviceLabel.Text=="KEYS"||hud.DeviceLabel.Text=="PAD","device modality unknown: '"+hud.DeviceLabel.Text+"'");
    bool touchBefore=Settings.Get("screen_controls",false);Settings.Set("screen_controls",true);await Frame();await Frame();
    Check(hud.DeviceLabel.Text=="TOUCH","touch modality not shown when screen controls are enabled: '"+hud.DeviceLabel.Text+"'");
+   // Touch layout structure (a second hud built while screen controls are on): two-row strip, the speed cluster
+   // below it, the minimap below that - no overlap, everything inside the canvas.
+   var touchHud=new Hud{Race=race,Player=player};AddChild(touchHud);await Frame();await Frame();
+   float cvw=GetViewport().GetVisibleRect().Size.X,cvh=GetViewport().GetVisibleRect().Size.Y;
+   var stripRect=touchHud.StripPanel.GetGlobalRect();var spRect=touchHud.SpeedLabel.GetGlobalRect();var mapRect=touchHud.MiniMapPanel.GetGlobalRect();
+   Check(stripRect.End.Y<=spRect.Position.Y+1,"touch speed cluster overlaps the strip: strip="+stripRect+" speed="+spRect);
+   Check(spRect.End.Y<=mapRect.Position.Y+1,"touch minimap overlaps the speed cluster: map="+mapRect+" speed="+spRect);
+   Check(stripRect.End.X<=cvw+1&&spRect.End.X<=cvw+1&&mapRect.End.X<=cvw+1&&mapRect.End.Y<=cvh+1,"touch hud exceeds the canvas: strip="+stripRect+" speed="+spRect+" map="+mapRect);
+   touchHud.QueueFree();await Frame();await Frame();
    Settings.Set("screen_controls",touchBefore);await Frame();await Frame();
+   // Chip cohesion: the standings, the ERS and the desktop speed chip resolve to the shared surface (6px corners,
+   // translucent), and the standings sits below the strip on the shared left rail.
+   var standBox=hud.StandingsPanel.GetThemeStylebox("panel") as StyleBoxFlat;Check(standBox!=null&&standBox.CornerRadiusTopLeft==6&&standBox.BgColor.A<0.95f,"standings surface is not the shared chip");
+   var ersBox=hud.HybridControls.GetThemeStylebox("panel") as StyleBoxFlat;Check(ersBox!=null&&ersBox.CornerRadiusTopLeft==6&&ersBox.BgColor.A<0.95f,"ers surface is not the shared chip");
+   Check(hud.SpeedLabel.GetParent().GetParent() is PanelContainer,"desktop speed pair is not chip-wrapped");
+   var standRect=hud.StandingsPanel.GetGlobalRect();Check(standRect.Position.Y>=hud.StripPanel.GetGlobalRect().End.Y-1,"standings surface overlaps the strip: "+standRect);
    // Session state: lap, timing, finish - independent literal formats. Two-car race shows the live POS grouping.
    Check(hud.InfoLabel.Text.Contains("POS")&&hud.InfoLabel.Text.Contains("/2"),"hud position grouping missing in a two-car race: '"+hud.InfoLabel.Text+"'");
    Check(hud.InfoLabel.Text.Contains("LAP 1/3")&&hud.InfoLabel.Text.Contains("LAP TIME 0.0s")&&hud.InfoLabel.Text.Contains("BEST -- (no valid lap)"),"hud session values not bound to live race state: '"+hud.InfoLabel.Text+"'");
@@ -53,6 +68,14 @@ public partial class ProductControlsScenario : Node {
    player.finished=true;await Frame();await Frame();
    Check(hud.InfoLabel.Text.Contains("FINISHED 3 laps"),"hud finish state not bound to live race state: '"+hud.InfoLabel.Text+"'");
    player.finished=false;player.completedLaps=0;
+   // Cockpit camera contract: the seat, the 9-deg instrument pitch and the FOV are the asserted source of truth
+   // (the reviewer's standing reject: halo dominance and the unreadable wheel/dash at the level eye line).
+   Check(DriveController.CockpitFov==68f,"cockpit fov drifted from the contract");
+   Check(DriveController.CockpitSeat(true).IsEqualApprox(new Vector3(0,0.88f,0.05f)),"open-wheel cockpit seat moved");
+   Check(DriveController.CockpitSeat(false).IsEqualApprox(new Vector3(-0.35f,0.88f,0.05f)),"closed-car cockpit seat moved");
+   var cockpitBasis=DriveController.CockpitPose(new Basis());
+   Check(cockpitBasis.Z.Y>0.14f&&cockpitBasis.Z.Y<0.17f,"cockpit eye-line pitch moved out of the instrument band: "+cockpitBasis.Z.Y.ToString("0.000"));
+   Check(cockpitBasis.X.X<-0.99f,"cockpit camera handedness wrong (mirrored view)");
    // Pause display uses the same flag the game sets; paused state freezes the live readouts (no fake injection).
    hud.Paused=true;await Frame();await Frame();
    Check(hud.InfoLabel.Text=="PAUSED  (Esc / Tab to resume)","paused hud text missing: '"+hud.InfoLabel.Text+"'");
@@ -60,6 +83,22 @@ public partial class ProductControlsScenario : Node {
    // Pause display uses the same flag the game sets; paused state freezes the live readouts (no fake injection).
    hud.Paused=true;await Frame();await Frame();
    Check(hud.InfoLabel.Text=="PAUSED  (Esc / Tab to resume)","paused hud text missing: '"+hud.InfoLabel.Text+"'");
+   hud.Paused=false;await Frame();await Frame();
+   // Bindings panel: the pause shows the live binding list; the setting hides it; a remap reflects without
+   // reopening pause; the panel sits inside the canvas, right of the centered pause column.
+   hud.Paused=true;await Frame();await Frame();
+   Check(hud.BindingsNode!=null&&hud.BindingsNode.Visible,"bindings panel hidden under pause while show_bindings is on");
+   var key0=(Label)hud.BindingsNode.FindChild("Key0",true,false);Check(key0!=null,"bindings row Key0 missing");
+   Check(key0.Text==OS.GetKeycodeString(ControlBindings.Get(0)),"bindings row not live from ControlBindings: '"+key0.Text+"'");
+   Key throttleBefore=ControlBindings.Get(0);Settings.Set("key_0",(long)Key.J);await Frame();await Frame();
+   Check(key0.Text=="J","remapped throttle key not reflected in the bindings panel: '"+key0.Text+"'");
+   Settings.Set("key_0",(long)throttleBefore);
+   Settings.Set("show_bindings",false);await Frame();await Frame();
+   Check(!hud.BindingsNode.Visible,"show_bindings off did not hide the panel");
+   Settings.Set("show_bindings",true);await Frame();await Frame();
+   Check(hud.BindingsNode.Visible,"show_bindings on did not restore the panel");
+   var bindRect=hud.BindingsNode.GetGlobalRect();float bindW=GetViewport().GetVisibleRect().Size.X;
+   Check(bindRect.Position.X>=741&&bindRect.End.X<=bindW-15&&bindRect.Position.Y>=15&&bindRect.End.Y<=GetViewport().GetVisibleRect().Size.Y-1,"bindings panel outside the designed right column: "+bindRect);
    hud.Paused=false;await Frame();await Frame();
    // Classification: the panel's first child is its HEADER; data rows are named Car<id>. Each named row
    // must carry the slot the LIVE standings gives that same car (order-agnostic view binding).
@@ -69,7 +108,11 @@ public partial class ProductControlsScenario : Node {
    var rankOrder=race.Standings();
    for(int i=0;i<rankOrder.Count;i++){var car=rankOrder[i];var rowLabel=rows.GetNodeOrNull<Label>("Car"+car.id);Check(rowLabel!=null,"standings data row missing for car "+car.id);
     string name=CarCatalog.Names[car.carModel];if(name.Length>18)name=name.Substring(0,18);
-    Check(rowLabel.Text==(i+1).ToString("00")+"  "+name+"  L"+System.Math.Min(car.completedLaps+1,race.targetLaps),"standings row not bound to live order: car "+car.id+" = '"+rowLabel.Text+"'");
+    // Gap column: the leader row carries none; a trailing running car carries its live metres deficit to the leader.
+    string gap="";if(i>0&&!car.finished&&!car.retired){float metres=(race.DistanceScore(rankOrder[0])-race.DistanceScore(car))*race.track.length;if(metres>=1f)gap="  +"+(int)metres+"m";}
+    Check(rowLabel.Text==(i+1).ToString("00")+"  "+name+"  L"+System.Math.Min(car.completedLaps+1,race.targetLaps)+gap,"standings row not bound to live order: car "+car.id+" = '"+rowLabel.Text+"'");
+    if(i==1)Check(gap.Length>0&&rankOrder[0].id!=rankOrder[1].id,"trailing row lost the live gap column: '"+rowLabel.Text+"'");
+    if(i==0)Check(!rankOrder[0].finished&&rowLabel.Text.EndsWith("L"+System.Math.Min(car.completedLaps+1,race.targetLaps)),"leader row gained a gap or lost its state");
     shown++;}
    Check(shown>0,"standings panel rendered no data rows");
    // ERS charge display equals the live battery; deploying state toggles from the model.

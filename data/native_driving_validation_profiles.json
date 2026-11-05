@@ -190,6 +190,7 @@
       "title": "Controlled barrier contact, damage recording and drive-away recovery",
       "purpose": "Record a real low-speed barrier contact end to end: impact event and DeltaV from NativeImpactDamage, damage state, absence of teleport/rescue, and recovery under the car's own drive. The aiming loop waits for the damage system's first impact event (DeltaV >= the profile's 2 m/s gate), so a glancing scrape that stays under the gate times the phase out and fails honestly for the next iteration to aim better. Requires the native damage system enabled for the run.",
       "requires": { "rotationalTyres": true, "damageEnabled": true },
+      "setup": { "recordRecovery": true, "recordContactArchetypes": true },
       "abort": { "maxDurationSeconds": 45, "lateralAbsBeyond": 40, "positionJumpBeyond": 2.5 },
       "phases": [
         { "id": "hold", "forSeconds": 1.2, "throttle": 0, "brake": 1, "steer": 0 },
@@ -207,6 +208,107 @@
         { "id": "no_teleport", "metric": "positionJumpMax:all", "op": "lt", "value": 2 },
         { "id": "drives_after_impact", "metric": "endLongitudinalSpeed:recover_fwd", "op": "gt", "value": 0.5 },
         { "id": "stayed_upright", "metric": "uprightMinCosine:recover_fwd", "op": "gte", "value": 0.7 }
+      ]
+    },
+    {
+      "id": "wall_contact_low",
+      "title": "Low-speed frontal barrier contact under real drive forces (~26 km/h approach)",
+      "purpose": "Force-driven wall contact from a scripted approach: impact event, per-tick velocity-jump-derived force estimate, impulse identity bound (impulse/mass is a DeltaV, so it cannot exceed the approach speed plus rebound margin), damage state, and drive-away recovery. Geometry of the hit is not prescribed: the approach runs to speed then a full-lock aim phase seeks the barrier; the achieved contact geometry is recorded.",
+      "requires": { "rotationalTyres": true, "damageEnabled": true },
+      "setup": { "recordRecovery": true, "recordContactArchetypes": true },
+      "abort": { "maxDurationSeconds": 45, "lateralAbsBeyond": 40, "positionJumpBeyond": 2.5 },
+      "phases": [
+        { "id": "hold", "forSeconds": 1.2, "throttle": 0, "brake": 1, "steer": 0 },
+        { "id": "approach", "throttle": 1, "brake": 0, "steer": 0, "until": { "speedAtLeast": 7.2 }, "minSeconds": 0.2 },
+        { "id": "aim", "throttle": 0.4, "brake": 0, "steer": -1, "until": { "impactEventsAtLeast": 1 }, "maxSeconds": 8, "minSeconds": 0.3 },
+        { "id": "contact_hold", "forSeconds": 0.5, "throttle": 0, "brake": 1, "steer": 0 },
+        { "id": "reverse_out", "forSeconds": 2, "throttle": 1, "brake": 0, "steer": 0, "reverse": true },
+        { "id": "recover_fwd", "forSeconds": 3, "throttle": 1, "brake": 0, "steer": 0 },
+        { "id": "stop", "throttle": 0, "brake": 1, "steer": 0, "until": { "speedBelow": 0.1 }, "minSeconds": 0.2 }
+      ],
+      "assertions": [
+        { "id": "wall_touched", "metric": "nonSurfaceContactSamples:aim", "op": "gte", "value": 1 },
+        { "id": "impact_recorded", "metric": "impactEventsDelta:aim", "op": "gte", "value": 1 },
+        { "id": "delta_v_band", "metric": "maxDeltaVRise:aim", "op": "between", "min": 1.5, "max": 20 },
+        { "id": "impulse_identity_bound", "metric": "impactImpulseEstimate:aim", "op": "betweenReference", "reference": "vehicleMass", "factorMin": 1.5, "factorMax": 16 },
+        { "id": "no_teleport", "metric": "positionJumpMax:all", "op": "lt", "value": 2 },
+        { "id": "drives_after_impact", "metric": "endLongitudinalSpeed:recover_fwd", "op": "gt", "value": 0.5 },
+        { "id": "stayed_upright", "metric": "uprightMinCosine:recover_fwd", "op": "gte", "value": 0.7 }
+      ]
+    },
+    {
+      "id": "wall_contact_high",
+      "title": "Mid-speed frontal barrier contact under real drive forces (~45 km/h approach)",
+      "purpose": "The same force-driven wall contact at the higher approach speed: DeltaV, impulse identity bound and recovery. The 1.5 m/s DeltaV floor stays the profile band; the 20 m/s ceiling covers a frontal stop from this approach with margin.",
+      "requires": { "rotationalTyres": true, "damageEnabled": true },
+      "setup": { "recordRecovery": true, "recordContactArchetypes": true },
+      "abort": { "maxDurationSeconds": 45, "lateralAbsBeyond": 40, "positionJumpBeyond": 2.5 },
+      "phases": [
+        { "id": "hold", "forSeconds": 1.2, "throttle": 0, "brake": 1, "steer": 0 },
+        { "id": "approach", "throttle": 1, "brake": 0, "steer": 0, "until": { "speedAtLeast": 12.5 }, "minSeconds": 0.2 },
+        { "id": "aim", "throttle": 0.4, "brake": 0, "steer": -1, "until": { "impactEventsAtLeast": 1 }, "maxSeconds": 8, "minSeconds": 0.3 },
+        { "id": "contact_hold", "forSeconds": 0.5, "throttle": 0, "brake": 1, "steer": 0 },
+        { "id": "reverse_out", "forSeconds": 2, "throttle": 1, "brake": 0, "steer": 0, "reverse": true },
+        { "id": "recover_fwd", "forSeconds": 3, "throttle": 1, "brake": 0, "steer": 0 },
+        { "id": "stop", "throttle": 0, "brake": 1, "steer": 0, "until": { "speedBelow": 0.1 }, "minSeconds": 0.2 }
+      ],
+      "assertions": [
+        { "id": "wall_touched", "metric": "nonSurfaceContactSamples:aim", "op": "gte", "value": 1 },
+        { "id": "impact_recorded", "metric": "impactEventsDelta:aim", "op": "gte", "value": 1 },
+        { "id": "delta_v_band", "metric": "maxDeltaVRise:aim", "op": "between", "min": 1.5, "max": 20 },
+        { "id": "impulse_identity_bound", "metric": "impactImpulseEstimate:aim", "op": "betweenReference", "reference": "vehicleMass", "factorMin": 1.5, "factorMax": 16 },
+        { "id": "no_teleport", "metric": "positionJumpMax:all", "op": "lt", "value": 2 },
+        { "id": "drives_after_impact", "metric": "endLongitudinalSpeed:recover_fwd", "op": "gt", "value": 0.5 },
+        { "id": "stayed_upright", "metric": "uprightMinCosine:recover_fwd", "op": "gte", "value": 0.7 }
+      ]
+    },
+    {
+      "id": "wall_contact_graze",
+      "title": "Oblique barrier graze with continued motion",
+      "purpose": "A shallow-angle contact (partial-lock aim) that should scrub along the barrier rather than stop: the contact window, side scrub and damage are recorded; assertions stay light because the graze deliberately sits at the impact-event threshold. No recovery drive is asserted if the car stops against the barrier - recovery happens via the reverse phase and motion is recorded.",
+      "requires": { "rotationalTyres": true, "damageEnabled": true },
+      "setup": { "recordRecovery": true, "recordContactArchetypes": true },
+      "abort": { "maxDurationSeconds": 45, "lateralAbsBeyond": 40, "positionJumpBeyond": 2.5 },
+      "phases": [
+        { "id": "hold", "forSeconds": 1.2, "throttle": 0, "brake": 1, "steer": 0 },
+        { "id": "approach", "throttle": 1, "brake": 0, "steer": 0, "until": { "speedAtLeast": 8.5 }, "minSeconds": 0.2 },
+        { "id": "aim", "throttle": 0.5, "brake": 0, "steer": -0.45, "until": { "nonSurfaceContact": true }, "maxSeconds": 8, "minSeconds": 0.3 },
+        { "id": "scrub", "forSeconds": 1.5, "throttle": 0.5, "brake": 0, "steer": 0 },
+        { "id": "contact_hold", "forSeconds": 0.5, "throttle": 0, "brake": 1, "steer": 0 },
+        { "id": "reverse_out", "forSeconds": 2, "throttle": 1, "brake": 0, "steer": 0, "reverse": true },
+        { "id": "recover_fwd", "forSeconds": 3, "throttle": 1, "brake": 0, "steer": 0 },
+        { "id": "stop", "throttle": 0, "brake": 1, "steer": 0, "until": { "speedBelow": 0.1 }, "minSeconds": 0.2 }
+      ],
+      "assertions": [
+        { "id": "wall_touched", "metric": "nonSurfaceContactSamples:aim", "op": "gte", "value": 1 },
+        { "id": "no_teleport", "metric": "positionJumpMax:all", "op": "lt", "value": 2 },
+        { "id": "stayed_upright", "metric": "uprightMinCosine:all", "op": "gte", "value": 0.7 },
+        { "id": "impulse_identity_bound", "metric": "impactImpulseEstimate:aim", "op": "betweenReference", "reference": "vehicleMass", "factorMin": 0, "factorMax": 16 }
+      ]
+    },
+    {
+      "id": "race_start_sequence",
+      "title": "Grid start sequence: countdown hold under full throttle (jump-start attempt), lights-out release and race-clock start",
+      "purpose": "Race-flow validation of the native start sequence under the userpath chain: the profile commands FULL THROTTLE through the grid countdown (a deliberate jump-start attempt); the grid must hold the car (no launch, no creep beyond the established guard), the countdown must expire inside its band, and the release must hand authority to the throttle within the same tick family so the launch happens at lights-out. The countdown's 1 Hz steps are visible in the per-tick samples (the lights timing layer; the light visuals themselves are the already-proven GUI fixture). Requires gridStart at the case level (the AI boot must not skip the countdown); no damage required; jump-start PENALTIES are not part of this validation - only the hold/hold-off mechanics and their timing.",
+      "requires": { "rotationalTyres": false, "damageEnabled": false },
+      "setup": { "requiresGridStart": true },
+      "abort": { "maxDurationSeconds": 40, "lateralAbsBeyond": 25, "positionJumpBeyond": 2.5 },
+      "phases": [
+        { "id": "grid", "throttle": 1, "brake": 0, "steer": 0, "until": { "raceStarted": true }, "maxSeconds": 12, "minSeconds": 0.5 },
+        { "id": "release", "throttle": 1, "brake": 0, "steer": 0, "until": { "speedAtLeast": 5 }, "maxSeconds": 6 },
+        { "id": "settle", "forSeconds": 1, "throttle": 0.3, "brake": 0, "steer": 0 },
+        { "id": "brake_stop", "throttle": 0, "brake": 1, "steer": 0, "until": { "speedBelow": 0.1 }, "minSeconds": 0.2 }
+      ],
+      "assertions": [
+        { "id": "jump_start_attempted", "metric": "throttleHoldSeconds:grid", "op": "gte", "value": 1 },
+        { "id": "grid_held_under_throttle", "metric": "maxSpeed:grid", "op": "lt", "value": 0.15 },
+        { "id": "grid_not_launched", "metric": "endSpeed:grid", "op": "lt", "value": 0.1 },
+        { "id": "countdown_band", "metric": "duration:grid", "op": "between", "min": 4.5, "max": 6.5 },
+        { "id": "release_bits_immediately", "metric": "speedRiseTime:release", "op": "lt", "value": 0.5 },
+        { "id": "race_started_in_release", "metric": "raceStartedFraction:release", "op": "gte", "value": 0.95 },
+        { "id": "launch_reached_speed", "metric": "endSpeed:release", "op": "between", "min": 4.8, "max": 7 },
+        { "id": "no_teleport", "metric": "positionJumpMax:all", "op": "lt", "value": 1 },
+        { "id": "stayed_upright", "metric": "uprightMinCosine:all", "op": "gte", "value": 0.9 }
       ]
     }
   ]
